@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'providers/admin_provider.dart';
 import 'views/dashboard_view.dart';
 import 'views/login_view.dart';
+import 'constants/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,16 +35,16 @@ class LearnLiAdminApp extends StatelessWidget {
             darkTheme: ThemeData(
               useMaterial3: true,
               brightness: Brightness.dark,
-              primaryColor: const Color(0xFF6366F1),
-              scaffoldBackgroundColor: const Color(0xFF090A0F),
-              cardColor: const Color(0xFF131520),
-              dividerColor: const Color(0xFF1C1E30),
+              primaryColor: AppColors.primary,
+              scaffoldBackgroundColor: AppColors.background,
+              cardColor: AppColors.card,
+              dividerColor: AppColors.divider,
               colorScheme: const ColorScheme.dark(
-                primary: Color(0xFF6366F1),
-                secondary: Color(0xFFA855F7),
-                background: Color(0xFF090A0F),
-                surface: Color(0xFF0E101A),
-                error: Color(0xFFEF4444),
+                primary: AppColors.primary,
+                secondary: AppColors.secondary,
+                background: AppColors.background,
+                surface: AppColors.surface,
+                error: AppColors.error,
               ),
               textTheme: GoogleFonts.interTextTheme(
                 ThemeData.dark().textTheme,
@@ -64,11 +65,11 @@ class LearnLiAdminApp extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(color: Color(0xFF6366F1)),
+                          CircularProgressIndicator(color: AppColors.primary),
                           SizedBox(height: 16),
                           Text(
                             'Initializing Admin Workspace...',
-                            style: TextStyle(color: Color(0xFF6C7194), fontSize: 13),
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                           ),
                         ],
                       ),

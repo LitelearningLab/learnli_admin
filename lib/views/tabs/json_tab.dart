@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
+import '../../constants/app_colors.dart';
 
 class JsonTab extends StatefulWidget {
   const JsonTab({super.key});
@@ -48,15 +49,15 @@ class _JsonTabState extends State<JsonTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Loaded ${result.files.single.name} successfully!'),
-            backgroundColor: const Color(0xFF6366F1),
+            backgroundColor: AppColors.primary,
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to read file: $e'),
-          backgroundColor: const Color(0xFFEF4444),
+        const SnackBar(
+          content: Text('Failed to read file'),
+          backgroundColor: AppColors.error,
         ),
       );
     }
@@ -86,7 +87,7 @@ class _JsonTabState extends State<JsonTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Bulk Database JSON validated successfully! Ready to seed.'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
         return;
@@ -113,7 +114,7 @@ class _JsonTabState extends State<JsonTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('JSON validated and loaded successfully! Ready to save.'),
-          backgroundColor: Color(0xFF10B981),
+          backgroundColor: AppColors.success,
         ),
       );
     }
@@ -141,14 +142,14 @@ class _JsonTabState extends State<JsonTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Exported file: $fileName'),
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: AppColors.success,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to download file: $e'),
-          backgroundColor: const Color(0xFFEF4444),
+        const SnackBar(
+          content: Text('Failed to download file'),
+          backgroundColor: AppColors.error,
         ),
       );
     }
@@ -172,7 +173,7 @@ class _JsonTabState extends State<JsonTab> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Database seeded successfully (Careers & Chapter Contents)!'),
-              backgroundColor: Color(0xFF10B981),
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -182,7 +183,7 @@ class _JsonTabState extends State<JsonTab> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Chapter content successfully published to Firebase Realtime DB!'),
-              backgroundColor: Color(0xFF10B981),
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -192,7 +193,7 @@ class _JsonTabState extends State<JsonTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save to Firebase: $e'),
-            backgroundColor: const Color(0xFFEF4444),
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -237,10 +238,10 @@ class _JsonTabState extends State<JsonTab> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
           decoration: const BoxDecoration(
-            color: Color(0xFF0E101A),
+            color: AppColors.surface,
             border: Border(
               bottom: BorderSide(
-                color: Color(0xFF1C1E30),
+                color: AppColors.divider,
                 width: 1.5,
               ),
             ),
@@ -252,20 +253,20 @@ class _JsonTabState extends State<JsonTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Grade', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Grade', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: adminProv.selectedGradeKey,
-                          hint: const Text('Choose Grade', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Grade', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: gradesList.map((key) {
@@ -296,20 +297,20 @@ class _JsonTabState extends State<JsonTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Subject', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Subject', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: adminProv.selectedSubjectId,
-                          hint: const Text('Choose Subject', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Subject', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: subjectsList.map((s) {
@@ -339,20 +340,20 @@ class _JsonTabState extends State<JsonTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Chapter', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Chapter', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<int>(
                           value: adminProv.selectedChapterNumber,
-                          hint: const Text('Choose Chapter', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Chapter', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: chaptersList.map((c) {
@@ -388,9 +389,9 @@ class _JsonTabState extends State<JsonTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(color: Color(0xFF6366F1)),
+                          CircularProgressIndicator(color: AppColors.primary),
                           SizedBox(height: 16),
-                          Text('Downloading chapter payload from DB...', style: TextStyle(color: Color(0xFF6C7194))),
+                          Text('Downloading chapter payload from DB...', style: TextStyle(color: AppColors.textSecondary)),
                         ],
                       ),
                     )
@@ -407,7 +408,7 @@ class _JsonTabState extends State<JsonTab> {
                                 icon: const Icon(Icons.file_upload_outlined, size: 16),
                                 label: const Text('Upload local JSON File'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF6366F1),
+                                  backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -419,8 +420,8 @@ class _JsonTabState extends State<JsonTab> {
                                 icon: const Icon(Icons.file_download_outlined, size: 16),
                                 label: const Text('Export / Download JSON'),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF8C91B2),
-                                  side: const BorderSide(color: Color(0xFF2C2F48)),
+                                  foregroundColor: AppColors.textSecondary,
+                                  side: const BorderSide(color: AppColors.border),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                 ),
@@ -431,7 +432,7 @@ class _JsonTabState extends State<JsonTab> {
                                 icon: const Icon(Icons.spellcheck, size: 16),
                                 label: const Text('Validate & Format'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFA855F7),
+                                  backgroundColor: AppColors.secondary,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -449,7 +450,7 @@ class _JsonTabState extends State<JsonTab> {
                                     : const Icon(Icons.cloud_upload_outlined, size: 16),
                                 label: Text(_isUploading ? 'Uploading...' : (_isBulkSeedJson ? 'Seed Firebase Database' : 'Save to Firebase DB')),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF10B981),
+                                  backgroundColor: AppColors.success,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -464,13 +465,13 @@ class _JsonTabState extends State<JsonTab> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFEF4444).withOpacity(0.1),
+                                color: AppColors.error.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                                border: Border.all(color: AppColors.error.withOpacity(0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 18),
+                                  const Icon(Icons.error_outline, color: AppColors.error, size: 18),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
@@ -488,9 +489,9 @@ class _JsonTabState extends State<JsonTab> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0C0E17),
+                                color: AppColors.background,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFF1C1E30)),
+                                border: Border.all(color: AppColors.divider),
                               ),
                               child: TextFormField(
                                 controller: _textController,
@@ -499,14 +500,14 @@ class _JsonTabState extends State<JsonTab> {
                                 keyboardType: TextInputType.multiline,
                                 style: GoogleFonts.robotoMono(
                                   fontSize: 13,
-                                  color: const Color(0xFF34D399),
+                                  color: AppColors.success,
                                   height: 1.5,
                                 ),
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.all(24),
                                   border: InputBorder.none,
                                   hintText: '{\n  "metadata": { ... },\n  "sections": { ... }\n}',
-                                  hintStyle: TextStyle(color: Color(0xFF2C2F48)),
+                                  hintStyle: TextStyle(color: AppColors.textMuted),
                                 ),
                                 onChanged: (val) {
                                   adminProv.updateJsonString(val);
@@ -535,7 +536,7 @@ class _JsonTabState extends State<JsonTab> {
             const Icon(
               Icons.code,
               size: 80,
-              color: Color(0xFF23263B),
+              color: AppColors.border,
             ),
             const SizedBox(height: 16),
             Text(
@@ -543,7 +544,7 @@ class _JsonTabState extends State<JsonTab> {
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF8C91B2),
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -552,7 +553,7 @@ class _JsonTabState extends State<JsonTab> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13,
-                color: const Color(0xFF555978),
+                color: AppColors.textMuted,
               ),
             ),
           ],

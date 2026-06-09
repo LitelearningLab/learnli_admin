@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/admin_provider.dart';
+import '../constants/app_colors.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -55,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
     final size = MediaQuery.of(context).size;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // Background Gradient Circles for Visual Appeal
@@ -69,7 +70,7 @@ class _LoginViewState extends State<LoginView> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF6366F1).withOpacity(0.2),
+                    AppColors.primary.withOpacity(0.2),
                     Colors.transparent,
                   ],
                 ),
@@ -86,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFFA855F7).withOpacity(0.15),
+                    AppColors.secondary.withOpacity(0.15),
                     Colors.transparent,
                   ],
                 ),
@@ -101,10 +102,10 @@ class _LoginViewState extends State<LoginView> {
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.all(40),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131520).withOpacity(0.85),
+                  color: AppColors.card.withOpacity(0.85),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: const Color(0xFF23263B),
+                    color: AppColors.border,
                     width: 1.5,
                   ),
                   boxShadow: [
@@ -129,7 +130,7 @@ class _LoginViewState extends State<LoginView> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
+                                colors: [AppColors.primary, AppColors.secondary],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -157,7 +158,7 @@ class _LoginViewState extends State<LoginView> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: const Color(0xFF8C91B2),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -167,15 +168,15 @@ class _LoginViewState extends State<LoginView> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444).withOpacity(0.1),
+                            color: AppColors.error.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFEF4444).withOpacity(0.3),
+                              color: AppColors.error.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 20),
+                              const Icon(Icons.error_outline, color: AppColors.error, size: 20),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -197,7 +198,7 @@ class _LoginViewState extends State<LoginView> {
                         'Email Address',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: const Color(0xFFB4B9D6),
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -208,22 +209,22 @@ class _LoginViewState extends State<LoginView> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'admin@gmail.com',
-                          hintStyle: GoogleFonts.inter(color: const Color(0xFF555978)),
-                          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF555978), size: 18),
+                          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                          prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textMuted, size: 18),
                           filled: true,
-                          fillColor: const Color(0xFF1B1D2C),
+                          fillColor: AppColors.surface,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF23263B)),
+                            borderSide: const BorderSide(color: AppColors.border),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF23263B)),
+                            borderSide: const BorderSide(color: AppColors.border),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                           ),
                         ),
                         validator: (value) {
@@ -243,7 +244,7 @@ class _LoginViewState extends State<LoginView> {
                         'Password',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: const Color(0xFFB4B9D6),
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -254,22 +255,22 @@ class _LoginViewState extends State<LoginView> {
                         style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: '••••••••',
-                          hintStyle: GoogleFonts.inter(color: const Color(0xFF555978)),
-                          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF555978), size: 18),
+                          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 18),
                           filled: true,
-                          fillColor: const Color(0xFF1B1D2C),
+                          fillColor: AppColors.surface,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF23263B)),
+                            borderSide: const BorderSide(color: AppColors.border),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF23263B)),
+                            borderSide: const BorderSide(color: AppColors.border),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                           ),
                         ),
                         validator: (value) {
@@ -299,8 +300,8 @@ class _LoginViewState extends State<LoginView> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: _isLoading 
-                                    ? [const Color(0xFF43458F), const Color(0xFF753EAA)]
-                                    : [const Color(0xFF6366F1), const Color(0xFFA855F7)],
+                                    ? [AppColors.primary.withOpacity(0.5), AppColors.secondary.withOpacity(0.5)]
+                                    : [AppColors.primary, AppColors.secondary],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -333,7 +334,7 @@ class _LoginViewState extends State<LoginView> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          color: const Color(0xFF4C5070),
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ],

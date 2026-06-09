@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/admin_provider.dart';
+import '../constants/app_colors.dart';
 import 'tabs/overview_tab.dart';
 import 'tabs/curriculum_tab.dart';
 import 'tabs/content_tab.dart';
@@ -48,17 +49,17 @@ class _DashboardViewState extends State<DashboardView> {
     final adminProv = Provider.of<AdminProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: AppColors.background,
       body: Row(
         children: [
           // Sidebar Left
           Container(
             width: 280,
             decoration: const BoxDecoration(
-              color: Color(0xFF0E101A),
+              color: AppColors.surface,
               border: Border(
                 right: BorderSide(
-                  color: Color(0xFF1C1E30),
+                  color: AppColors.divider,
                   width: 1.5,
                 ),
               ),
@@ -75,7 +76,7 @@ class _DashboardViewState extends State<DashboardView> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
+                            colors: [AppColors.primary, AppColors.secondary],
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -102,7 +103,7 @@ class _DashboardViewState extends State<DashboardView> {
                             'Content Management',
                             style: GoogleFonts.inter(
                               fontSize: 11,
-                              color: const Color(0xFF555978),
+                              color: AppColors.textMuted,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -111,7 +112,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ],
                   ),
                 ),
-                const Divider(height: 1, color: Color(0xFF1C1E30)),
+                const Divider(height: 1, color: AppColors.divider),
                 const SizedBox(height: 24),
 
                 // Navigation Items
@@ -149,7 +150,7 @@ class _DashboardViewState extends State<DashboardView> {
                 const Spacer(),
 
                 // User Info & Sign Out
-                const Divider(height: 1, color: Color(0xFF1C1E30)),
+                const Divider(height: 1, color: AppColors.divider),
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -158,10 +159,10 @@ class _DashboardViewState extends State<DashboardView> {
                         children: [
                           CircleAvatar(
                             radius: 18,
-                            backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
+                            backgroundColor: AppColors.primary.withOpacity(0.1),
                             child: const Icon(
                               Icons.person_outline,
-                              color: Color(0xFF6366F1),
+                              color: AppColors.primary,
                               size: 18,
                             ),
                           ),
@@ -183,7 +184,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.inter(
                                     fontSize: 11,
-                                    color: const Color(0xFF6C7194),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -203,8 +204,8 @@ class _DashboardViewState extends State<DashboardView> {
                             style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
                           ),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFEF4444),
-                            side: BorderSide(color: const Color(0xFFEF4444).withOpacity(0.4)),
+                            foregroundColor: AppColors.error,
+                            side: BorderSide(color: AppColors.error.withOpacity(0.4)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -227,10 +228,10 @@ class _DashboardViewState extends State<DashboardView> {
                 Container(
                   height: 80,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF0C0E17),
+                    color: AppColors.surface,
                     border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFF1C1E30),
+                        color: AppColors.divider,
                         width: 1.5,
                       ),
                     ),
@@ -251,10 +252,10 @@ class _DashboardViewState extends State<DashboardView> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withOpacity(0.1),
+                          color: AppColors.secondary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF10B981).withOpacity(0.3),
+                            color: AppColors.secondary.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -265,7 +266,7 @@ class _DashboardViewState extends State<DashboardView> {
                               height: 8,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Color(0xFF10B981),
+                                color: AppColors.secondary,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -274,7 +275,7 @@ class _DashboardViewState extends State<DashboardView> {
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF34D399),
+                                color: AppColors.secondary,
                               ),
                             ),
                           ],
@@ -292,12 +293,12 @@ class _DashboardViewState extends State<DashboardView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircularProgressIndicator(
-                                color: Color(0xFF6366F1),
+                                color: AppColors.primary,
                               ),
                               SizedBox(height: 16),
                               Text(
                                 'Loading curriculum structure from Firebase...',
-                                style: TextStyle(color: Color(0xFF6C7194)),
+                                style: TextStyle(color: AppColors.textSecondary),
                               )
                             ],
                           ),
@@ -332,7 +333,7 @@ class _DashboardViewState extends State<DashboardView> {
           borderRadius: BorderRadius.circular(10),
           child: Ink(
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+              color: isActive ? AppColors.primaryHighlight : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Container(
@@ -341,7 +342,7 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   Icon(
                     isActive ? activeIcon : icon,
-                    color: isActive ? const Color(0xFF6366F1) : const Color(0xFF555978),
+                    color: isActive ? AppColors.primary : AppColors.textMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 16),
@@ -350,7 +351,7 @@ class _DashboardViewState extends State<DashboardView> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                      color: isActive ? Colors.white : const Color(0xFF8C91B2),
+                      color: isActive ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ],

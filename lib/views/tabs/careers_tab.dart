@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/career_models.dart';
+import '../../constants/app_colors.dart';
 
 class CareersTab extends StatefulWidget {
   const CareersTab({super.key});
@@ -21,13 +22,13 @@ class _CareersTabState extends State<CareersTab> {
     final titleController = TextEditingController();
     final iconController = TextEditingController(text: '💼');
     final subtitleController = TextEditingController();
-    final colorController = TextEditingController(text: '#6366F1');
+    final colorController = TextEditingController(text: '#4E7FFF');
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text(
             'Create New Career Pathway',
             style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
@@ -46,7 +47,7 @@ class _CareersTabState extends State<CareersTab> {
                   children: [
                     Expanded(child: _buildDialogTextField(iconController, 'Icon Emoji', '🚀')),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildDialogTextField(colorController, 'Theme Color (Hex)', '#2196F3')),
+                    Expanded(child: _buildDialogTextField(colorController, 'Theme Color (Hex)', '#4E7FFF')),
                   ],
                 ),
               ],
@@ -55,7 +56,7 @@ class _CareersTabState extends State<CareersTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -68,7 +69,7 @@ class _CareersTabState extends State<CareersTab> {
                     id: 'current',
                     title: 'YOU ARE HERE 📍',
                     icon: '📍',
-                    color: '#3E68FF',
+                    color: '#4E7FFF',
                     bgColor: '#E8F0FF',
                     data: {'description': 'Dream big! Start your journey today.'},
                   ),
@@ -102,12 +103,12 @@ class _CareersTabState extends State<CareersTab> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Career created locally! Remember to save changes.'),
-                    backgroundColor: Color(0xFF6366F1),
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Create'),
@@ -122,19 +123,19 @@ class _CareersTabState extends State<CareersTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.inter(color: const Color(0xFF8C91B2), fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           style: const TextStyle(color: Colors.white, fontSize: 13),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF555978)),
+            hintStyle: const TextStyle(color: AppColors.textMuted),
             filled: true,
-            fillColor: const Color(0xFF0C0E17),
+            fillColor: AppColors.background,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
           ),
         ),
       ],
@@ -152,7 +153,7 @@ class _CareersTabState extends State<CareersTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Careers successfully published to Firebase Realtime DB!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -161,7 +162,7 @@ class _CareersTabState extends State<CareersTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save careers: $e'),
-            backgroundColor: const Color(0xFFEF4444),
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -179,16 +180,16 @@ class _CareersTabState extends State<CareersTab> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: const Text('Delete Career Pathway?', style: TextStyle(color: Colors.white)),
           content: Text(
             'Are you sure you want to permanently delete "$id"? This will remove it from Firebase DB immediately.',
-            style: const TextStyle(color: Color(0xFF8C91B2)),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -199,7 +200,7 @@ class _CareersTabState extends State<CareersTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Career deleted successfully!'),
-                        backgroundColor: Color(0xFF10B981),
+                        backgroundColor: AppColors.success,
                       ),
                     );
                   }
@@ -208,13 +209,13 @@ class _CareersTabState extends State<CareersTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Failed to delete career: $e'),
-                        backgroundColor: const Color(0xFFEF4444),
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
               child: const Text('Delete'),
             ),
           ],
@@ -247,7 +248,7 @@ class _CareersTabState extends State<CareersTab> {
           width: 320,
           decoration: const BoxDecoration(
             border: Border(
-              right: BorderSide(color: Color(0xFF1C1E30), width: 1.5),
+              right: BorderSide(color: AppColors.divider, width: 1.5),
             ),
           ),
           child: Column(
@@ -261,13 +262,13 @@ class _CareersTabState extends State<CareersTab> {
                       style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
                         hintText: 'Search career pathways...',
-                        hintStyle: const TextStyle(color: Color(0xFF555978)),
-                        prefixIcon: const Icon(Icons.search, size: 16, color: Color(0xFF555978)),
+                        hintStyle: const TextStyle(color: AppColors.textMuted),
+                        prefixIcon: const Icon(Icons.search, size: 16, color: AppColors.textMuted),
                         filled: true,
-                        fillColor: const Color(0xFF131520),
+                        fillColor: AppColors.card,
                         contentPadding: EdgeInsets.zero,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
                       ),
                       onChanged: (val) {
                         setState(() {
@@ -283,7 +284,7 @@ class _CareersTabState extends State<CareersTab> {
                         icon: const Icon(Icons.add, size: 16),
                         label: const Text('Add Career Pathway'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6366F1),
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -293,17 +294,17 @@ class _CareersTabState extends State<CareersTab> {
                   ],
                 ),
               ),
-              const Divider(height: 1, color: Color(0xFF1C1E30)),
+              const Divider(height: 1, color: AppColors.divider),
 
               // Careers list
               Expanded(
                 child: adminProv.isLoadingCareers
-                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                     : filteredKeys.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Text(
                               'No career pathways found',
-                              style: TextStyle(color: const Color(0xFF555978), fontSize: 13),
+                              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                             ),
                           )
                         : ListView.builder(
@@ -324,12 +325,12 @@ class _CareersTabState extends State<CareersTab> {
                                     });
                                   },
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  tileColor: isSelected ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+                                  tileColor: isSelected ? AppColors.primaryHighlight : Colors.transparent,
                                   leading: Text(career.icon, style: const TextStyle(fontSize: 22)),
                                   title: Text(
                                     career.title,
                                     style: GoogleFonts.inter(
-                                      color: isSelected ? Colors.white : const Color(0xFFB4B9D6),
+                                      color: isSelected ? Colors.white : AppColors.textSecondary,
                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                                       fontSize: 13.5,
                                     ),
@@ -338,7 +339,7 @@ class _CareersTabState extends State<CareersTab> {
                                     career.subtitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(color: const Color(0xFF555978), fontSize: 11.5),
+                                    style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 11.5),
                                   ),
                                   trailing: isSelected
                                       ? Container(
@@ -369,8 +370,8 @@ class _CareersTabState extends State<CareersTab> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                       decoration: const BoxDecoration(
-                        color: Color(0xFF0C0E17),
-                        border: Border(bottom: BorderSide(color: Color(0xFF1C1E30), width: 1.5)),
+                        color: AppColors.surface,
+                        border: Border(bottom: BorderSide(color: AppColors.divider, width: 1.5)),
                       ),
                       child: Row(
                         children: [
@@ -385,7 +386,7 @@ class _CareersTabState extends State<CareersTab> {
                               ),
                               Text(
                                 'ID: ${activeCareer.id}',
-                                style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold),
+                                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -398,7 +399,7 @@ class _CareersTabState extends State<CareersTab> {
                                 : const Icon(Icons.cloud_done_outlined, size: 16),
                             label: const Text('Save to Firebase DB'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF10B981),
+                              backgroundColor: AppColors.success,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -411,8 +412,8 @@ class _CareersTabState extends State<CareersTab> {
                             icon: const Icon(Icons.delete_forever, size: 16),
                             label: const Text('Delete Pathway'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFFEF4444),
-                              side: BorderSide(color: const Color(0xFFEF4444).withOpacity(0.4)),
+                              foregroundColor: AppColors.error,
+                              side: BorderSide(color: AppColors.error.withOpacity(0.4)),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                             ),
@@ -430,7 +431,7 @@ class _CareersTabState extends State<CareersTab> {
                           Container(
                             width: 250,
                             decoration: const BoxDecoration(
-                              border: Border(right: BorderSide(color: Color(0xFF1C1E30), width: 1.5)),
+                              border: Border(right: BorderSide(color: AppColors.divider, width: 1.5)),
                             ),
                             child: Column(
                               children: [
@@ -439,9 +440,9 @@ class _CareersTabState extends State<CareersTab> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('TIMELINE STEPS', style: GoogleFonts.inter(color: const Color(0xFF555978), fontSize: 11, fontWeight: FontWeight.bold)),
+                                      Text('TIMELINE STEPS', style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.bold)),
                                       IconButton(
-                                        icon: const Icon(Icons.add_circle_outline, size: 18, color: Color(0xFF818CF8)),
+                                        icon: const Icon(Icons.add_circle_outline, size: 18, color: AppColors.primary),
                                         tooltip: 'Insert Step',
                                         onPressed: () => _insertStep(adminProv, activeCareer),
                                         padding: EdgeInsets.zero,
@@ -467,7 +468,7 @@ class _CareersTabState extends State<CareersTab> {
                                             });
                                           },
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          tileColor: isSelected ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+                                          tileColor: isSelected ? AppColors.primaryHighlight : Colors.transparent,
                                           leading: CircleAvatar(
                                             radius: 12,
                                             backgroundColor: _parseHexColor(step.bgColor),
@@ -481,18 +482,18 @@ class _CareersTabState extends State<CareersTab> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.inter(
-                                              color: isSelected ? Colors.white : const Color(0xFF8C91B2),
+                                              color: isSelected ? Colors.white : AppColors.textSecondary,
                                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                               fontSize: 12,
                                             ),
                                           ),
                                           subtitle: Text(
                                             'Type: ${step.id}',
-                                            style: TextStyle(color: const Color(0xFF555978), fontSize: 10),
+                                            style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
                                           ),
                                           trailing: isSelected
                                               ? IconButton(
-                                                  icon: const Icon(Icons.remove_circle_outline, size: 14, color: Color(0xFFEF4444)),
+                                                  icon: const Icon(Icons.remove_circle_outline, size: 14, color: AppColors.error),
                                                   onPressed: () => _removeStep(adminProv, activeCareer, index),
                                                   padding: EdgeInsets.zero,
                                                   constraints: const BoxConstraints(),
@@ -517,7 +518,7 @@ class _CareersTabState extends State<CareersTab> {
                                   // General Career Metadata if step index is 0/Overview, or let's show it at the top of everything
                                   _buildCareerMetadataForm(adminProv, activeCareer),
                                   const SizedBox(height: 24),
-                                  const Divider(height: 1, color: Color(0xFF1C1E30)),
+                                  const Divider(height: 1, color: AppColors.divider),
                                   const SizedBox(height: 24),
 
                                   if (activeCareer.steps.isNotEmpty && _activeStepIndex < activeCareer.steps.length) ...[
@@ -527,11 +528,11 @@ class _CareersTabState extends State<CareersTab> {
                                         const Spacer(),
                                         // Reorder Up/Down
                                         IconButton(
-                                          icon: const Icon(Icons.arrow_upward, size: 16, color: Color(0xFF8C91B2)),
+                                          icon: const Icon(Icons.arrow_upward, size: 16, color: AppColors.textSecondary),
                                           onPressed: _activeStepIndex > 0 ? () => _reorderStep(adminProv, activeCareer, _activeStepIndex, -1) : null,
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.arrow_downward, size: 16, color: Color(0xFF8C91B2)),
+                                          icon: const Icon(Icons.arrow_downward, size: 16, color: AppColors.textSecondary),
                                           onPressed: _activeStepIndex < activeCareer.steps.length - 1 ? () => _reorderStep(adminProv, activeCareer, _activeStepIndex, 1) : null,
                                         ),
                                       ],
@@ -558,16 +559,16 @@ class _CareersTabState extends State<CareersTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.work_outline, size: 80, color: Color(0xFF23263B)),
+          const Icon(Icons.work_outline, size: 80, color: AppColors.border),
           const SizedBox(height: 16),
           Text(
             'No Career Pathway Selected',
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF8C91B2)),
+            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             'Select a pathway from the left sidebar to edit, or create a new one.',
-            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF555978)),
+            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -582,7 +583,7 @@ class _CareersTabState extends State<CareersTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('GENERAL CAREER PROPERTIES', style: GoogleFonts.inter(color: const Color(0xFF555978), fontSize: 11, fontWeight: FontWeight.bold)),
+        Text('GENERAL CAREER PROPERTIES', style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -676,8 +677,8 @@ class _CareersTabState extends State<CareersTab> {
       id: 'preparation',
       title: 'NEW TIMELINE PHASE',
       icon: '🎯',
-      color: '#FFB800',
-      bgColor: '#FFF9E6',
+      color: '#4E7FFF',
+      bgColor: '#E8F0FF',
       data: {'duration': 'Grades 7-12 • 6 years', 'subjects': []},
     );
 
@@ -692,7 +693,7 @@ class _CareersTabState extends State<CareersTab> {
   void _removeStep(AdminProvider prov, Career career, int index) {
     if (career.steps.length <= 1) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot remove the last step! A career must have at least one step.'), backgroundColor: Color(0xFFEF4444)),
+        const SnackBar(content: Text('Cannot remove the last step! A career must have at least one step.'), backgroundColor: AppColors.error),
       );
       return;
     }
@@ -741,19 +742,19 @@ class _CareersTabState extends State<CareersTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Step Type ID', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+                  Text('Step Type ID', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF131520),
+                      color: AppColors.card,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF1C1E30)),
+                      border: Border.all(color: AppColors.divider),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: stepTypes.contains(step.id) ? step.id : 'current',
-                        dropdownColor: const Color(0xFF131520),
+                        dropdownColor: AppColors.card,
                         isExpanded: true,
                         style: const TextStyle(color: Colors.white, fontSize: 13),
                         items: stepTypes.map((type) {
@@ -847,7 +848,7 @@ class _CareersTabState extends State<CareersTab> {
         ),
 
         const SizedBox(height: 16),
-        Text('PHASE-SPECIFIC DATA FIELDS', style: GoogleFonts.inter(color: const Color(0xFF555978), fontSize: 11, fontWeight: FontWeight.bold)),
+        Text('PHASE-SPECIFIC DATA FIELDS', style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
 
         // Sub-form editor depending on step type
@@ -953,7 +954,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add Subject', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -967,7 +968,7 @@ class _CareersTabState extends State<CareersTab> {
             final sub = subjects[idx] is Map ? Map<String, dynamic>.from(subjects[idx] as Map) : {'name': '', 'importance': 3};
             return Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.divider)),
               child: Row(
                 children: [
                   Expanded(
@@ -989,14 +990,14 @@ class _CareersTabState extends State<CareersTab> {
                     flex: 2,
                     child: Row(
                       children: [
-                        const Text('Importance:', style: TextStyle(color: Color(0xFF8C91B2), fontSize: 11)),
+                        const Text('Importance:', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
                         Expanded(
                           child: Slider(
                             value: (sub['importance'] ?? 3).toDouble(),
                             min: 1,
                             max: 3,
                             divisions: 2,
-                            activeColor: const Color(0xFFA855F7),
+                            activeColor: AppColors.secondary,
                             onChanged: (val) {
                               setState(() {
                                 sub['importance'] = val.toInt();
@@ -1011,7 +1012,7 @@ class _CareersTabState extends State<CareersTab> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                    icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                     onPressed: () {
                       subjects.removeAt(idx);
                       step.data['subjects'] = subjects;
@@ -1057,7 +1058,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add Exam', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -1071,7 +1072,7 @@ class _CareersTabState extends State<CareersTab> {
             final ex = exams[idx] is Map ? Map<String, dynamic>.from(exams[idx] as Map) : <String, dynamic>{};
             return Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.divider)),
               child: Column(
                 children: [
                   Row(
@@ -1079,7 +1080,7 @@ class _CareersTabState extends State<CareersTab> {
                       Text('Exam #${idx + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                         onPressed: () {
                           exams.removeAt(idx);
                           step.data['exams'] = exams;
@@ -1206,7 +1207,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add College', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -1220,7 +1221,7 @@ class _CareersTabState extends State<CareersTab> {
             final col = colleges[idx] is Map ? Map<String, dynamic>.from(colleges[idx] as Map) : {'name': '', 'fees': '', 'rank': 1};
             return Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.divider)),
               child: Row(
                 children: [
                   Expanded(
@@ -1230,7 +1231,7 @@ class _CareersTabState extends State<CareersTab> {
                       initialValue: (col['rank'] ?? 1).toString(),
                       keyboardType: TextInputType.number,
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Rank', border: InputBorder.none, labelText: 'Rank', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'Rank', border: InputBorder.none, labelText: 'Rank', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['rank'] = int.tryParse(val) ?? 1;
                         colleges[idx] = col;
@@ -1245,7 +1246,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_col_${idx}_name'),
                       initialValue: col['name'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'College Name', border: InputBorder.none, labelText: 'Name', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'College Name', border: InputBorder.none, labelText: 'Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['name'] = val;
                         colleges[idx] = col;
@@ -1260,7 +1261,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_col_${idx}_fees'),
                       initialValue: col['fees'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: '₹8-10 lakhs', border: InputBorder.none, labelText: 'Fees Details', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: '₹8-10 lakhs', border: InputBorder.none, labelText: 'Fees Details', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['fees'] = val;
                         colleges[idx] = col;
@@ -1269,7 +1270,7 @@ class _CareersTabState extends State<CareersTab> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                    icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                     onPressed: () {
                       colleges.removeAt(idx);
                       step.data['colleges'] = colleges;
@@ -1288,7 +1289,6 @@ class _CareersTabState extends State<CareersTab> {
 
   // 5. Education Step Form
   Widget _buildEducationStepForm(AdminProvider prov, Career career, CareerStep step) {
-    // Structure: data: { duration, education: { courseDuration, duration, totalCost, costNote, specialization: [] } }
     final eduMap = step.data['education'] is Map
         ? Map<String, dynamic>.from(step.data['education'] as Map)
         : {'courseDuration': 'BTech', 'totalCost': '5 lakhs', 'costNote': '', 'specialization': []};
@@ -1372,7 +1372,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add Milestone', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -1386,7 +1386,7 @@ class _CareersTabState extends State<CareersTab> {
             final spec = specList[idx] is Map ? Map<String, dynamic>.from(specList[idx] as Map) : {'name': '', 'duration': ''};
             return Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.divider)),
               child: Row(
                 children: [
                   Expanded(
@@ -1395,7 +1395,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_spec_${idx}_name'),
                       initialValue: spec['name'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Specialization Name', border: InputBorder.none, labelText: 'Milestone Name', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'Specialization Name', border: InputBorder.none, labelText: 'Milestone Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         spec['name'] = val;
                         specList[idx] = spec;
@@ -1412,7 +1412,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_spec_${idx}_dur'),
                       initialValue: spec['duration'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'e.g. 2 years', border: InputBorder.none, labelText: 'Duration', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'e.g. 2 years', border: InputBorder.none, labelText: 'Duration', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         spec['duration'] = val;
                         specList[idx] = spec;
@@ -1423,7 +1423,7 @@ class _CareersTabState extends State<CareersTab> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                    icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                     onPressed: () {
                       specList.removeAt(idx);
                       eduMap['specialization'] = specList;
@@ -1443,7 +1443,6 @@ class _CareersTabState extends State<CareersTab> {
 
   // 6. Career / Opportunities Step Form
   Widget _buildCareerOpportunitiesStepForm(AdminProvider prov, Career career, CareerStep step) {
-    // Note: Stored under opportunities key
     final List opportunities = step.data['opportunities'] is List
         ? step.data['opportunities']
         : (step.data['career'] is List ? step.data['career'] : []);
@@ -1464,7 +1463,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add Role', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -1478,7 +1477,7 @@ class _CareersTabState extends State<CareersTab> {
             final opp = opportunities[idx] is Map ? Map<String, dynamic>.from(opportunities[idx] as Map) : {'role': '', 'icon': '💼', 'salary': ''};
             return Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.divider)),
               child: Row(
                 children: [
                   Expanded(
@@ -1487,7 +1486,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_icon'),
                       initialValue: opp['icon'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Emoji', border: InputBorder.none, labelText: 'Icon', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'Emoji', border: InputBorder.none, labelText: 'Icon', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['icon'] = val;
                         opportunities[idx] = opp;
@@ -1502,7 +1501,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_role'),
                       initialValue: opp['role'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Role Title', border: InputBorder.none, labelText: 'Job Title', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'Role Title', border: InputBorder.none, labelText: 'Job Title', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['role'] = val;
                         opportunities[idx] = opp;
@@ -1517,7 +1516,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_sal'),
                       initialValue: opp['salary'],
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Salary Range', border: InputBorder.none, labelText: 'Income Package', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                      decoration: const InputDecoration(hintText: 'Salary Range', border: InputBorder.none, labelText: 'Income Package', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['salary'] = val;
                         opportunities[idx] = opp;
@@ -1526,7 +1525,7 @@ class _CareersTabState extends State<CareersTab> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                    icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                     onPressed: () {
                       opportunities.removeAt(idx);
                       step.data['opportunities'] = opportunities;
@@ -1563,7 +1562,7 @@ class _CareersTabState extends State<CareersTab> {
               },
               icon: const Icon(Icons.add, size: 12),
               label: const Text('Add Abroad Info', style: TextStyle(fontSize: 11)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
             )
           ],
         ),
@@ -1577,7 +1576,7 @@ class _CareersTabState extends State<CareersTab> {
             final ab = abroad[idx] is Map ? Map<String, dynamic>.from(abroad[idx] as Map) : {'country': '', 'flag': '🇺🇸', 'exam': '', 'salary': ''};
             return Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF131520), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFF1C1E30))),
+              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.divider)),
               child: Column(
                 children: [
                   Row(
@@ -1587,7 +1586,7 @@ class _CareersTabState extends State<CareersTab> {
                       Text('Country Option #${idx + 1}: ${ab['country']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 16),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
                         onPressed: () {
                           abroad.removeAt(idx);
                           step.data['abroad'] = abroad;
@@ -1605,7 +1604,7 @@ class _CareersTabState extends State<CareersTab> {
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_country'),
                           initialValue: ab['country'],
                           style: const TextStyle(color: Colors.white, fontSize: 13),
-                          decoration: const InputDecoration(hintText: 'USA', labelText: 'Country Name', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                          decoration: const InputDecoration(hintText: 'USA', labelText: 'Country Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['country'] = val;
                             abroad[idx] = ab;
@@ -1619,7 +1618,7 @@ class _CareersTabState extends State<CareersTab> {
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_flag'),
                           initialValue: ab['flag'],
                           style: const TextStyle(color: Colors.white, fontSize: 13),
-                          decoration: const InputDecoration(hintText: '🇺🇸', labelText: 'Flag Emoji', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                          decoration: const InputDecoration(hintText: '🇺🇸', labelText: 'Flag Emoji', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['flag'] = val;
                             abroad[idx] = ab;
@@ -1636,7 +1635,7 @@ class _CareersTabState extends State<CareersTab> {
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_exam'),
                           initialValue: ab['exam'],
                           style: const TextStyle(color: Colors.white, fontSize: 13),
-                          decoration: const InputDecoration(hintText: 'USMLE / GRE', labelText: 'Required Exams', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                          decoration: const InputDecoration(hintText: 'USMLE / GRE', labelText: 'Required Exams', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['exam'] = val;
                             abroad[idx] = ab;
@@ -1650,7 +1649,7 @@ class _CareersTabState extends State<CareersTab> {
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_salary'),
                           initialValue: ab['salary'],
                           style: const TextStyle(color: Colors.white, fontSize: 13),
-                          decoration: const InputDecoration(hintText: r'$100k/year', labelText: 'Salary Range', labelStyle: TextStyle(color: Color(0xFF555978), fontSize: 10)),
+                          decoration: const InputDecoration(hintText: r'$100k/year', labelText: 'Salary Range', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['salary'] = val;
                             abroad[idx] = ab;
@@ -1738,7 +1737,7 @@ class _CareersTabState extends State<CareersTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFB4B9D6), fontWeight: FontWeight.w600)),
+          Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextFormField(
             key: ValueKey(key),
@@ -1748,13 +1747,13 @@ class _CareersTabState extends State<CareersTab> {
             style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF555978)),
+              hintStyle: const TextStyle(color: AppColors.textMuted),
               filled: true,
-              fillColor: const Color(0xFF131520),
+              fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1C1E30))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.divider)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
             ),
             onChanged: onChanged,
           ),

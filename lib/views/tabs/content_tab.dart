@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/chapter_content_model.dart';
+import '../../constants/app_colors.dart';
 
 class ContentTab extends StatefulWidget {
   const ContentTab({super.key});
@@ -50,10 +51,10 @@ class _ContentTabState extends State<ContentTab> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
           decoration: const BoxDecoration(
-            color: Color(0xFF0E101A),
+            color: AppColors.surface,
             border: Border(
               bottom: BorderSide(
-                color: Color(0xFF1C1E30),
+                color: AppColors.divider,
                 width: 1.5,
               ),
             ),
@@ -65,20 +66,20 @@ class _ContentTabState extends State<ContentTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Grade', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Grade', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: adminProv.selectedGradeKey,
-                          hint: const Text('Choose Grade', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Grade', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: gradesList.map((key) {
@@ -107,20 +108,20 @@ class _ContentTabState extends State<ContentTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Subject', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Subject', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: adminProv.selectedSubjectId,
-                          hint: const Text('Choose Subject', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Subject', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: subjectsList.map((s) {
@@ -148,20 +149,20 @@ class _ContentTabState extends State<ContentTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Chapter', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF555978), fontWeight: FontWeight.bold)),
+                    Text('Select Chapter', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131520),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF1C1E30)),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<int>(
                           value: adminProv.selectedChapterNumber,
-                          hint: const Text('Choose Chapter', style: TextStyle(color: Color(0xFF555978), fontSize: 13)),
-                          dropdownColor: const Color(0xFF131520),
+                          hint: const Text('Choose Chapter', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          dropdownColor: AppColors.card,
                           isExpanded: true,
                           style: const TextStyle(color: Colors.white, fontSize: 13),
                           items: chaptersList.map((c) {
@@ -195,9 +196,9 @@ class _ContentTabState extends State<ContentTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(color: Color(0xFF6366F1)),
+                          CircularProgressIndicator(color: AppColors.primary),
                           SizedBox(height: 16),
-                          Text('Downloading chapter payload from DB...', style: TextStyle(color: Color(0xFF6C7194))),
+                          Text('Downloading chapter payload from DB...', style: TextStyle(color: AppColors.textSecondary)),
                         ],
                       ),
                     )
@@ -209,7 +210,7 @@ class _ContentTabState extends State<ContentTab> {
                           width: 250,
                           decoration: const BoxDecoration(
                             border: Border(
-                              right: BorderSide(color: Color(0xFF1C1E30), width: 1.5),
+                              right: BorderSide(color: AppColors.divider, width: 1.5),
                             ),
                           ),
                           child: ListView.builder(
@@ -227,11 +228,11 @@ class _ContentTabState extends State<ContentTab> {
                                   },
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   dense: true,
-                                  tileColor: isActive ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+                                  tileColor: isActive ? AppColors.primaryHighlight : Colors.transparent,
                                   title: Text(
                                     _sections[idx],
                                     style: GoogleFonts.inter(
-                                      color: isActive ? Colors.white : const Color(0xFF8C91B2),
+                                      color: isActive ? Colors.white : AppColors.textSecondary,
                                       fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                                     ),
                                   ),
@@ -266,7 +267,7 @@ class _ContentTabState extends State<ContentTab> {
                                       icon: const Icon(Icons.cloud_done_outlined, size: 16),
                                       label: const Text('Save Chapter Content'),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF10B981),
+                                        backgroundColor: AppColors.success,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -279,8 +280,8 @@ class _ContentTabState extends State<ContentTab> {
                                       icon: const Icon(Icons.delete_forever, size: 16),
                                       label: const Text('Delete Payload'),
                                       style: OutlinedButton.styleFrom(
-                                        foregroundColor: const Color(0xFFEF4444),
-                                        side: BorderSide(color: const Color(0xFFEF4444).withOpacity(0.4)),
+                                        foregroundColor: AppColors.error,
+                                        side: BorderSide(color: AppColors.error.withOpacity(0.4)),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                       ),
@@ -288,7 +289,7 @@ class _ContentTabState extends State<ContentTab> {
                                   ],
                                 ),
                                 const SizedBox(height: 24),
-                                const Divider(height: 1, color: Color(0xFF1C1E30)),
+                                const Divider(height: 1, color: AppColors.divider),
                                 const SizedBox(height: 24),
 
                                 // Render Active Section form
@@ -317,7 +318,7 @@ class _ContentTabState extends State<ContentTab> {
             const Icon(
               Icons.playlist_add_check,
               size: 80,
-              color: Color(0xFF23263B),
+              color: AppColors.border,
             ),
             const SizedBox(height: 16),
             Text(
@@ -325,7 +326,7 @@ class _ContentTabState extends State<ContentTab> {
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF8C91B2),
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -334,7 +335,7 @@ class _ContentTabState extends State<ContentTab> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13,
-                color: const Color(0xFF555978),
+                color: AppColors.textMuted,
               ),
             ),
           ],
@@ -391,7 +392,7 @@ class _ContentTabState extends State<ContentTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFB4B9D6), fontWeight: FontWeight.w600)),
+          Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextFormField(
             initialValue: value,
@@ -400,21 +401,21 @@ class _ContentTabState extends State<ContentTab> {
             style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF555978)),
+              hintStyle: const TextStyle(color: AppColors.textMuted),
               filled: true,
-              fillColor: const Color(0xFF131520),
+              fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
             onChanged: onChanged,
@@ -508,7 +509,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Concepts list (${content.simpleOverview.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Concepts list (${content.simpleOverview.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.simpleOverview.add(ConceptItem(title: 'New Concept', explanation: ''));
@@ -516,7 +517,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Concept'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -531,9 +532,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -542,7 +543,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Concept #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.simpleOverview.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -583,7 +584,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Sections list (${content.readMode.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Sections list (${content.readMode.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.readMode.add(ReadModeSection(heading: 'New Section', paragraphs: [], keyPoints: [], example: ''));
@@ -591,7 +592,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Section'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -606,9 +607,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -617,7 +618,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Section #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.readMode.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -676,7 +677,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Terms list (${content.mustKnow.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Terms list (${content.mustKnow.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.mustKnow.add(MustKnowTerm(term: '', definition: '', importance: ''));
@@ -684,7 +685,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Term'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -699,9 +700,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -710,7 +711,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Term #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.mustKnow.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -759,7 +760,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Insights list (${content.goodToKnow.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Insights list (${content.goodToKnow.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.goodToKnow.add(GoodToKnowInsight(title: '', content: '', connection: ''));
@@ -767,7 +768,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Insight'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -782,9 +783,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -793,7 +794,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Insight #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.goodToKnow.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -842,7 +843,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Prerequisites list (${content.preRequisite.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Prerequisites list (${content.preRequisite.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.preRequisite.add(PreRequisiteItem(concept: '', explanation: '', connection: ''));
@@ -850,7 +851,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Prerequisite'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -865,9 +866,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -876,7 +877,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Prerequisite #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.preRequisite.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -925,7 +926,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Industry Applications list (${content.industryInsights.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Industry Applications list (${content.industryInsights.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 content.industryInsights.add(IndustryInsightItem(field: '', application: '', exampleRole: ''));
@@ -933,7 +934,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Application'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -948,9 +949,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 children: [
@@ -959,7 +960,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Application #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.industryInsights.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1007,7 +1008,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Chips List (${content.chips.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Chips List (${content.chips.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 final idStr = '${content.metadata.chapterNumber}_chip_${content.chips.length + 1}';
@@ -1016,7 +1017,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Chip'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -1031,9 +1032,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1048,7 +1049,7 @@ class _ContentTabState extends State<ContentTab> {
                           const Text('AI Enabled', style: TextStyle(color: Colors.white, fontSize: 12)),
                           Checkbox(
                             value: chip.aiEnabled,
-                            activeColor: const Color(0xFF6366F1),
+                            activeColor: AppColors.primary,
                             checkColor: Colors.white,
                             onChanged: (val) {
                               chip.aiEnabled = val ?? true;
@@ -1058,7 +1059,7 @@ class _ContentTabState extends State<ContentTab> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.chips.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1131,7 +1132,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Topics list (${content.plusPoints.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Topics list (${content.plusPoints.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 final idStr = '${content.metadata.chapterNumber}.${content.plusPoints.length + 1}';
@@ -1140,7 +1141,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Topic'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -1155,9 +1156,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1172,7 +1173,7 @@ class _ContentTabState extends State<ContentTab> {
                           const Text('AI Mode', style: TextStyle(color: Colors.white, fontSize: 12)),
                           Checkbox(
                             value: topic.aiEnabled,
-                            activeColor: const Color(0xFF6366F1),
+                            activeColor: AppColors.primary,
                             onChanged: (val) {
                               topic.aiEnabled = val ?? true;
                               prov.updateActiveContent(content);
@@ -1182,7 +1183,7 @@ class _ContentTabState extends State<ContentTab> {
                           const Text('Eval Ready', style: TextStyle(color: Colors.white, fontSize: 12)),
                           Checkbox(
                             value: topic.evaluationReady,
-                            activeColor: const Color(0xFF6366F1),
+                            activeColor: AppColors.primary,
                             onChanged: (val) {
                               topic.evaluationReady = val ?? true;
                               prov.updateActiveContent(content);
@@ -1191,7 +1192,7 @@ class _ContentTabState extends State<ContentTab> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.plusPoints.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1265,9 +1266,9 @@ class _ContentTabState extends State<ContentTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1B4B).withOpacity(0.4),
+            color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF312E81)),
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1329,7 +1330,7 @@ class _ContentTabState extends State<ContentTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Questions list (${content.quiz.questions.length})', style: const TextStyle(color: Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+            Text('Questions list (${content.quiz.questions.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 final newQ = QuizQuestion(
@@ -1351,7 +1352,7 @@ class _ContentTabState extends State<ContentTab> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add MCQ Question'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             )
           ],
         ),
@@ -1366,9 +1367,9 @@ class _ContentTabState extends State<ContentTab> {
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F101A),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1378,7 +1379,7 @@ class _ContentTabState extends State<ContentTab> {
                       Text('Question #${idx + 1} (ID: ${q.id})', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Color(0xFFEF4444), size: 18),
+                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
                         onPressed: () {
                           content.quiz.questions.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1414,19 +1415,19 @@ class _ContentTabState extends State<ContentTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Difficulty', style: TextStyle(color: Color(0xFFB4B9D6), fontSize: 12, fontWeight: FontWeight.bold)),
+                            const Text('Difficulty', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF131520),
+                                color: AppColors.card,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFF1C1E30)),
+                                border: Border.all(color: AppColors.divider),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   value: q.difficulty,
-                                  dropdownColor: const Color(0xFF131520),
+                                  dropdownColor: AppColors.card,
                                   isExpanded: true,
                                   style: const TextStyle(color: Colors.white, fontSize: 13),
                                   items: ['easy', 'medium', 'hard'].map((d) {
@@ -1456,7 +1457,7 @@ class _ContentTabState extends State<ContentTab> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  Text('Answers Options & Correct Choice', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF8C91B2), fontWeight: FontWeight.bold)),
+                  Text('Answers Options & Correct Choice', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   // Render options A, B, C, D fields
                   ...q.options.map((opt) {
@@ -1469,8 +1470,8 @@ class _ContentTabState extends State<ContentTab> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: q.correctAnswer == opt.key
-                                ? const Color(0xFF10B981)
-                                : const Color(0xFF1C1E30),
+                                ? AppColors.success
+                                : AppColors.divider,
                           ),
                           child: Text(opt.key, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
@@ -1487,7 +1488,7 @@ class _ContentTabState extends State<ContentTab> {
                         Radio<String>(
                           value: opt.key,
                           groupValue: q.correctAnswer,
-                          activeColor: const Color(0xFF10B981),
+                          activeColor: AppColors.success,
                           onChanged: (val) {
                             if (val != null) {
                               q.correctAnswer = val;
@@ -1526,7 +1527,7 @@ class _ContentTabState extends State<ContentTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Chapter content successfully published to Firebase RTDB!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -1535,7 +1536,7 @@ class _ContentTabState extends State<ContentTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to publish content: $e'),
-            backgroundColor: const Color(0xFFEF4444),
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -1547,13 +1548,13 @@ class _ContentTabState extends State<ContentTab> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text('Confirm Database Deletion', style: GoogleFonts.outfit(color: Colors.white)),
-          content: Text('Are you sure you want to permanently delete the content payload for Chapter ${prov.selectedChapterNumber} from Firebase? This action cannot be undone.', style: GoogleFonts.inter(color: const Color(0xFF8C91B2))),
+          content: Text('Are you sure you want to permanently delete the content payload for Chapter ${prov.selectedChapterNumber} from Firebase? This action cannot be undone.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -1564,7 +1565,7 @@ class _ContentTabState extends State<ContentTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Chapter content deleted from Firebase.'),
-                        backgroundColor: Color(0xFFEF4444),
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
@@ -1573,13 +1574,13 @@ class _ContentTabState extends State<ContentTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Failed to delete content: $e'),
-                        backgroundColor: const Color(0xFFEF4444),
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
               child: const Text('Delete Permanently'),
             ),
           ],

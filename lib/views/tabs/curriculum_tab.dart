@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/curriculum_models.dart';
+import '../../constants/app_colors.dart';
 
 class CurriculumTab extends StatefulWidget {
   const CurriculumTab({super.key});
@@ -110,7 +111,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Curriculum updated successfully in Firebase!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -119,7 +120,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save changes: $e'),
-            backgroundColor: const Color(0xFFEF4444),
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -150,7 +151,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 decoration: const BoxDecoration(
                   border: Border(
                     right: BorderSide(
-                      color: Color(0xFF1C1E30),
+                      color: AppColors.divider,
                       width: 1.5,
                     ),
                   ),
@@ -172,7 +173,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                           style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6366F1),
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -181,7 +182,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         ),
                       ),
                     ),
-                    const Divider(height: 1, color: Color(0xFF1C1E30)),
+                    const Divider(height: 1, color: AppColors.divider),
                     // Tree list body
                     Expanded(
                       child: ListView.builder(
@@ -196,15 +197,15 @@ class _CurriculumTabState extends State<CurriculumTab> {
                             initiallyExpanded: true,
                             shape: const RoundedRectangleBorder(),
                             collapsedShape: const RoundedRectangleBorder(),
-                            iconColor: const Color(0xFF818CF8),
-                            collapsedIconColor: const Color(0xFF555978),
+                            iconColor: AppColors.primary,
+                            collapsedIconColor: AppColors.textMuted,
                             title: InkWell(
                               onTap: () => _selectGradeNode(gradeKey, grade),
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                 decoration: BoxDecoration(
-                                  color: isGradeSelected ? const Color(0xFF6366F1).withOpacity(0.15) : Colors.transparent,
+                                  color: isGradeSelected ? AppColors.primaryHighlight : Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
@@ -216,13 +217,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                         grade.name,
                                         style: GoogleFonts.inter(
                                           fontWeight: isGradeSelected ? FontWeight.bold : FontWeight.w600,
-                                          color: isGradeSelected ? Colors.white : const Color(0xFFB4B9D6),
+                                          color: isGradeSelected ? Colors.white : AppColors.textSecondary,
                                           fontSize: 13.5,
                                         ),
                                       ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.add_circle_outline, size: 16, color: Color(0xFF818CF8)),
+                                      icon: const Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
                                       onPressed: () => _showAddSubjectDialog(gradeKey),
                                       tooltip: 'Add Subject',
                                       padding: EdgeInsets.zero,
@@ -249,7 +250,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                       decoration: BoxDecoration(
-                                        color: isSubjectSelected ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+                                        color: isSubjectSelected ? AppColors.primaryHighlight : Colors.transparent,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Row(
@@ -261,13 +262,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                               subject.name,
                                               style: GoogleFonts.inter(
                                                 fontWeight: isSubjectSelected ? FontWeight.bold : FontWeight.w500,
-                                                color: isSubjectSelected ? Colors.white : const Color(0xFF8C91B2),
+                                                color: isSubjectSelected ? Colors.white : AppColors.textSecondary,
                                                 fontSize: 13,
                                               ),
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.post_add_outlined, size: 16, color: Color(0xFFA855F7)),
+                                            icon: const Icon(Icons.post_add_outlined, size: 16, color: AppColors.secondary),
                                             onPressed: () => _showAddChapterDialog(gradeKey, subject.id),
                                             tooltip: 'Add Chapter',
                                             padding: EdgeInsets.zero,
@@ -292,14 +293,14 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(6),
                                         ),
-                                        tileColor: isChapterSelected ? const Color(0xFF6366F1).withOpacity(0.1) : Colors.transparent,
-                                        leading: const Icon(Icons.bookmark_outline, size: 14, color: Color(0xFF555978)),
+                                        tileColor: isChapterSelected ? AppColors.primaryHighlight : Colors.transparent,
+                                        leading: const Icon(Icons.bookmark_outline, size: 14, color: AppColors.textMuted),
                                         title: Text(
                                           'Ch ${chapter.number}: ${chapter.title}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
-                                            color: isChapterSelected ? Colors.white : const Color(0xFF6C7194),
+                                            color: isChapterSelected ? Colors.white : AppColors.textSecondary,
                                             fontWeight: isChapterSelected ? FontWeight.bold : FontWeight.normal,
                                             fontSize: 12,
                                           ),
@@ -330,7 +331,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         children: [
                           Icon(
                             _getNodeIcon(),
-                            color: const Color(0xFF6366F1),
+                            color: AppColors.primary,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
@@ -349,7 +350,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               icon: const Icon(Icons.close, size: 16),
                               label: const Text('Cancel Select'),
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF6C7194),
+                                foregroundColor: AppColors.textSecondary,
                               ),
                             )
                         ],
@@ -375,21 +376,21 @@ class _CurriculumTabState extends State<CurriculumTab> {
           height: 72,
           padding: const EdgeInsets.symmetric(horizontal: 40),
           decoration: const BoxDecoration(
-            color: Color(0xFF0E101A),
+            color: AppColors.surface,
             border: Border(
               top: BorderSide(
-                color: Color(0xFF1C1E30),
+                color: AppColors.divider,
                 width: 1.5,
               ),
             ),
           ),
           child: Row(
             children: [
-              const Icon(Icons.info_outline, color: Color(0xFF555978), size: 18),
+              const Icon(Icons.info_outline, color: AppColors.textMuted, size: 18),
               const SizedBox(width: 12),
               Text(
                 'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
-                style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF555978)),
+                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
               ),
               const Spacer(),
               OutlinedButton(
@@ -398,8 +399,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   _clearSelection();
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF8C91B2),
-                  side: const BorderSide(color: Color(0xFF2C2F48)),
+                  foregroundColor: AppColors.textSecondary,
+                  side: const BorderSide(color: AppColors.border),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -422,7 +423,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
+                  backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -459,10 +460,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
       padding: const EdgeInsets.symmetric(vertical: 80),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.account_tree_outlined,
             size: 80,
-            color: const Color(0xFF23263B),
+            color: AppColors.border,
           ),
           const SizedBox(height: 16),
           Text(
@@ -470,7 +471,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF8C91B2),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -479,7 +480,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 13,
-              color: const Color(0xFF555978),
+              color: AppColors.textMuted,
             ),
           ),
         ],
@@ -527,7 +528,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 _showSavedIndicator();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -545,7 +546,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Grade'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFEF4444),
+                foregroundColor: AppColors.error,
               ),
             ),
           ],
@@ -572,7 +573,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               child: _buildTextField(
                 controller: _subjectColorController,
                 label: 'Subject Color (HEX)',
-                hint: '#6366F1',
+                hint: '#4E7FFF',
               ),
             ),
           ],
@@ -606,14 +607,14 @@ class _CurriculumTabState extends State<CurriculumTab> {
                     id: _activeSubjectId!,
                     name: _subjectNameController.text,
                     emoji: _subjectEmojiController.text.isEmpty ? '📚' : _subjectEmojiController.text,
-                    color: _subjectColorController.text.isEmpty ? '#6366F1' : _subjectColorController.text,
+                    color: _subjectColorController.text.isEmpty ? '#4E7FFF' : _subjectColorController.text,
                     chapters: oldSub?.chapters ?? [],
                   ),
                 );
                 _showSavedIndicator();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -631,7 +632,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Subject'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFEF4444),
+                foregroundColor: AppColors.error,
               ),
             ),
           ],
@@ -689,7 +690,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 _showSavedIndicator();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -707,7 +708,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Chapter'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFEF4444),
+                foregroundColor: AppColors.error,
               ),
             ),
           ],
@@ -731,7 +732,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           label,
           style: GoogleFonts.inter(
             fontSize: 12,
-            color: const Color(0xFFB4B9D6),
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -741,24 +742,24 @@ class _CurriculumTabState extends State<CurriculumTab> {
           enabled: enabled,
           maxLines: maxLines,
           keyboardType: keyboardType,
-          style: GoogleFonts.inter(color: enabled ? Colors.white : const Color(0xFF6C7194), fontSize: 14),
+          style: GoogleFonts.inter(color: enabled ? Colors.white : AppColors.textSecondary, fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(color: const Color(0xFF555978)),
+            hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
             filled: true,
-            fillColor: const Color(0xFF131520),
+            fillColor: AppColors.card,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
             ),
           ),
         ),
@@ -815,7 +816,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text('Add Grade Level', style: GoogleFonts.outfit(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -825,7 +826,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Database Key (e.g. grade_7)',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -834,7 +835,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Grade Name (e.g. Grade 7)',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -843,7 +844,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Emoji Icon',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -852,7 +853,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
             ],
@@ -860,7 +861,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -876,7 +877,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 );
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Add'),
             ),
           ],
@@ -889,13 +890,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
     final idCtrl = TextEditingController();
     final nameCtrl = TextEditingController();
     final emojiCtrl = TextEditingController();
-    final colorCtrl = TextEditingController(text: '#6366F1');
+    final colorCtrl = TextEditingController(text: '#4E7FFF');
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text('Add Subject', style: GoogleFonts.outfit(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -905,7 +906,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Subject ID/Code (e.g. science, math)',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -914,7 +915,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Subject Name (e.g. Science)',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -923,7 +924,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Emoji Icon',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -932,7 +933,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Hex Color code',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
             ],
@@ -940,7 +941,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -957,7 +958,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 );
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Add'),
             ),
           ],
@@ -975,7 +976,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text('Add Chapter', style: GoogleFonts.outfit(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -986,7 +987,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Chapter Number',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -995,7 +996,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Chapter Title',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1004,7 +1005,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Interactive Lesson URL (Optional)',
-                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
             ],
@@ -1012,7 +1013,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1029,7 +1030,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 );
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Add'),
             ),
           ],
@@ -1043,20 +1044,20 @@ class _CurriculumTabState extends State<CurriculumTab> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF131520),
+          backgroundColor: AppColors.card,
           title: Text('Confirm Deletion', style: GoogleFonts.outfit(color: Colors.white)),
-          content: Text('Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.', style: GoogleFonts.inter(color: const Color(0xFF8C91B2))),
+          content: Text('Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () {
                 onDelete();
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
               child: const Text('Delete'),
             ),
           ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
+import '../../constants/app_colors.dart';
 
 class OverviewTab extends StatelessWidget {
   const OverviewTab({super.key});
@@ -32,12 +33,12 @@ class OverviewTab extends StatelessWidget {
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF1E1B4B), Color(0xFF311042)],
+                colors: [Color(0xFF0A1E3F), Color(0xFF063A3C)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF312E81)),
+              border: Border.all(color: const Color(0xFF1E3A8A)),
             ),
             child: Row(
               children: [
@@ -58,7 +59,7 @@ class OverviewTab extends StatelessWidget {
                         'Manage, add, and publish structured education material. Your changes sync in real-time to the student mobile app.',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: const Color(0xFFC7D2FE),
+                          color: AppColors.textLight,
                         ),
                       ),
                     ],
@@ -68,7 +69,7 @@ class OverviewTab extends StatelessWidget {
                 const Icon(
                   Icons.auto_stories,
                   size: 64,
-                  color: Color(0xFF818CF8),
+                  color: AppColors.primary,
                 )
               ],
             ),
@@ -88,13 +89,13 @@ class OverviewTab extends StatelessWidget {
                 title: 'Total Grades',
                 value: totalGrades.toString(),
                 icon: Icons.school_outlined,
-                gradientColors: [const Color(0xFF6366F1), const Color(0xFF4F46E5)],
+                gradientColors: [AppColors.primary, const Color(0xFF2563EB)],
               ),
               _buildStatCard(
                 title: 'Total Subjects',
                 value: totalSubjects.toString(),
                 icon: Icons.menu_book_outlined,
-                gradientColors: [const Color(0xFFA855F7), const Color(0xFF7C3AED)],
+                gradientColors: [AppColors.secondary, const Color(0xFF059669)],
               ),
               _buildStatCard(
                 title: 'Total Chapters',
@@ -106,7 +107,7 @@ class OverviewTab extends StatelessWidget {
                 title: 'Total Careers',
                 value: adminProv.careers.length.toString(),
                 icon: Icons.work_outline,
-                gradientColors: [const Color(0xFF10B981), const Color(0xFF059669)],
+                gradientColors: [AppColors.warning, const Color(0xFFD97706)],
               ),
             ],
           ),
@@ -126,14 +127,14 @@ class OverviewTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF131520),
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF1C1E30)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Center(
                 child: Text(
                   'No curriculum structure found in the database. Head over to Curriculum Editor to create one.',
-                  style: GoogleFonts.inter(color: const Color(0xFF6C7194)),
+                  style: GoogleFonts.inter(color: AppColors.textSecondary),
                 ),
               ),
             )
@@ -148,15 +149,15 @@ class OverviewTab extends StatelessWidget {
                 final grade = curriculum[key]!;
                 return Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131520),
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF1C1E30)),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: ExpansionTile(
                     shape: const RoundedRectangleBorder(),
                     collapsedShape: const RoundedRectangleBorder(),
                     leading: Text(
-                      grade.emoji,
+                       grade.emoji,
                       style: const TextStyle(fontSize: 24),
                     ),
                     title: Text(
@@ -170,7 +171,7 @@ class OverviewTab extends StatelessWidget {
                       grade.description,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: const Color(0xFF6C7194),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     childrenPadding: const EdgeInsets.all(16),
@@ -178,7 +179,7 @@ class OverviewTab extends StatelessWidget {
                       if (grade.subjects.isEmpty)
                         Text(
                           'No subjects defined.',
-                          style: GoogleFonts.inter(color: const Color(0xFF555978), fontSize: 13),
+                          style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
                         )
                       else
                         Wrap(
@@ -189,10 +190,10 @@ class OverviewTab extends StatelessWidget {
                               width: 320,
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1B1D2C),
+                                color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFF2C2F48),
+                                  color: AppColors.border,
                                 ),
                               ),
                               child: Column(
@@ -229,7 +230,7 @@ class OverviewTab extends StatelessWidget {
                                     '${sub.chapters.length} Chapters registered:',
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
-                                      color: const Color(0xFF8C91B2),
+                                      color: AppColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -238,7 +239,7 @@ class OverviewTab extends StatelessWidget {
                                     Text(
                                       'No chapters created.',
                                       style: GoogleFonts.inter(
-                                        color: const Color(0xFF555978),
+                                        color: AppColors.textMuted,
                                         fontSize: 12,
                                         fontStyle: FontStyle.italic,
                                       ),
@@ -251,7 +252,7 @@ class OverviewTab extends StatelessWidget {
                                           'Ch ${ch.number}: ${ch.title}',
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
-                                            color: const Color(0xFF6C7194),
+                                            color: AppColors.textSecondary,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -263,7 +264,7 @@ class OverviewTab extends StatelessWidget {
                                       child: Text(
                                         '+ ${sub.chapters.length - 3} more...',
                                         style: GoogleFonts.inter(
-                                          color: const Color(0xFF6366F1),
+                                          color: AppColors.primary,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -293,10 +294,10 @@ class OverviewTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF131520),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF1C1E30),
+          color: AppColors.divider,
           width: 1.5,
         ),
       ),
@@ -312,7 +313,7 @@ class OverviewTab extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF8C91B2),
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 8),

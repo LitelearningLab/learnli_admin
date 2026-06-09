@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/curriculum_models.dart';
 import '../models/chapter_content_model.dart';
+import '../models/career_models.dart';
 
 class DatabaseService {
   static final FirebaseDatabase _db = FirebaseDatabase.instance;
@@ -183,6 +184,73 @@ class DatabaseService {
       print('✅ Chapter content deleted successfully');
     } catch (e) {
       print('Error deleting chapter content: $e');
+      rethrow;
+    }
+  }
+
+  // ==========================================
+  // CAREERS API
+  // ==========================================
+
+  /// Fetch all careers
+  static Future<Map<String, Career>> fetchCareers() async {
+    try {
+      await authenticateFirebase();
+      final snapshot = await _db.ref('careers').get();
+      if (!snapshot.exists || snapshot.value == null) {
+        return {};
+      }
+
+      final Map<String, Career> result = {};
+      final rawData = _toStringDynamicMap(snapshot.value);
+      rawData.forEach((key, value) {
+        if (value is Map) {
+          result[key] = Career.fromJson(_toStringDynamicMap(value));
+        }
+      });
+      return result;
+    } catch (e) {
+      print('Error fetching careers: $e');
+      rethrow;
+    }
+  }
+
+  /// Save all careers in bulk
+  static Future<void> saveCareers(Map<String, Career> careers) async {
+    try {
+      await authenticateFirebase();
+      final Map<String, dynamic> data = {};
+      careers.forEach((key, value) {
+        data[key] = value.toJson();
+      });
+      await _db.ref('careers').set(data);
+      print('✅ Careers saved successfully');
+    } catch (e) {
+      print('Error saving careers: $e');
+      rethrow;
+    }
+  }
+
+  /// Save a single career
+  static Future<void> saveCareer(String id, Career career) async {
+    try {
+      await authenticateFirebase();
+      await _db.ref('careers/$id').set(career.toJson());
+      print('✅ Career $id saved successfully');
+    } catch (e) {
+      print('Error saving career $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete a single career
+  static Future<void> deleteCareer(String id) async {
+    try {
+      await authenticateFirebase();
+      await _db.ref('careers/$id').remove();
+      print('✅ Career $id deleted successfully');
+    } catch (e) {
+      print('Error deleting career $id: $e');
       rethrow;
     }
   }

@@ -5,6 +5,7 @@ import '../providers/admin_provider.dart';
 import 'tabs/overview_tab.dart';
 import 'tabs/curriculum_tab.dart';
 import 'tabs/content_tab.dart';
+import 'tabs/careers_tab.dart';
 import 'tabs/json_tab.dart';
 
 class DashboardView extends StatefulWidget {
@@ -21,6 +22,7 @@ class _DashboardViewState extends State<DashboardView> {
     'Overview Dashboard',
     'Curriculum Structuring',
     'Chapter Content Editor',
+    'Career Pathways Editor',
     'JSON Structural Import/Export',
   ];
 
@@ -33,6 +35,8 @@ class _DashboardViewState extends State<DashboardView> {
       case 2:
         return const ContentTab();
       case 3:
+        return const CareersTab();
+      case 4:
         return const JsonTab();
       default:
         return const OverviewTab();
@@ -131,6 +135,12 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 _buildSidebarItem(
                   index: 3,
+                  label: 'Careers Editor',
+                  icon: Icons.work_outline,
+                  activeIcon: Icons.work,
+                ),
+                _buildSidebarItem(
+                  index: 4,
                   label: 'JSON Import/Export',
                   icon: Icons.code_outlined,
                   activeIcon: Icons.code,

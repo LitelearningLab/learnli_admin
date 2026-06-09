@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/curriculum_models.dart';
 import '../models/chapter_content_model.dart';
+import '../models/career_models.dart';
 import '../services/database_service.dart';
 
 class AdminProvider with ChangeNotifier {
@@ -23,6 +24,11 @@ class AdminProvider with ChangeNotifier {
   bool _isLoadingContent = false;
   String _jsonString = '';
 
+  // Careers state
+  Map<String, Career> _careers = {};
+  bool _isLoadingCareers = false;
+  String? _selectedCareerId;
+
   // Getters
   bool get isAuthenticated => _isAuthenticated;
   bool get isInitializing => _isInitializing;
@@ -36,6 +42,11 @@ class AdminProvider with ChangeNotifier {
   ChapterContent? get activeContent => _activeContent;
   bool get isLoadingContent => _isLoadingContent;
   String get jsonString => _jsonString;
+
+  Map<String, Career> get careers => _careers;
+  bool get isLoadingCareers => _isLoadingCareers;
+  String? get selectedCareerId => _selectedCareerId;
+  Career? get selectedCareer => _selectedCareerId != null ? _careers[_selectedCareerId] : null;
 
   // Constructor - triggers auto login check
   AdminProvider() {
@@ -54,8 +65,9 @@ class AdminProvider with ChangeNotifier {
         final success = await DatabaseService.authenticateFirebase();
         if (success) {
           _isAuthenticated = true;
-          // Preload curriculum
+          // Preload curriculum & careers
           await loadCurriculum();
+          await loadCareers();
         }
       }
     } catch (e) {
@@ -74,8 +86,9 @@ class AdminProvider with ChangeNotifier {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('admin_logged_in', true);
         notifyListeners();
-        // Load curriculum
+        // Load curriculum & careers
         await loadCurriculum();
+        await loadCareers();
         return true;
       }
     }
@@ -89,6 +102,9 @@ class AdminProvider with ChangeNotifier {
     _selectedChapterNumber = null;
     _activeContent = null;
     _curriculum = {};
+    _careers = {};
+    _selectedCareerId = null;
+    _isLoadingCareers = false;
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('admin_logged_in');
@@ -459,6 +475,170 @@ class AdminProvider with ChangeNotifier {
       return null;
     } catch (e) {
       return 'Syntax or structure error: ${e.toString()}';
+    }
+  }
+
+  // ==========================================
+  // CAREERS STATE METHODS
+  // ==========================================
+
+  Future<void> loadCareers() async {
+    _isLoadingCareers = true;
+    notifyListeners();
+
+    try {
+      _careers = await DatabaseService.fetchCareers();
+    } catch (e) {
+      print('Error loading careers in provider: $e');
+    } finally {
+      _isLoadingCareers = false;
+      notifyListeners();
+    }
+  }
+
+  void selectCareer(String? id) {
+    _selectedCareerId = id;
+    notifyListeners();
+  }
+
+  void updateCareer(String id, Career career) {
+    _careers[id] = career;
+    notifyListeners();
+  }
+
+  void addCareer(String id, Career career) {
+    _careers[id] = career;
+    _selectedCareerId = id;
+    notifyListeners();
+  }
+
+  void removeCareer(String id) {
+    _careers.remove(id);
+    if (_selectedCareerId == id) {
+      _selectedCareerId = null;
+    }
+    notifyListeners();
+  }
+
+  Future<void> saveCareers() async {
+    _isLoadingCareers = true;
+    notifyListeners();
+
+    try {
+      await DatabaseService.saveCareers(_careers);
+    } catch (e) {
+      print('Error saving careers in provider: $e');
+      rethrow;
+    } finally {
+      _isLoadingCareers = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> saveSingleCareer(String id) async {
+    final career = _careers[id];
+    if (career == null) return;
+
+    _isLoadingCareers = true;
+    notifyListeners();
+
+    try {
+      await DatabaseService.saveCareer(id, career);
+    } catch (e) {
+      print('Error saving career $id in provider: $e');
+      rethrow;
+    } finally {
+      _isLoadingCareers = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCareer(String id) async {
+    _isLoadingCareers = true;
+    notifyListeners();
+
+    try {
+      await DatabaseService.deleteCareer(id);
+      _careers.remove(id);
+      if (_selectedCareerId == id) {
+        _selectedCareerId = null;
+      }
+    } catch (e) {
+      print('Error deleting career $id in provider: $e');
+      rethrow;
+    } finally {
+      _isLoadingCareers = false;
+      notifyListeners();
+    }
+  }
+
+  // ==========================================
+  // BULK SEED DATABASE
+  // ==========================================
+
+  Future<void> seedDatabase(Map<String, dynamic> seedData) async {
+    _isLoadingCurriculum = true;
+    _isLoadingContent = true;
+    _isLoadingCareers = true;
+    notifyListeners();
+
+    try {
+      // 1. Seed Careers (if present)
+      if (seedData.containsKey('careers') && seedData['careers'] is Map) {
+        final Map<String, dynamic> careersMap = Map<String, dynamic>.from(seedData['careers']);
+        final Map<String, Career> parsedCareers = {};
+        careersMap.forEach((key, value) {
+          if (value is Map) {
+            parsedCareers[key] = Career.fromJson(Map<String, dynamic>.from(value));
+          }
+        });
+        await DatabaseService.saveCareers(parsedCareers);
+        _careers = parsedCareers;
+      }
+
+      // 2. Seed Content chapters (if present)
+      if (seedData.containsKey('content') && seedData['content'] is Map) {
+        final Map<String, dynamic> contentMap = Map<String, dynamic>.from(seedData['content']);
+        for (var gradeKey in contentMap.keys) {
+          final gradeVal = contentMap[gradeKey];
+          if (gradeVal is Map) {
+            final gradeStr = gradeKey.replaceFirst('grade_', '');
+            final gradeInt = int.tryParse(gradeStr);
+            if (gradeInt == null) continue;
+
+            for (var subjectKey in gradeVal.keys) {
+              final subjectVal = gradeVal[subjectKey];
+              if (subjectVal is Map) {
+                for (var chapterIdKey in subjectVal.keys) {
+                  final chapterVal = subjectVal[chapterIdKey];
+                  if (chapterVal is Map) {
+                    final contentObj = ChapterContent.fromJson(Map<String, dynamic>.from(chapterVal));
+                    final chNum = contentObj.metadata.chapterNumber;
+                    await DatabaseService.saveChapterContent(
+                      gradeInt,
+                      subjectKey,
+                      chNum,
+                      contentObj,
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Reload curriculum and careers to keep state in sync
+      await loadCurriculum();
+      await loadCareers();
+    } catch (e) {
+      print('Seeding database failed: $e');
+      rethrow;
+    } finally {
+      _isLoadingCurriculum = false;
+      _isLoadingContent = false;
+      _isLoadingCareers = false;
+      notifyListeners();
     }
   }
 }

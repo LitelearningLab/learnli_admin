@@ -77,12 +77,12 @@ class OverviewTab extends StatelessWidget {
 
           // Stat Metrics Row
           GridView.count(
-            crossAxisCount: 3,
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
+            crossAxisCount: 4,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.2,
+            childAspectRatio: 1.8,
             children: [
               _buildStatCard(
                 title: 'Total Grades',
@@ -101,6 +101,12 @@ class OverviewTab extends StatelessWidget {
                 value: totalChapters.toString(),
                 icon: Icons.collections_bookmark_outlined,
                 gradientColors: [const Color(0xFF0EA5E9), const Color(0xFF2563EB)],
+              ),
+              _buildStatCard(
+                title: 'Total Careers',
+                value: adminProv.careers.length.toString(),
+                icon: Icons.work_outline,
+                gradientColors: [const Color(0xFF10B981), const Color(0xFF059669)],
               ),
             ],
           ),

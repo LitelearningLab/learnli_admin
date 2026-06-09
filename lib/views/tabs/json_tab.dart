@@ -18,6 +18,7 @@ class _JsonTabState extends State<JsonTab> {
   String? _validationError;
   bool _isValidated = false;
   bool _isUploading = false;
+  bool _isBulkSeedJson = false;
 
   @override
   void dispose() {
@@ -67,12 +68,36 @@ class _JsonTabState extends State<JsonTab> {
       setState(() {
         _validationError = 'JSON string cannot be empty.';
         _isValidated = false;
+        _isBulkSeedJson = false;
       });
       return;
     }
 
+    // Check if it's a bulk backup JSON containing careers or content key
+    try {
+      final decoded = json.decode(rawText);
+      if (decoded is Map<String, dynamic> &&
+          (decoded.containsKey('careers') || decoded.containsKey('content'))) {
+        setState(() {
+          _validationError = null;
+          _isValidated = true;
+          _isBulkSeedJson = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bulk Database JSON validated successfully! Ready to seed.'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // Ignore exception here and fallback to regular chapter content validation
+    }
+
     final error = prov.validateAndImportJson(rawText);
     setState(() {
+      _isBulkSeedJson = false;
       if (error != null) {
         _validationError = error;
         _isValidated = false;
@@ -139,14 +164,28 @@ class _JsonTabState extends State<JsonTab> {
     });
 
     try {
-      await prov.saveChapterContent();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Chapter content successfully published to Firebase Realtime DB!'),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
+      if (_isBulkSeedJson) {
+        final rawText = _textController.text.trim();
+        final decoded = json.decode(rawText) as Map<String, dynamic>;
+        await prov.seedDatabase(decoded);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Database seeded successfully (Careers & Chapter Contents)!'),
+              backgroundColor: Color(0xFF10B981),
+            ),
+          );
+        }
+      } else {
+        await prov.saveChapterContent();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Chapter content successfully published to Firebase Realtime DB!'),
+              backgroundColor: Color(0xFF10B981),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -408,7 +447,7 @@ class _JsonTabState extends State<JsonTab> {
                                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                       )
                                     : const Icon(Icons.cloud_upload_outlined, size: 16),
-                                label: Text(_isUploading ? 'Uploading...' : 'Save to Firebase DB'),
+                                label: Text(_isUploading ? 'Uploading...' : (_isBulkSeedJson ? 'Seed Firebase Database' : 'Save to Firebase DB')),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF10B981),
                                   foregroundColor: Colors.white,

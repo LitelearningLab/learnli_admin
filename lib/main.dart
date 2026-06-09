@@ -31,15 +31,15 @@ class LearnLiAdminApp extends StatelessWidget {
           return MaterialApp(
             title: 'LearnLi Admin Console',
             debugShowCheckedModeBanner: false,
-            themeMode: ThemeMode.dark,
-            darkTheme: ThemeData(
+            themeMode: ThemeMode.light,
+            theme: ThemeData(
               useMaterial3: true,
-              brightness: Brightness.dark,
+              brightness: Brightness.light,
               primaryColor: AppColors.primary,
               scaffoldBackgroundColor: AppColors.background,
               cardColor: AppColors.card,
               dividerColor: AppColors.divider,
-              colorScheme: const ColorScheme.dark(
+              colorScheme: const ColorScheme.light(
                 primary: AppColors.primary,
                 secondary: AppColors.secondary,
                 background: AppColors.background,
@@ -47,14 +47,14 @@ class LearnLiAdminApp extends StatelessWidget {
                 error: AppColors.error,
               ),
               textTheme: GoogleFonts.interTextTheme(
-                ThemeData.dark().textTheme,
+                ThemeData.light().textTheme,
               ).copyWith(
                 titleLarge: GoogleFonts.outfit(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
                 titleMedium: GoogleFonts.outfit(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),

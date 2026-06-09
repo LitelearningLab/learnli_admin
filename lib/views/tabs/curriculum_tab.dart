@@ -217,7 +217,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                         grade.name,
                                         style: GoogleFonts.inter(
                                           fontWeight: isGradeSelected ? FontWeight.bold : FontWeight.w600,
-                                          color: isGradeSelected ? Colors.white : AppColors.textSecondary,
+                                          color: isGradeSelected ? AppColors.primary : AppColors.textSecondary,
                                           fontSize: 13.5,
                                         ),
                                       ),
@@ -262,7 +262,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                               subject.name,
                                               style: GoogleFonts.inter(
                                                 fontWeight: isSubjectSelected ? FontWeight.bold : FontWeight.w500,
-                                                color: isSubjectSelected ? Colors.white : AppColors.textSecondary,
+                                                color: isSubjectSelected ? AppColors.primary : AppColors.textSecondary,
                                                 fontSize: 13,
                                               ),
                                             ),
@@ -300,7 +300,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
-                                            color: isChapterSelected ? Colors.white : AppColors.textSecondary,
+                                            color: isChapterSelected ? AppColors.primary : AppColors.textSecondary,
                                             fontWeight: isChapterSelected ? FontWeight.bold : FontWeight.normal,
                                             fontSize: 12,
                                           ),
@@ -329,6 +329,15 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       // Active Node Card header
                       Row(
                         children: [
+                          Container(
+                            width: 6,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Icon(
                             _getNodeIcon(),
                             color: AppColors.primary,
@@ -340,7 +349,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                             style: GoogleFonts.outfit(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const Spacer(),
@@ -742,7 +751,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           enabled: enabled,
           maxLines: maxLines,
           keyboardType: keyboardType,
-          style: GoogleFonts.inter(color: enabled ? Colors.white : AppColors.textSecondary, fontSize: 14),
+          style: GoogleFonts.inter(color: enabled ? AppColors.textPrimary : AppColors.textSecondary, fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
@@ -817,13 +826,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Add Grade Level', style: GoogleFonts.outfit(color: Colors.white)),
+          title: Text('Add Grade Level', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: keyCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Database Key (e.g. grade_7)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -832,7 +841,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: nameCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Grade Name (e.g. Grade 7)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -841,7 +850,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: emojiCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Emoji Icon',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -850,7 +859,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: descCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -897,13 +906,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Add Subject', style: GoogleFonts.outfit(color: Colors.white)),
+          title: Text('Add Subject', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: idCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Subject ID/Code (e.g. science, math)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -912,7 +921,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: nameCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Subject Name (e.g. Science)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -921,7 +930,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: emojiCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Emoji Icon',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -930,7 +939,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: colorCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Hex Color code',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -977,14 +986,14 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Add Chapter', style: GoogleFonts.outfit(color: Colors.white)),
+          title: Text('Add Chapter', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: numCtrl,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Chapter Number',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -993,7 +1002,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: titleCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Chapter Title',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -1002,7 +1011,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               const SizedBox(height: 12),
               TextField(
                 controller: urlCtrl,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   labelText: 'Interactive Lesson URL (Optional)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -1045,7 +1054,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Confirm Deletion', style: GoogleFonts.outfit(color: Colors.white)),
+          title: Text('Confirm Deletion', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
           content: Text('Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           actions: [
             TextButton(

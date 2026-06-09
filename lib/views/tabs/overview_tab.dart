@@ -33,12 +33,12 @@ class OverviewTab extends StatelessWidget {
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF0A1E3F), Color(0xFF063A3C)],
+                colors: [AppColors.primary, AppColors.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF1E3A8A)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.2)),
             ),
             child: Row(
               children: [
@@ -147,134 +147,188 @@ class OverviewTab extends StatelessWidget {
               itemBuilder: (context, idx) {
                 final key = curriculum.keys.elementAt(idx);
                 final grade = curriculum[key]!;
+                final colors = [
+                  AppColors.primary,
+                  AppColors.secondary,
+                  const Color(0xFF8B5CF6), // Purple
+                  const Color(0xFFEC4899), // Pink
+                  const Color(0xFFF59E0B), // Orange
+                ];
+                final accentColor = colors[idx % colors.length];
+
                 return Container(
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.divider),
                   ),
-                  child: ExpansionTile(
-                    shape: const RoundedRectangleBorder(),
-                    collapsedShape: const RoundedRectangleBorder(),
-                    leading: Text(
-                       grade.emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                    title: Text(
-                      grade.name,
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    subtitle: Text(
-                      grade.description,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    childrenPadding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      if (grade.subjects.isEmpty)
-                        Text(
-                          'No subjects defined.',
-                          style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
-                        )
-                      else
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          children: grade.subjects.map((sub) {
-                            return Container(
-                              width: 320,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.border,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        sub.emoji,
-                                        style: const TextStyle(fontSize: 20),
+                      Container(
+                        width: 5,
+                        height: 120, // Approximate height to align left border accent visually
+                        decoration: BoxDecoration(
+                          color: accentColor,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            bottomLeft: Radius.circular(16),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ExpansionTile(
+                          shape: const RoundedRectangleBorder(),
+                          collapsedShape: const RoundedRectangleBorder(),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              grade.emoji,
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
+                          title: Text(
+                            grade.name,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          subtitle: Text(
+                            grade.description,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          childrenPadding: const EdgeInsets.all(16),
+                          children: [
+                            if (grade.subjects.isEmpty)
+                              Text(
+                                'No subjects defined.',
+                                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+                              )
+                            else
+                              Wrap(
+                                spacing: 16,
+                                runSpacing: 16,
+                                children: grade.subjects.map((sub) {
+                                  final subjectColor = _parseHexColor(sub.color);
+                                  return IntrinsicHeight(
+                                    child: Container(
+                                      width: 320,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surface,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: AppColors.border),
                                       ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          sub.name,
-                                          style: GoogleFonts.inter(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Container(
+                                            width: 4,
+                                            decoration: BoxDecoration(
+                                              color: subjectColor,
+                                              borderRadius: const BorderRadius.only(
+                                                topLeft: Radius.circular(12),
+                                                bottomLeft: Radius.circular(12),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 12,
-                                        height: 12,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: _parseHexColor(sub.color),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    '${sub.chapters.length} Chapters registered:',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  if (sub.chapters.isEmpty)
-                                    Text(
-                                      'No chapters created.',
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.textMuted,
-                                        fontSize: 12,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    )
-                                  else
-                                    ...sub.chapters.take(3).map((ch) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 4.0),
-                                        child: Text(
-                                          'Ch ${ch.number}: ${ch.title}',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.inter(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 12,
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        sub.emoji,
+                                                        style: const TextStyle(fontSize: 20),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: Text(
+                                                          sub.name,
+                                                          style: GoogleFonts.inter(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: AppColors.textPrimary,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        width: 12,
+                                                        height: 12,
+                                                        decoration: BoxDecoration(
+                                                          shape: BoxShape.circle,
+                                                          color: subjectColor,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 12),
+                                                  Text(
+                                                    '${sub.chapters.length} Chapters registered:',
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 12,
+                                                      color: AppColors.textSecondary,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  if (sub.chapters.isEmpty)
+                                                    Text(
+                                                      'No chapters created.',
+                                                      style: GoogleFonts.inter(
+                                                        color: AppColors.textMuted,
+                                                        fontSize: 12,
+                                                        fontStyle: FontStyle.italic,
+                                                      ),
+                                                    )
+                                                  else
+                                                    ...sub.chapters.take(3).map((ch) {
+                                                      return Padding(
+                                                        padding: const EdgeInsets.only(top: 4.0),
+                                                        child: Text(
+                                                          'Ch ${ch.number}: ${ch.title}',
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: GoogleFonts.inter(
+                                                            color: AppColors.textSecondary,
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  if (sub.chapters.length > 3)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 4.0),
+                                                      child: Text(
+                                                        '+ ${sub.chapters.length - 3} more...',
+                                                        style: GoogleFonts.inter(
+                                                          color: AppColors.primary,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    }),
-                                  if (sub.chapters.length > 3)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4.0),
-                                      child: Text(
-                                        '+ ${sub.chapters.length - 3} more...',
-                                        style: GoogleFonts.inter(
-                                          color: AppColors.primary,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        ],
                                       ),
                                     ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        )
+                                  );
+                                }).toList(),
+                              )
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -322,7 +376,7 @@ class OverviewTab extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],

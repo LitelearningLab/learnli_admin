@@ -31,7 +31,7 @@ class _CareersTabState extends State<CareersTab> {
           backgroundColor: AppColors.card,
           title: Text(
             'Create New Career Pathway',
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -127,7 +127,7 @@ class _CareersTabState extends State<CareersTab> {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: AppColors.textMuted),
@@ -181,7 +181,7 @@ class _CareersTabState extends State<CareersTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: const Text('Delete Career Pathway?', style: TextStyle(color: Colors.white)),
+          title: const Text('Delete Career Pathway?', style: TextStyle(color: AppColors.textPrimary)),
           content: Text(
             'Are you sure you want to permanently delete "$id"? This will remove it from Firebase DB immediately.',
             style: const TextStyle(color: AppColors.textSecondary),
@@ -259,7 +259,7 @@ class _CareersTabState extends State<CareersTab> {
                 child: Column(
                   children: [
                     TextField(
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         hintText: 'Search career pathways...',
                         hintStyle: const TextStyle(color: AppColors.textMuted),
@@ -330,7 +330,7 @@ class _CareersTabState extends State<CareersTab> {
                                   title: Text(
                                     career.title,
                                     style: GoogleFonts.inter(
-                                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                                       fontSize: 13.5,
                                     ),
@@ -382,7 +382,7 @@ class _CareersTabState extends State<CareersTab> {
                             children: [
                               Text(
                                 activeCareer.title,
-                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                               ),
                               Text(
                                 'ID: ${activeCareer.id}',
@@ -459,6 +459,7 @@ class _CareersTabState extends State<CareersTab> {
                                       final step = activeCareer.steps[index];
                                       final isSelected = _activeStepIndex == index;
 
+                                      final stepColor = _parseHexColor(step.color);
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(vertical: 2.0),
                                         child: ListTile(
@@ -468,7 +469,7 @@ class _CareersTabState extends State<CareersTab> {
                                             });
                                           },
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          tileColor: isSelected ? AppColors.primaryHighlight : Colors.transparent,
+                                          tileColor: isSelected ? stepColor.withOpacity(0.12) : Colors.transparent,
                                           leading: CircleAvatar(
                                             radius: 12,
                                             backgroundColor: _parseHexColor(step.bgColor),
@@ -482,7 +483,7 @@ class _CareersTabState extends State<CareersTab> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.inter(
-                                              color: isSelected ? Colors.white : AppColors.textSecondary,
+                                              color: isSelected ? stepColor : AppColors.textSecondary,
                                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                               fontSize: 12,
                                             ),
@@ -524,7 +525,7 @@ class _CareersTabState extends State<CareersTab> {
                                   if (activeCareer.steps.isNotEmpty && _activeStepIndex < activeCareer.steps.length) ...[
                                     Row(
                                       children: [
-                                        Text('Step #${_activeStepIndex + 1} Properties', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                        Text('Step #${_activeStepIndex + 1} Properties', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                                         const Spacer(),
                                         // Reorder Up/Down
                                         IconButton(
@@ -756,7 +757,7 @@ class _CareersTabState extends State<CareersTab> {
                         value: stepTypes.contains(step.id) ? step.id : 'current',
                         dropdownColor: AppColors.card,
                         isExpanded: true,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                         items: stepTypes.map((type) {
                           return DropdownMenuItem(value: type, child: Text(type.toUpperCase()));
                         }).toList(),
@@ -944,7 +945,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Subjects & Focus Areas', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Subjects & Focus Areas', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 subjects.add({'name': 'New Subject', 'importance': 3});
@@ -976,7 +977,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_sub_${idx}_name'),
                       initialValue: sub['name'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Subject Name', border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 8)),
                       onChanged: (val) {
                         sub['name'] = val;
@@ -1007,7 +1008,7 @@ class _CareersTabState extends State<CareersTab> {
                             },
                           ),
                         ),
-                        Text('${sub['importance'] ?? 3}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                        Text('${sub['importance'] ?? 3}', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
@@ -1048,7 +1049,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Entrance Exams', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Entrance Exams', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 exams.add({'name': 'Exam Name', 'fullName': '', 'totalMarks': '', 'requiredScore': '', 'duration': '', 'subjects': ''});
@@ -1077,7 +1078,7 @@ class _CareersTabState extends State<CareersTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Exam #${idx + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text('Exam #${idx + 1}', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
@@ -1197,7 +1198,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Target Universities / Colleges', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Target Universities / Colleges', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 colleges.add({'name': 'College Name', 'fees': '₹5 lakhs/year', 'rank': colleges.length + 1});
@@ -1230,7 +1231,7 @@ class _CareersTabState extends State<CareersTab> {
                       key: ValueKey('${career.id}_${step.id}_col_${idx}_rank'),
                       initialValue: (col['rank'] ?? 1).toString(),
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Rank', border: InputBorder.none, labelText: 'Rank', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['rank'] = int.tryParse(val) ?? 1;
@@ -1245,7 +1246,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_col_${idx}_name'),
                       initialValue: col['name'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'College Name', border: InputBorder.none, labelText: 'Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['name'] = val;
@@ -1260,7 +1261,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_col_${idx}_fees'),
                       initialValue: col['fees'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: '₹8-10 lakhs', border: InputBorder.none, labelText: 'Fees Details', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         col['fees'] = val;
@@ -1361,7 +1362,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Specializations & Training Milestones', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Specializations & Training Milestones', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 specList.add({'name': 'IAF Pilot Training', 'duration': '3-4 years'});
@@ -1394,7 +1395,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_spec_${idx}_name'),
                       initialValue: spec['name'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Specialization Name', border: InputBorder.none, labelText: 'Milestone Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         spec['name'] = val;
@@ -1411,7 +1412,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_spec_${idx}_dur'),
                       initialValue: spec['duration'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'e.g. 2 years', border: InputBorder.none, labelText: 'Duration', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         spec['duration'] = val;
@@ -1453,7 +1454,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Job Roles & Salary Levels', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Job Roles & Salary Levels', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 opportunities.add({'role': 'Software Engineer', 'icon': '💻', 'salary': '₹6-30 LPA'});
@@ -1485,7 +1486,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_icon'),
                       initialValue: opp['icon'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Emoji', border: InputBorder.none, labelText: 'Icon', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['icon'] = val;
@@ -1500,7 +1501,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_role'),
                       initialValue: opp['role'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Role Title', border: InputBorder.none, labelText: 'Job Title', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['role'] = val;
@@ -1515,7 +1516,7 @@ class _CareersTabState extends State<CareersTab> {
                     child: TextFormField(
                       key: ValueKey('${career.id}_${step.id}_opp_${idx}_sal'),
                       initialValue: opp['salary'],
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                       decoration: const InputDecoration(hintText: 'Salary Range', border: InputBorder.none, labelText: 'Income Package', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                       onChanged: (val) {
                         opp['salary'] = val;
@@ -1552,7 +1553,7 @@ class _CareersTabState extends State<CareersTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Global Opportunities', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text('Global Opportunities', style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
             ElevatedButton.icon(
               onPressed: () {
                 abroad.add({'country': 'USA', 'flag': '🇺🇸', 'exam': 'GRE/MS', 'salary': r'$80k/year'});
@@ -1583,7 +1584,7 @@ class _CareersTabState extends State<CareersTab> {
                     children: [
                       Text(ab['flag'] ?? '🇺🇸', style: const TextStyle(fontSize: 16)),
                       const SizedBox(width: 8),
-                      Text('Country Option #${idx + 1}: ${ab['country']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text('Country Option #${idx + 1}: ${ab['country']}', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 12)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
@@ -1603,7 +1604,7 @@ class _CareersTabState extends State<CareersTab> {
                         child: TextFormField(
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_country'),
                           initialValue: ab['country'],
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           decoration: const InputDecoration(hintText: 'USA', labelText: 'Country Name', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['country'] = val;
@@ -1617,7 +1618,7 @@ class _CareersTabState extends State<CareersTab> {
                         child: TextFormField(
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_flag'),
                           initialValue: ab['flag'],
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           decoration: const InputDecoration(hintText: '🇺🇸', labelText: 'Flag Emoji', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['flag'] = val;
@@ -1634,7 +1635,7 @@ class _CareersTabState extends State<CareersTab> {
                         child: TextFormField(
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_exam'),
                           initialValue: ab['exam'],
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           decoration: const InputDecoration(hintText: 'USMLE / GRE', labelText: 'Required Exams', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['exam'] = val;
@@ -1648,7 +1649,7 @@ class _CareersTabState extends State<CareersTab> {
                         child: TextFormField(
                           key: ValueKey('${career.id}_${step.id}_ab_${idx}_salary'),
                           initialValue: ab['salary'],
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           decoration: const InputDecoration(hintText: r'$100k/year', labelText: 'Salary Range', labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 10)),
                           onChanged: (val) {
                             ab['salary'] = val;
@@ -1744,7 +1745,7 @@ class _CareersTabState extends State<CareersTab> {
             initialValue: value,
             maxLines: maxLines,
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5),
+            style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: AppColors.textMuted),

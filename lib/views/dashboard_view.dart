@@ -95,7 +95,7 @@ class _DashboardViewState extends State<DashboardView> {
                             style: GoogleFonts.outfit(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -176,7 +176,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   style: GoogleFonts.inter(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 Text(
@@ -244,7 +244,7 @@ class _DashboardViewState extends State<DashboardView> {
                         style: GoogleFonts.outfit(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const Spacer(),
@@ -340,6 +340,17 @@ class _DashboardViewState extends State<DashboardView> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
+                  if (isActive) ...[
+                    Container(
+                      width: 4,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Icon(
                     isActive ? activeIcon : icon,
                     color: isActive ? AppColors.primary : AppColors.textMuted,
@@ -351,7 +362,7 @@ class _DashboardViewState extends State<DashboardView> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                      color: isActive ? Colors.white : AppColors.textSecondary,
+                      color: isActive ? AppColors.primary : AppColors.textSecondary,
                     ),
                   ),
                 ],

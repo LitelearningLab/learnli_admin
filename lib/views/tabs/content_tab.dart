@@ -81,7 +81,7 @@ class _ContentTabState extends State<ContentTab> {
                           hint: const Text('Choose Grade', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: gradesList.map((key) {
                             final g = curriculum[key]!;
                             return DropdownMenuItem(
@@ -123,7 +123,7 @@ class _ContentTabState extends State<ContentTab> {
                           hint: const Text('Choose Subject', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: subjectsList.map((s) {
                             return DropdownMenuItem(
                               value: s.id,
@@ -164,7 +164,7 @@ class _ContentTabState extends State<ContentTab> {
                           hint: const Text('Choose Chapter', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: chaptersList.map((c) {
                             return DropdownMenuItem(
                               value: c.number,
@@ -232,7 +232,7 @@ class _ContentTabState extends State<ContentTab> {
                                   title: Text(
                                     _sections[idx],
                                     style: GoogleFonts.inter(
-                                      color: isActive ? Colors.white : AppColors.textSecondary,
+                                      color: isActive ? AppColors.primary : AppColors.textSecondary,
                                       fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                                     ),
                                   ),
@@ -252,12 +252,21 @@ class _ContentTabState extends State<ContentTab> {
                                 // Heading
                                 Row(
                                   children: [
+                                    Container(
+                                      width: 6,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
                                     Text(
                                       _sections[_activeSectionIndex],
                                       style: GoogleFonts.outfit(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: AppColors.textPrimary,
                                       ),
                                     ),
                                     const Spacer(),
@@ -398,7 +407,7 @@ class _ContentTabState extends State<ContentTab> {
             initialValue: value,
             maxLines: maxLines,
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5),
+            style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: AppColors.textMuted),
@@ -540,7 +549,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Concept #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Concept #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -615,7 +624,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Section #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Section #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -708,7 +717,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Term #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Term #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -791,7 +800,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Insight #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Insight #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -874,7 +883,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Prerequisite #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Prerequisite #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -957,7 +966,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Application #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Application #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -1041,12 +1050,12 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Chip #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Chip #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('AI Enabled', style: TextStyle(color: Colors.white, fontSize: 12)),
+                          const Text('AI Enabled', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
                           Checkbox(
                             value: chip.aiEnabled,
                             activeColor: AppColors.primary,
@@ -1165,12 +1174,12 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Topic #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Topic #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('AI Mode', style: TextStyle(color: Colors.white, fontSize: 12)),
+                          const Text('AI Mode', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
                           Checkbox(
                             value: topic.aiEnabled,
                             activeColor: AppColors.primary,
@@ -1180,7 +1189,7 @@ class _ContentTabState extends State<ContentTab> {
                             },
                           ),
                           const SizedBox(width: 12),
-                          const Text('Eval Ready', style: TextStyle(color: Colors.white, fontSize: 12)),
+                          const Text('Eval Ready', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
                           Checkbox(
                             value: topic.evaluationReady,
                             activeColor: AppColors.primary,
@@ -1273,7 +1282,7 @@ class _ContentTabState extends State<ContentTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Quiz Settings', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              Text('Quiz Settings', style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -1376,7 +1385,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Row(
                     children: [
-                      Text('Question #${idx + 1} (ID: ${q.id})', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Question #${idx + 1} (ID: ${q.id})', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
@@ -1429,7 +1438,7 @@ class _ContentTabState extends State<ContentTab> {
                                   value: q.difficulty,
                                   dropdownColor: AppColors.card,
                                   isExpanded: true,
-                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                                   items: ['easy', 'medium', 'hard'].map((d) {
                                     return DropdownMenuItem(value: d, child: Text(d.toUpperCase()));
                                   }).toList(),
@@ -1473,7 +1482,7 @@ class _ContentTabState extends State<ContentTab> {
                                 ? AppColors.success
                                 : AppColors.divider,
                           ),
-                          child: Text(opt.key, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          child: Text(opt.key, style: TextStyle(color: q.correctAnswer == opt.key ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -1549,7 +1558,7 @@ class _ContentTabState extends State<ContentTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Confirm Database Deletion', style: GoogleFonts.outfit(color: Colors.white)),
+          title: Text('Confirm Database Deletion', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
           content: Text('Are you sure you want to permanently delete the content payload for Chapter ${prov.selectedChapterNumber} from Firebase? This action cannot be undone.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
           actions: [
             TextButton(

@@ -102,7 +102,7 @@ class _LoginViewState extends State<LoginView> {
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.all(40),
                 decoration: BoxDecoration(
-                  color: AppColors.card.withOpacity(0.85),
+                  color: AppColors.card,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: AppColors.border,
@@ -110,7 +110,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withOpacity(0.06),
                       blurRadius: 32,
                       offset: const Offset(0, 16),
                     ),
@@ -146,7 +146,7 @@ class _LoginViewState extends State<LoginView> {
                             style: GoogleFonts.outfit(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -182,7 +182,7 @@ class _LoginViewState extends State<LoginView> {
                                 child: Text(
                                   _errorMessage!,
                                   style: GoogleFonts.inter(
-                                    color: const Color(0xFFFCA5A5),
+                                    color: AppColors.error,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -205,7 +205,7 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailController,
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'admin@gmail.com',
@@ -252,7 +252,7 @@ class _LoginViewState extends State<LoginView> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: '••••••••',
                           hintStyle: GoogleFonts.inter(color: AppColors.textMuted),

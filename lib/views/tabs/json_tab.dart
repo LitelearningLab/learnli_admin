@@ -268,7 +268,7 @@ class _JsonTabState extends State<JsonTab> {
                           hint: const Text('Choose Grade', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: gradesList.map((key) {
                             final g = curriculum[key]!;
                             return DropdownMenuItem(
@@ -312,7 +312,7 @@ class _JsonTabState extends State<JsonTab> {
                           hint: const Text('Choose Subject', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: subjectsList.map((s) {
                             return DropdownMenuItem(
                               value: s.id,
@@ -355,7 +355,7 @@ class _JsonTabState extends State<JsonTab> {
                           hint: const Text('Choose Chapter', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                           dropdownColor: AppColors.card,
                           isExpanded: true,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                           items: chaptersList.map((c) {
                             return DropdownMenuItem(
                               value: c.number,
@@ -476,7 +476,7 @@ class _JsonTabState extends State<JsonTab> {
                                   Expanded(
                                     child: Text(
                                       _validationError!,
-                                      style: GoogleFonts.inter(color: const Color(0xFFFCA5A5), fontSize: 13),
+                                      style: GoogleFonts.inter(color: AppColors.error, fontSize: 13),
                                     ),
                                   ),
                                 ],

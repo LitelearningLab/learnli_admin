@@ -1,0 +1,213 @@
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import '../models/curriculum_models.dart';
+import '../models/chapter_content_model.dart';
+
+class DatabaseService {
+  static final FirebaseDatabase _db = FirebaseDatabase.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  /// Authenticate with Firebase using standard credentials behind the scenes
+  static Future<bool> authenticateFirebase() async {
+    try {
+      if (_auth.currentUser != null) {
+        return true;
+      }
+      await _auth.signInWithEmailAndPassword(
+        email: 'litelearninglab@gmail.com',
+        password: 'password',
+      );
+      print('✅ Authenticated with Firebase');
+      return true;
+    } catch (e) {
+      print('❌ Firebase authentication error: $e');
+      // If sign in fails, attempt to create
+      try {
+        await _auth.createUserWithEmailAndPassword(
+          email: 'litelearninglab@gmail.com',
+          password: 'password',
+        );
+        print('✅ Created and authenticated Firebase user');
+        return true;
+      } catch (createErr) {
+        print('❌ Failed to create Firebase user: $createErr');
+        return false;
+      }
+    }
+  }
+
+  /// Sign out
+  static Future<void> signOut() async {
+    await _auth.signOut();
+  }
+
+  /// Map subject code to Firebase folder name
+  static String getSubjectFolder(String subject) {
+    final subjectCode = subject.length >= 3
+        ? subject.substring(0, 3).toUpperCase()
+        : subject.toUpperCase();
+    final subjectMap = {
+      'SCI': 'science',
+      'MAT': 'math',
+      'MATH': 'math',
+      'ENG': 'english',
+      'SST': 'social',
+      'HIN': 'hindi',
+      'COMP': 'computer',
+    };
+
+    return subjectMap[subjectCode] ?? subject.toLowerCase();
+  }
+
+  /// Get database path for a chapter
+  static String getChapterPath(int grade, String subjectCode, int chapterNumber) {
+    final gradeFolder = 'grade_$grade';
+    final subjectFolder = getSubjectFolder(subjectCode);
+    final chapterStr = chapterNumber.toString().padLeft(2, '0');
+    final idPattern = 'G${grade}_${subjectCode.toUpperCase()}_CH$chapterStr';
+    
+    return 'content/$gradeFolder/$subjectFolder/$idPattern';
+  }
+
+  // ==========================================
+  // CURRICULUM API
+  // ==========================================
+
+  /// Fetch full curriculum
+  static Future<Map<String, Grade>> fetchCurriculum() async {
+    try {
+      await authenticateFirebase();
+      final snapshot = await _db.ref('curriculum').get();
+      if (!snapshot.exists || snapshot.value == null) {
+        return {};
+      }
+
+      final Map<String, Grade> curriculum = {};
+      final rawData = _toStringDynamicMap(snapshot.value);
+
+      rawData.forEach((key, value) {
+        if (value is Map) {
+          try {
+            curriculum[key] = Grade.fromJson(_toStringDynamicMap(value));
+          } catch (e) {
+            print('Error parsing grade $key: $e');
+          }
+        }
+      });
+
+      return curriculum;
+    } catch (e) {
+      print('Error fetching curriculum: $e');
+      rethrow;
+    }
+  }
+
+  /// Save full curriculum
+  static Future<void> saveCurriculum(Map<String, Grade> curriculum) async {
+    try {
+      await authenticateFirebase();
+      final Map<String, dynamic> dataToSave = {};
+      curriculum.forEach((key, value) {
+        dataToSave[key] = value.toJson();
+      });
+
+      await _db.ref('curriculum').set(dataToSave);
+      print('✅ Curriculum saved successfully');
+    } catch (e) {
+      print('Error saving curriculum: $e');
+      rethrow;
+    }
+  }
+
+  // ==========================================
+  // CHAPTER CONTENT API
+  // ==========================================
+
+  /// Fetch chapter content
+  static Future<ChapterContent?> fetchChapterContent(
+    int grade,
+    String subjectCode,
+    int chapterNumber,
+  ) async {
+    try {
+      await authenticateFirebase();
+      final path = getChapterPath(grade, subjectCode, chapterNumber);
+      print('Fetching chapter from path: $path');
+      final snapshot = await _db.ref(path).get();
+
+      if (!snapshot.exists || snapshot.value == null) {
+        print('Chapter content does not exist at $path');
+        return null;
+      }
+
+      final rawData = _toStringDynamicMap(snapshot.value);
+      return ChapterContent.fromJson(rawData);
+    } catch (e) {
+      print('Error fetching chapter content: $e');
+      rethrow;
+    }
+  }
+
+  /// Save chapter content
+  static Future<void> saveChapterContent(
+    int grade,
+    String subjectCode,
+    int chapterNumber,
+    ChapterContent content,
+  ) async {
+    try {
+      await authenticateFirebase();
+      final path = getChapterPath(grade, subjectCode, chapterNumber);
+      print('Saving chapter to path: $path');
+      final data = content.toJson();
+      await _db.ref(path).set(data);
+      print('✅ Chapter content saved successfully at $path');
+    } catch (e) {
+      print('Error saving chapter content: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete chapter content
+  static Future<void> deleteChapterContent(
+    int grade,
+    String subjectCode,
+    int chapterNumber,
+  ) async {
+    try {
+      await authenticateFirebase();
+      final path = getChapterPath(grade, subjectCode, chapterNumber);
+      print('Deleting chapter at path: $path');
+      await _db.ref(path).remove();
+      print('✅ Chapter content deleted successfully');
+    } catch (e) {
+      print('Error deleting chapter content: $e');
+      rethrow;
+    }
+  }
+
+  // ==========================================
+  // HELPERS
+  // ==========================================
+
+  static Map<String, dynamic> _toStringDynamicMap(dynamic raw) {
+    if (raw is! Map) return {};
+
+    final result = <String, dynamic>{};
+    raw.forEach((key, value) {
+      result[key.toString()] = _normalizeValue(value);
+    });
+    return result;
+  }
+
+  static dynamic _normalizeValue(dynamic value) {
+    if (value is Map) {
+      return _toStringDynamicMap(value);
+    }
+    if (value is List) {
+      return value.map(_normalizeValue).toList();
+    }
+    return value;
+  }
+}

@@ -1,0 +1,1067 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../providers/admin_provider.dart';
+import '../../models/curriculum_models.dart';
+
+class CurriculumTab extends StatefulWidget {
+  const CurriculumTab({super.key});
+
+  @override
+  State<CurriculumTab> createState() => _CurriculumTabState();
+}
+
+class _CurriculumTabState extends State<CurriculumTab> {
+  // Tree selection state
+  String? _activeGradeKey;
+  String? _activeSubjectId;
+  int? _activeChapterNumber;
+  String _selectedNodeType = ''; // 'grade', 'subject', 'chapter', ''
+
+  // Form Controllers
+  final _gradeNameController = TextEditingController();
+  final _gradeDescController = TextEditingController();
+  final _gradeEmojiController = TextEditingController();
+
+  final _subjectIdController = TextEditingController();
+  final _subjectNameController = TextEditingController();
+  final _subjectEmojiController = TextEditingController();
+  final _subjectColorController = TextEditingController();
+
+  final _chapterNumberController = TextEditingController();
+  final _chapterTitleController = TextEditingController();
+  final _chapterUrlController = TextEditingController();
+
+  bool _isSavingToDb = false;
+
+  @override
+  void dispose() {
+    _gradeNameController.dispose();
+    _gradeDescController.dispose();
+    _gradeEmojiController.dispose();
+    _subjectIdController.dispose();
+    _subjectNameController.dispose();
+    _subjectEmojiController.dispose();
+    _subjectColorController.dispose();
+    _chapterNumberController.dispose();
+    _chapterTitleController.dispose();
+    _chapterUrlController.dispose();
+    super.dispose();
+  }
+
+  void _selectGradeNode(String key, Grade grade) {
+    setState(() {
+      _activeGradeKey = key;
+      _activeSubjectId = null;
+      _activeChapterNumber = null;
+      _selectedNodeType = 'grade';
+
+      _gradeNameController.text = grade.name;
+      _gradeDescController.text = grade.description;
+      _gradeEmojiController.text = grade.emoji;
+    });
+  }
+
+  void _selectSubjectNode(String gradeKey, Subject subject) {
+    setState(() {
+      _activeGradeKey = gradeKey;
+      _activeSubjectId = subject.id;
+      _activeChapterNumber = null;
+      _selectedNodeType = 'subject';
+
+      _subjectIdController.text = subject.id;
+      _subjectNameController.text = subject.name;
+      _subjectEmojiController.text = subject.emoji;
+      _subjectColorController.text = subject.color;
+    });
+  }
+
+  void _selectChapterNode(String gradeKey, String subjectId, Chapter chapter) {
+    setState(() {
+      _activeGradeKey = gradeKey;
+      _activeSubjectId = subjectId;
+      _activeChapterNumber = chapter.number;
+      _selectedNodeType = 'chapter';
+
+      _chapterNumberController.text = chapter.number.toString();
+      _chapterTitleController.text = chapter.title;
+      _chapterUrlController.text = chapter.interactiveLessonUrl ?? '';
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _activeGradeKey = null;
+      _activeSubjectId = null;
+      _activeChapterNumber = null;
+      _selectedNodeType = '';
+    });
+  }
+
+  Future<void> _commitCurriculumChanges() async {
+    setState(() {
+      _isSavingToDb = true;
+    });
+
+    try {
+      final prov = Provider.of<AdminProvider>(context, listen: false);
+      await prov.saveCurriculum();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Curriculum updated successfully in Firebase!'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save changes: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingToDb = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final adminProv = Provider.of<AdminProvider>(context);
+    final curriculum = adminProv.curriculum;
+
+    return Column(
+      children: [
+        // Main Editor Area
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Tree structure navigation pane
+              Container(
+                width: 340,
+                decoration: const BoxDecoration(
+                  border: Border(
+                    right: BorderSide(
+                      color: Color(0xFF1C1E30),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Tree Header Actions
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // Add new grade dialog / setup
+                          _showAddGradeDialog();
+                        },
+                        icon: const Icon(Icons.add, size: 16),
+                        label: Text(
+                          'Add Grade Level',
+                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6366F1),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1, color: Color(0xFF1C1E30)),
+                    // Tree list body
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                        itemCount: curriculum.length,
+                        itemBuilder: (context, index) {
+                          final gradeKey = curriculum.keys.elementAt(index);
+                          final grade = curriculum[gradeKey]!;
+                          final isGradeSelected = _selectedNodeType == 'grade' && _activeGradeKey == gradeKey;
+
+                          return ExpansionTile(
+                            initiallyExpanded: true,
+                            shape: const RoundedRectangleBorder(),
+                            collapsedShape: const RoundedRectangleBorder(),
+                            iconColor: const Color(0xFF818CF8),
+                            collapsedIconColor: const Color(0xFF555978),
+                            title: InkWell(
+                              onTap: () => _selectGradeNode(gradeKey, grade),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  color: isGradeSelected ? const Color(0xFF6366F1).withOpacity(0.15) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(grade.emoji, style: const TextStyle(fontSize: 18)),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        grade.name,
+                                        style: GoogleFonts.inter(
+                                          fontWeight: isGradeSelected ? FontWeight.bold : FontWeight.w600,
+                                          color: isGradeSelected ? Colors.white : const Color(0xFFB4B9D6),
+                                          fontSize: 13.5,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add_circle_outline, size: 16, color: Color(0xFF818CF8)),
+                                      onPressed: () => _showAddSubjectDialog(gradeKey),
+                                      tooltip: 'Add Subject',
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            children: grade.subjects.map((subject) {
+                              final isSubjectSelected = _selectedNodeType == 'subject' &&
+                                  _activeGradeKey == gradeKey &&
+                                  _activeSubjectId == subject.id;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: ExpansionTile(
+                                  initiallyExpanded: true,
+                                  shape: const RoundedRectangleBorder(),
+                                  collapsedShape: const RoundedRectangleBorder(),
+                                  title: InkWell(
+                                    onTap: () => _selectSubjectNode(gradeKey, subject),
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                      decoration: BoxDecoration(
+                                        color: isSubjectSelected ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(subject.emoji, style: const TextStyle(fontSize: 16)),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              subject.name,
+                                              style: GoogleFonts.inter(
+                                                fontWeight: isSubjectSelected ? FontWeight.bold : FontWeight.w500,
+                                                color: isSubjectSelected ? Colors.white : const Color(0xFF8C91B2),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.post_add_outlined, size: 16, color: Color(0xFFA855F7)),
+                                            onPressed: () => _showAddChapterDialog(gradeKey, subject.id),
+                                            tooltip: 'Add Chapter',
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  children: subject.chapters.map((chapter) {
+                                    final isChapterSelected = _selectedNodeType == 'chapter' &&
+                                        _activeGradeKey == gradeKey &&
+                                        _activeSubjectId == subject.id &&
+                                        _activeChapterNumber == chapter.number;
+
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 32.0, bottom: 4.0),
+                                      child: ListTile(
+                                        onTap: () => _selectChapterNode(gradeKey, subject.id, chapter),
+                                        dense: true,
+                                        visualDensity: VisualDensity.compact,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        tileColor: isChapterSelected ? const Color(0xFF6366F1).withOpacity(0.1) : Colors.transparent,
+                                        leading: const Icon(Icons.bookmark_outline, size: 14, color: Color(0xFF555978)),
+                                        title: Text(
+                                          'Ch ${chapter.number}: ${chapter.title}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.inter(
+                                            color: isChapterSelected ? Colors.white : const Color(0xFF6C7194),
+                                            fontWeight: isChapterSelected ? FontWeight.bold : FontWeight.normal,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Form Details editing pane
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Active Node Card header
+                      Row(
+                        children: [
+                          Icon(
+                            _getNodeIcon(),
+                            color: const Color(0xFF6366F1),
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            _getNodeTitle(),
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (_selectedNodeType.isNotEmpty)
+                            TextButton.icon(
+                              onPressed: _clearSelection,
+                              icon: const Icon(Icons.close, size: 16),
+                              label: const Text('Cancel Select'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF6C7194),
+                              ),
+                            )
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Form Body based on selected node
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: _buildEditingForm(adminProv),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom Commit Action bar
+        Container(
+          height: 72,
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          decoration: const BoxDecoration(
+            color: Color(0xFF0E101A),
+            border: Border(
+              top: BorderSide(
+                color: Color(0xFF1C1E30),
+                width: 1.5,
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, color: Color(0xFF555978), size: 18),
+              const SizedBox(width: 12),
+              Text(
+                'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
+                style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF555978)),
+              ),
+              const Spacer(),
+              OutlinedButton(
+                onPressed: () {
+                  adminProv.loadCurriculum();
+                  _clearSelection();
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF8C91B2),
+                  side: const BorderSide(color: Color(0xFF2C2F48)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                ),
+                child: const Text('Discard Local Edits'),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
+                icon: _isSavingToDb
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_upload_outlined, size: 16),
+                label: Text(
+                  _isSavingToDb ? 'Committing...' : 'Commit Changes to Firebase',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  // ==========================================
+  // VIEW BUILDERS
+  // ==========================================
+
+  Widget _buildEditingForm(AdminProvider prov) {
+    switch (_selectedNodeType) {
+      case 'grade':
+        return _buildGradeForm(prov);
+      case 'subject':
+        return _buildSubjectForm(prov);
+      case 'chapter':
+        return _buildChapterForm(prov);
+      default:
+        return _buildEmptyState();
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 80),
+      child: Column(
+        children: [
+          Icon(
+            Icons.account_tree_outlined,
+            size: 80,
+            color: const Color(0xFF23263B),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Element Selected',
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF8C91B2),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Select a Grade, Subject, or Chapter from the tree sidebar to edit its properties, or create new elements.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: const Color(0xFF555978),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradeForm(AdminProvider prov) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTextField(
+          controller: _gradeEmojiController,
+          label: 'Emoji Icon',
+          hint: '🎓',
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _gradeNameController,
+          label: 'Grade Level Name',
+          hint: 'Grade 7',
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _gradeDescController,
+          label: 'Curriculum Description',
+          hint: 'CBSE (NCERT Syllabus)',
+          maxLines: 3,
+        ),
+        const SizedBox(height: 40),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                if (_gradeNameController.text.isEmpty) return;
+                prov.updateGrade(
+                  _activeGradeKey!,
+                  Grade(
+                    name: _gradeNameController.text,
+                    description: _gradeDescController.text,
+                    emoji: _gradeEmojiController.text.isEmpty ? '🎓' : _gradeEmojiController.text,
+                    subjects: prov.curriculum[_activeGradeKey!]?.subjects ?? [],
+                  ),
+                );
+                _showSavedIndicator();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Update Grade Properties'),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () {
+                _showDeleteConfirmDialog('Grade Level', () {
+                  prov.removeGrade(_activeGradeKey!);
+                  _clearSelection();
+                });
+              },
+              icon: const Icon(Icons.delete, size: 16),
+              label: const Text('Delete Grade'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFEF4444),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubjectForm(AdminProvider prov) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildTextField(
+                controller: _subjectEmojiController,
+                label: 'Emoji Icon',
+                hint: '🧬',
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: _buildTextField(
+                controller: _subjectColorController,
+                label: 'Subject Color (HEX)',
+                hint: '#6366F1',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _subjectIdController,
+          label: 'Subject Unique ID (Code)',
+          hint: 'science',
+          enabled: false, // Don't let users edit ID after creation as it forms the database folder structure
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _subjectNameController,
+          label: 'Subject Name',
+          hint: 'Science',
+        ),
+        const SizedBox(height: 40),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                if (_subjectNameController.text.isEmpty) return;
+                final grade = prov.curriculum[_activeGradeKey!];
+                final oldSub = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
+
+                prov.updateSubject(
+                  _activeGradeKey!,
+                  _activeSubjectId!,
+                  Subject(
+                    id: _activeSubjectId!,
+                    name: _subjectNameController.text,
+                    emoji: _subjectEmojiController.text.isEmpty ? '📚' : _subjectEmojiController.text,
+                    color: _subjectColorController.text.isEmpty ? '#6366F1' : _subjectColorController.text,
+                    chapters: oldSub?.chapters ?? [],
+                  ),
+                );
+                _showSavedIndicator();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Update Subject Properties'),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () {
+                _showDeleteConfirmDialog('Subject', () {
+                  prov.removeSubject(_activeGradeKey!, _activeSubjectId!);
+                  _clearSelection();
+                });
+              },
+              icon: const Icon(Icons.delete, size: 16),
+              label: const Text('Delete Subject'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFEF4444),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChapterForm(AdminProvider prov) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTextField(
+          controller: _chapterNumberController,
+          label: 'Chapter Number (Numeric)',
+          hint: '1',
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _chapterTitleController,
+          label: 'Chapter Title',
+          hint: 'Nutrition in Plants',
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _chapterUrlController,
+          label: 'Interactive Web Lesson URL (Optional)',
+          hint: 'https://h5p.org/h5p/embed/123456',
+        ),
+        const SizedBox(height: 40),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                final chNum = int.tryParse(_chapterNumberController.text);
+                if (chNum == null || _chapterTitleController.text.isEmpty) return;
+
+                prov.updateChapter(
+                  _activeGradeKey!,
+                  _activeSubjectId!,
+                  _activeChapterNumber!,
+                  Chapter(
+                    number: chNum,
+                    title: _chapterTitleController.text,
+                    interactiveLessonUrl: _chapterUrlController.text.trim().isEmpty ? null : _chapterUrlController.text.trim(),
+                  ),
+                );
+                
+                // Update selection to match new number
+                setState(() {
+                  _activeChapterNumber = chNum;
+                });
+                
+                _showSavedIndicator();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Update Chapter Properties'),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () {
+                _showDeleteConfirmDialog('Chapter', () {
+                  prov.removeChapter(_activeGradeKey!, _activeSubjectId!, _activeChapterNumber!);
+                  _clearSelection();
+                });
+              },
+              icon: const Icon(Icons.delete, size: 16),
+              label: const Text('Delete Chapter'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFEF4444),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int maxLines = 1,
+    bool enabled = true,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: const Color(0xFFB4B9D6),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          enabled: enabled,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          style: GoogleFonts.inter(color: enabled ? Colors.white : const Color(0xFF6C7194), fontSize: 14),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.inter(color: const Color(0xFF555978)),
+            filled: true,
+            fillColor: const Color(0xFF131520),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFF1C1E30)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _getNodeIcon() {
+    switch (_selectedNodeType) {
+      case 'grade':
+        return Icons.school_outlined;
+      case 'subject':
+        return Icons.menu_book_outlined;
+      case 'chapter':
+        return Icons.bookmark_outline;
+      default:
+        return Icons.edit;
+    }
+  }
+
+  String _getNodeTitle() {
+    switch (_selectedNodeType) {
+      case 'grade':
+        return 'Edit Grade Level Properties';
+      case 'subject':
+        return 'Edit Subject Properties';
+      case 'chapter':
+        return 'Edit Chapter Properties';
+      default:
+        return 'Selection Details';
+    }
+  }
+
+  void _showSavedIndicator() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Local tree updated! Use bottom Commit button to save in Firebase.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // ==========================================
+  // DIALOG BUILDERS
+  // ==========================================
+
+  void _showAddGradeDialog() {
+    final keyCtrl = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final emojiCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF131520),
+          title: Text('Add Grade Level', style: GoogleFonts.outfit(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: keyCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Database Key (e.g. grade_7)',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Grade Name (e.g. Grade 7)',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: emojiCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Emoji Icon',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (keyCtrl.text.isEmpty || nameCtrl.text.isEmpty) return;
+                Provider.of<AdminProvider>(context, listen: false).addGrade(
+                  keyCtrl.text.trim(),
+                  Grade(
+                    name: nameCtrl.text.trim(),
+                    description: descCtrl.text.trim(),
+                    emoji: emojiCtrl.text.trim().isEmpty ? '🎓' : emojiCtrl.text.trim(),
+                    subjects: [],
+                  ),
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddSubjectDialog(String gradeKey) {
+    final idCtrl = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final emojiCtrl = TextEditingController();
+    final colorCtrl = TextEditingController(text: '#6366F1');
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF131520),
+          title: Text('Add Subject', style: GoogleFonts.outfit(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: idCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Subject ID/Code (e.g. science, math)',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Subject Name (e.g. Science)',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: emojiCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Emoji Icon',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: colorCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Hex Color code',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (idCtrl.text.isEmpty || nameCtrl.text.isEmpty) return;
+                Provider.of<AdminProvider>(context, listen: false).addSubject(
+                  gradeKey,
+                  Subject(
+                    id: idCtrl.text.trim(),
+                    name: nameCtrl.text.trim(),
+                    emoji: emojiCtrl.text.trim().isEmpty ? '📚' : emojiCtrl.text.trim(),
+                    color: colorCtrl.text.trim(),
+                    chapters: [],
+                  ),
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddChapterDialog(String gradeKey, String subjectId) {
+    final numCtrl = TextEditingController();
+    final titleCtrl = TextEditingController();
+    final urlCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF131520),
+          title: Text('Add Chapter', style: GoogleFonts.outfit(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: numCtrl,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Chapter Number',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: titleCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Chapter Title',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: urlCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Interactive Lesson URL (Optional)',
+                  labelStyle: TextStyle(color: Color(0xFF6C7194)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final chNum = int.tryParse(numCtrl.text);
+                if (chNum == null || titleCtrl.text.isEmpty) return;
+                Provider.of<AdminProvider>(context, listen: false).addChapter(
+                  gradeKey,
+                  subjectId,
+                  Chapter(
+                    number: chNum,
+                    title: titleCtrl.text.trim(),
+                    interactiveLessonUrl: urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim(),
+                  ),
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmDialog(String type, VoidCallback onDelete) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF131520),
+          title: Text('Confirm Deletion', style: GoogleFonts.outfit(color: Colors.white)),
+          content: Text('Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.', style: GoogleFonts.inter(color: const Color(0xFF8C91B2))),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF6C7194))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onDelete();
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

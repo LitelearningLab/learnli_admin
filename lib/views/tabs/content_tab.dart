@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/chapter_content_model.dart';
 import '../../constants/app_colors.dart';
+import '../../services/database_service.dart';
 
 class ContentTab extends StatefulWidget {
   const ContentTab({super.key});
@@ -26,6 +29,113 @@ class _ContentTabState extends State<ContentTab> {
     'Plus Points Topics',
     'Quiz & Questions',
   ];
+
+  bool _isUploadingHtml = false;
+
+  Future<String?> _pickAndUploadHtml() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['html'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final name = result.files.single.name;
+        
+        final downloadUrl = await DatabaseService.uploadHtmlFile(name, bytes);
+        if (downloadUrl != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Uploaded $name successfully!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+        return downloadUrl;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+    return null;
+  }
+
+  Widget _buildUrlFormField({
+    required String label,
+    required String value,
+    required ValueChanged<String> onChanged,
+    required VoidCallback onUploadPressed,
+    bool isUploading = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  initialValue: value,
+                  key: ValueKey(value),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
+                  decoration: InputDecoration(
+                    hintText: 'https://h5p.org/h5p/embed/123456',
+                    hintStyle: const TextStyle(color: AppColors.textMuted),
+                    filled: true,
+                    fillColor: AppColors.card,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                    ),
+                  ),
+                  onChanged: onChanged,
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: isUploading ? null : onUploadPressed,
+                icon: isUploading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_upload_outlined, size: 16),
+                label: Text(isUploading ? 'Uploading...' : 'Upload HTML'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -505,6 +615,33 @@ class _ContentTabState extends State<ContentTab> {
               ),
             ),
           ],
+        ),
+        _buildUrlFormField(
+          label: 'Interactive Web Lesson URL (Optional)',
+          value: content.metadata.interactiveLessonUrl ?? '',
+          isUploading: _isUploadingHtml,
+          onChanged: (val) {
+            content.metadata.interactiveLessonUrl = val.trim().isEmpty ? null : val.trim();
+            prov.updateActiveContent(content);
+          },
+          onUploadPressed: () async {
+            setState(() {
+              _isUploadingHtml = true;
+            });
+            try {
+              final fileUrl = await _pickAndUploadHtml();
+              if (fileUrl != null) {
+                content.metadata.interactiveLessonUrl = fileUrl;
+                prov.updateActiveContent(content);
+              }
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _isUploadingHtml = false;
+                });
+              }
+            }
+          },
         ),
       ],
     );

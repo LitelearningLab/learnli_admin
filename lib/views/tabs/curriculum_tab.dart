@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/curriculum_models.dart';
 import '../../constants/app_colors.dart';
+import '../../services/database_service.dart';
 
 class CurriculumTab extends StatefulWidget {
   const CurriculumTab({super.key});
@@ -34,6 +37,60 @@ class _CurriculumTabState extends State<CurriculumTab> {
   final _chapterUrlController = TextEditingController();
 
   bool _isSavingToDb = false;
+  bool _isUploadingHtml = false;
+
+  Future<String?> _pickAndUploadHtml() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['html'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final name = result.files.single.name;
+        
+        final downloadUrl = await DatabaseService.uploadHtmlFile(name, bytes);
+        if (downloadUrl != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Uploaded $name successfully!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+        return downloadUrl;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+    return null;
+  }
+
+  Future<void> _uploadHtmlForCurriculum(AdminProvider prov) async {
+    setState(() {
+      _isUploadingHtml = true;
+    });
+    try {
+      final fileUrl = await _pickAndUploadHtml();
+      if (fileUrl != null) {
+        _chapterUrlController.text = fileUrl;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingHtml = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -650,6 +707,72 @@ class _CurriculumTabState extends State<CurriculumTab> {
     );
   }
 
+  Widget _buildUrlInputWithUpload(AdminProvider prov) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Interactive Web Lesson URL (Optional)',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _chapterUrlController,
+                style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'https://h5p.org/h5p/embed/123456',
+                  hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                  filled: true,
+                  fillColor: AppColors.card,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton.icon(
+              onPressed: _isUploadingHtml ? null : () => _uploadHtmlForCurriculum(prov),
+              icon: _isUploadingHtml
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_upload_outlined, size: 16),
+              label: Text(_isUploadingHtml ? 'Uploading...' : 'Upload HTML'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildChapterForm(AdminProvider prov) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -667,11 +790,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           hint: 'Nutrition in Plants',
         ),
         const SizedBox(height: 20),
-        _buildTextField(
-          controller: _chapterUrlController,
-          label: 'Interactive Web Lesson URL (Optional)',
-          hint: 'https://h5p.org/h5p/embed/123456',
-        ),
+        _buildUrlInputWithUpload(prov),
         const SizedBox(height: 40),
         Row(
           children: [
@@ -980,69 +1099,109 @@ class _CurriculumTabState extends State<CurriculumTab> {
     final numCtrl = TextEditingController();
     final titleCtrl = TextEditingController();
     final urlCtrl = TextEditingController();
+    bool isUploadingHtml = false;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          title: Text('Add Chapter', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: numCtrl,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Chapter Number',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: titleCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Chapter Title',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: urlCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Interactive Lesson URL (Optional)',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final chNum = int.tryParse(numCtrl.text);
-                if (chNum == null || titleCtrl.text.isEmpty) return;
-                Provider.of<AdminProvider>(context, listen: false).addChapter(
-                  gradeKey,
-                  subjectId,
-                  Chapter(
-                    number: chNum,
-                    title: titleCtrl.text.trim(),
-                    interactiveLessonUrl: urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim(),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.card,
+              title: Text('Add Chapter', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: numCtrl,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
+                      labelText: 'Chapter Number',
+                      labelStyle: TextStyle(color: AppColors.textSecondary),
+                    ),
                   ),
-                );
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Add'),
-            ),
-          ],
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: titleCtrl,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
+                      labelText: 'Chapter Title',
+                      labelStyle: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: urlCtrl,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: const InputDecoration(
+                            labelText: 'Interactive Lesson URL (Optional)',
+                            labelStyle: TextStyle(color: AppColors.textSecondary),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: isUploadingHtml
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              )
+                            : const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+                        onPressed: isUploadingHtml
+                            ? null
+                            : () async {
+                                setDialogState(() {
+                                  isUploadingHtml = true;
+                                });
+                                try {
+                                  final fileUrl = await _pickAndUploadHtml();
+                                  if (fileUrl != null) {
+                                    urlCtrl.text = fileUrl;
+                                  }
+                                } finally {
+                                  setDialogState(() {
+                                    isUploadingHtml = false;
+                                  });
+                                }
+                              },
+                        tooltip: 'Upload HTML to Firebase Storage',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final chNum = int.tryParse(numCtrl.text);
+                    if (chNum == null || titleCtrl.text.isEmpty) return;
+                    Provider.of<AdminProvider>(context, listen: false).addChapter(
+                      gradeKey,
+                      subjectId,
+                      Chapter(
+                        number: chNum,
+                        title: titleCtrl.text.trim(),
+                        interactiveLessonUrl: urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim(),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

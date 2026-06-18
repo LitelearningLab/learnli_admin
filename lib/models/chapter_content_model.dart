@@ -1,3 +1,21 @@
+String _getSubjectPrefix(String subject) {
+  final s = subject.trim().toLowerCase();
+  if (s.startsWith('sci')) {
+    return 'SCI';
+  } else if (s.startsWith('math') || s.startsWith('mat')) {
+    return 'MATHS';
+  } else if (s.startsWith('social') || s.startsWith('sst') || s.startsWith('soc')) {
+    return 'SST';
+  } else if (s.startsWith('eng')) {
+    return 'ENG';
+  } else if (s.startsWith('hin')) {
+    return 'HIN';
+  } else if (s.startsWith('comp') || s.startsWith('com')) {
+    return 'COMP';
+  }
+  return s.length >= 3 ? s.substring(0, 3).toUpperCase() : s.toUpperCase();
+}
+
 class ChapterContent {
   final ChapterMetadata metadata;
   final List<ConceptItem> simpleOverview;
@@ -162,11 +180,22 @@ class ChapterContent {
 
   // Helper factory to create empty content
   factory ChapterContent.empty(int grade, String subject, int chapterNum, String title) {
+    final prefix = _getSubjectPrefix(subject);
+    final subjectDisplayMap = {
+      'SCI': 'Science',
+      'MATHS': 'Maths',
+      'SST': 'Social Studies',
+      'ENG': 'English',
+      'HIN': 'Hindi',
+      'COMP': 'Computer',
+    };
+    final displaySubject = subjectDisplayMap[prefix] ?? subject;
+
     return ChapterContent(
       metadata: ChapterMetadata(
         grade: grade,
-        subject: subject,
-        chapterId: 'G${grade}_${subject.substring(0, 3).toUpperCase()}_CH${chapterNum.toString().padLeft(2, '0')}',
+        subject: displaySubject,
+        chapterId: 'G${grade}_${prefix}_CH${chapterNum.toString().padLeft(2, '0')}',
         chapterName: title,
         chapterNumber: chapterNum,
       ),
@@ -197,6 +226,7 @@ class ChapterMetadata {
   int chapterNumber;
   String formatVersion;
   String outputType;
+  String? interactiveLessonUrl;
 
   ChapterMetadata({
     required this.grade,
@@ -206,6 +236,7 @@ class ChapterMetadata {
     required this.chapterNumber,
     this.formatVersion = '2.0',
     this.outputType = 'structured_json',
+    this.interactiveLessonUrl,
   });
 
   factory ChapterMetadata.fromJson(Map<String, dynamic> json) {
@@ -217,6 +248,7 @@ class ChapterMetadata {
       chapterNumber: json['chapter_number'] ?? 0,
       formatVersion: json['format_version'] ?? '2.0',
       outputType: json['output_type'] ?? 'structured_json',
+      interactiveLessonUrl: json['interactive_lesson_url'] ?? json['interactiveLessonUrl'],
     );
   }
 
@@ -229,6 +261,8 @@ class ChapterMetadata {
       'chapter_number': chapterNumber,
       'format_version': formatVersion,
       'output_type': outputType,
+      if (interactiveLessonUrl != null)
+        'interactive_lesson_url': interactiveLessonUrl,
     };
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/curriculum_models.dart';
 import '../models/chapter_content_model.dart';
 import '../models/career_models.dart';
@@ -43,30 +45,48 @@ class DatabaseService {
     await _auth.signOut();
   }
 
+  /// Map subject identifier to subject code/prefix (e.g. 'science_7' -> 'SCI', 'mathematics_7' -> 'MATHS')
+  static String getSubjectPrefix(String subject) {
+    final s = subject.trim().toLowerCase();
+    if (s.startsWith('sci')) {
+      return 'SCI';
+    } else if (s.startsWith('math') || s.startsWith('mat')) {
+      return 'MATHS';
+    } else if (s.startsWith('social') || s.startsWith('sst') || s.startsWith('soc')) {
+      return 'SST';
+    } else if (s.startsWith('eng')) {
+      return 'ENG';
+    } else if (s.startsWith('hin')) {
+      return 'HIN';
+    } else if (s.startsWith('comp') || s.startsWith('com')) {
+      return 'COMP';
+    }
+    // Fallback: use first 3 chars capitalized or whatever
+    return s.length >= 3 ? s.substring(0, 3).toUpperCase() : s.toUpperCase();
+  }
+
   /// Map subject code to Firebase folder name
   static String getSubjectFolder(String subject) {
-    final subjectCode = subject.length >= 3
-        ? subject.substring(0, 3).toUpperCase()
-        : subject.toUpperCase();
+    final prefix = getSubjectPrefix(subject);
     final subjectMap = {
       'SCI': 'science',
-      'MAT': 'math',
-      'MATH': 'math',
+      'MATHS': 'math',
       'ENG': 'english',
       'SST': 'social',
       'HIN': 'hindi',
       'COMP': 'computer',
     };
 
-    return subjectMap[subjectCode] ?? subject.toLowerCase();
+    return subjectMap[prefix] ?? subject.toLowerCase();
   }
 
   /// Get database path for a chapter
   static String getChapterPath(int grade, String subjectCode, int chapterNumber) {
     final gradeFolder = 'grade_$grade';
     final subjectFolder = getSubjectFolder(subjectCode);
+    final prefix = getSubjectPrefix(subjectCode);
     final chapterStr = chapterNumber.toString().padLeft(2, '0');
-    final idPattern = 'G${grade}_${subjectCode.toUpperCase()}_CH$chapterStr';
+    final idPattern = 'G${grade}_${prefix}_CH$chapterStr';
     
     return 'content/$gradeFolder/$subjectFolder/$idPattern';
   }
@@ -184,6 +204,25 @@ class DatabaseService {
       print('✅ Chapter content deleted successfully');
     } catch (e) {
       print('Error deleting chapter content: $e');
+      rethrow;
+    }
+  }
+
+  /// Upload HTML file to Firebase Storage and return its download URL
+  static Future<String?> uploadHtmlFile(String fileName, Uint8List fileBytes) async {
+    try {
+      await authenticateFirebase();
+      final storageRef = FirebaseStorage.instance.ref().child('lessons/$fileName');
+      final uploadTask = storageRef.putData(
+        fileBytes,
+        SettableMetadata(contentType: 'text/html'),
+      );
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print('✅ HTML file uploaded successfully: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      print('❌ Error uploading HTML file: $e');
       rethrow;
     }
   }

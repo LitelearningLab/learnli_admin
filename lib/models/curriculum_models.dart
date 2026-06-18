@@ -13,7 +13,7 @@ class Chapter {
     return Chapter(
       number: json['number'] ?? 0,
       title: json['title'] ?? '',
-      interactiveLessonUrl: json['interactiveLessonUrl'],
+      interactiveLessonUrl: json['interactiveLessonUrl'] ?? json['interactive_lesson_url'],
     );
   }
 
@@ -21,8 +21,10 @@ class Chapter {
     return {
       'number': number,
       'title': title,
-      if (interactiveLessonUrl != null && interactiveLessonUrl!.isNotEmpty)
+      if (interactiveLessonUrl != null && interactiveLessonUrl!.isNotEmpty) ...{
         'interactiveLessonUrl': interactiveLessonUrl,
+        'interactive_lesson_url': interactiveLessonUrl,
+      }
     };
   }
 }

@@ -179,7 +179,7 @@ class ChapterContent {
   }
 
   // Helper factory to create empty content
-  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title) {
+  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title, {String? interactiveLessonUrl}) {
     final prefix = _getSubjectPrefix(subject);
     final subjectDisplayMap = {
       'SCI': 'Science',
@@ -198,6 +198,7 @@ class ChapterContent {
         chapterId: 'G${grade}_${prefix}_CH${chapterNum.toString().padLeft(2, '0')}',
         chapterName: title,
         chapterNumber: chapterNum,
+        interactiveLessonUrl: interactiveLessonUrl,
       ),
       simpleOverview: [],
       readMode: [],
@@ -261,8 +262,10 @@ class ChapterMetadata {
       'chapter_number': chapterNumber,
       'format_version': formatVersion,
       'output_type': outputType,
-      if (interactiveLessonUrl != null)
+      if (interactiveLessonUrl != null) ...{
         'interactive_lesson_url': interactiveLessonUrl,
+        'interactiveLessonUrl': interactiveLessonUrl,
+      }
     };
   }
 }

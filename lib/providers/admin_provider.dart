@@ -361,20 +361,43 @@ class AdminProvider with ChangeNotifier {
         _selectedChapterNumber!,
       );
 
+      final grade = _curriculum[_selectedGradeKey];
+      Subject? subject;
+      if (grade != null) {
+        for (var s in grade.subjects) {
+          if (s.id == _selectedSubjectId) {
+            subject = s;
+            break;
+          }
+        }
+      }
+      Chapter? chapter;
+      if (subject != null) {
+        for (var c in subject.chapters) {
+          if (c.number == _selectedChapterNumber) {
+            chapter = c;
+            break;
+          }
+        }
+      }
+
       if (content != null) {
         _activeContent = content;
-        _jsonString = const JsonEncoder.withIndent('  ').convert(content.toJson());
+        if ((_activeContent!.metadata.interactiveLessonUrl == null ||
+             _activeContent!.metadata.interactiveLessonUrl!.isEmpty) &&
+            chapter?.interactiveLessonUrl != null &&
+            chapter!.interactiveLessonUrl!.isNotEmpty) {
+          _activeContent!.metadata.interactiveLessonUrl = chapter.interactiveLessonUrl;
+        }
+        _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       } else {
         // Create an empty configuration ready for upload
-        final grade = _curriculum[_selectedGradeKey];
-        final subject = grade?.subjects.firstWhere((s) => s.id == _selectedSubjectId);
-        final chapter = subject?.chapters.firstWhere((c) => c.number == _selectedChapterNumber);
-        
         _activeContent = ChapterContent.empty(
           gradeVal,
           _selectedSubjectId!,
           _selectedChapterNumber!,
           chapter?.title ?? 'Chapter $_selectedChapterNumber',
+          interactiveLessonUrl: chapter?.interactiveLessonUrl,
         );
         _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       }

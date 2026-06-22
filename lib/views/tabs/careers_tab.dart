@@ -373,50 +373,63 @@ class _CareersTabState extends State<CareersTab> {
                         color: AppColors.surface,
                         border: Border(bottom: BorderSide(color: AppColors.divider, width: 1.5)),
                       ),
-                      child: Row(
+                      child: Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text(activeCareer.icon, style: const TextStyle(fontSize: 24)),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                activeCareer.title,
-                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                              ),
-                              Text(
-                                'ID: ${activeCareer.id}',
-                                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                              Text(activeCareer.icon, style: const TextStyle(fontSize: 24)),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    activeCareer.title,
+                                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                  ),
+                                  Text(
+                                    'ID: ${activeCareer.id}',
+                                    style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const Spacer(),
-                          // Commit Button
-                          ElevatedButton.icon(
-                            onPressed: _isSavingToDb ? null : () => _saveChanges(adminProv),
-                            icon: _isSavingToDb
-                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Icon(Icons.cloud_done_outlined, size: 16),
-                            label: const Text('Save to Firebase DB'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.success,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Delete Button
-                          OutlinedButton.icon(
-                            onPressed: () => _showDeleteConfirm(adminProv, activeCareer.id),
-                            icon: const Icon(Icons.delete_forever, size: 16),
-                            label: const Text('Delete Pathway'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.error,
-                              side: BorderSide(color: AppColors.error.withOpacity(0.4)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Commit Button
+                              ElevatedButton.icon(
+                                onPressed: _isSavingToDb ? null : () => _saveChanges(adminProv),
+                                icon: _isSavingToDb
+                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : const Icon(Icons.cloud_done_outlined, size: 16),
+                                label: const Text('Save to Firebase DB'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.success,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Delete Button
+                              OutlinedButton.icon(
+                                onPressed: () => _showDeleteConfirm(adminProv, activeCareer.id),
+                                icon: const Icon(Icons.delete_forever, size: 16),
+                                label: const Text('Delete Pathway'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.error,
+                                  side: BorderSide(color: AppColors.error.withOpacity(0.4)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

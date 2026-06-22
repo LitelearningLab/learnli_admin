@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -68,6 +67,7 @@ class _ContentTabState extends State<ContentTab> {
   }
 
   Widget _buildUrlFormField({
+    required String key,
     required String label,
     required String value,
     required ValueChanged<String> onChanged,
@@ -86,7 +86,7 @@ class _ContentTabState extends State<ContentTab> {
               Expanded(
                 child: TextFormField(
                   initialValue: value,
-                  key: ValueKey(value),
+                  key: ValueKey(key),
                   style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
                   decoration: InputDecoration(
                     hintText: 'https://h5p.org/h5p/embed/123456',
@@ -360,50 +360,63 @@ class _ContentTabState extends State<ContentTab> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 // Heading
-                                Row(
+                                Wrap(
+                                  spacing: 16,
+                                  runSpacing: 16,
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
-                                    Container(
-                                      width: 6,
-                                      height: 24,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 6,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          _sections[_activeSectionIndex],
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      _sections[_activeSectionIndex],
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    // Save Button
-                                    ElevatedButton.icon(
-                                      onPressed: () => _handleSave(adminProv),
-                                      icon: const Icon(Icons.cloud_done_outlined, size: 16),
-                                      label: const Text('Save Chapter Content'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.success,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Delete Button
-                                    OutlinedButton.icon(
-                                      onPressed: () => _handleDelete(adminProv),
-                                      icon: const Icon(Icons.delete_forever, size: 16),
-                                      label: const Text('Delete Payload'),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.error,
-                                        side: BorderSide(color: AppColors.error.withOpacity(0.4)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Save Button
+                                        ElevatedButton.icon(
+                                          onPressed: () => _handleSave(adminProv),
+                                          icon: const Icon(Icons.cloud_done_outlined, size: 16),
+                                          label: const Text('Save Chapter Content'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.success,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        // Delete Button
+                                        OutlinedButton.icon(
+                                          onPressed: () => _handleDelete(adminProv),
+                                          icon: const Icon(Icons.delete_forever, size: 16),
+                                          label: const Text('Delete Payload'),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColors.error,
+                                            side: BorderSide(color: AppColors.error.withOpacity(0.4)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -499,6 +512,7 @@ class _ContentTabState extends State<ContentTab> {
 
   // Forms Fields Helpers
   Widget _buildFormField({
+    required String key,
     required String label,
     required String value,
     required ValueChanged<String> onChanged,
@@ -514,6 +528,7 @@ class _ContentTabState extends State<ContentTab> {
           Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextFormField(
+            key: ValueKey(key),
             initialValue: value,
             maxLines: maxLines,
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
@@ -549,6 +564,7 @@ class _ContentTabState extends State<ContentTab> {
     return Column(
       children: [
         _buildFormField(
+          key: 'meta_chapter_id',
           label: 'Chapter Code / ID',
           value: content.metadata.chapterId,
           onChanged: (val) {
@@ -557,6 +573,7 @@ class _ContentTabState extends State<ContentTab> {
           },
         ),
         _buildFormField(
+          key: 'meta_chapter_name',
           label: 'Chapter Name',
           value: content.metadata.chapterName,
           onChanged: (val) {
@@ -568,6 +585,7 @@ class _ContentTabState extends State<ContentTab> {
           children: [
             Expanded(
               child: _buildFormField(
+                key: 'meta_grade',
                 label: 'Grade Level',
                 value: content.metadata.grade.toString(),
                 isNumeric: true,
@@ -580,6 +598,7 @@ class _ContentTabState extends State<ContentTab> {
             const SizedBox(width: 20),
             Expanded(
               child: _buildFormField(
+                key: 'meta_chapter_number',
                 label: 'Chapter Number',
                 value: content.metadata.chapterNumber.toString(),
                 isNumeric: true,
@@ -595,6 +614,7 @@ class _ContentTabState extends State<ContentTab> {
           children: [
             Expanded(
               child: _buildFormField(
+                key: 'meta_format_version',
                 label: 'Format Version',
                 value: content.metadata.formatVersion,
                 onChanged: (val) {
@@ -606,6 +626,7 @@ class _ContentTabState extends State<ContentTab> {
             const SizedBox(width: 20),
             Expanded(
               child: _buildFormField(
+                key: 'meta_output_type',
                 label: 'Output Type',
                 value: content.metadata.outputType,
                 onChanged: (val) {
@@ -617,6 +638,7 @@ class _ContentTabState extends State<ContentTab> {
           ],
         ),
         _buildUrlFormField(
+          key: 'meta_interactive_url',
           label: 'Interactive Web Lesson URL (Optional)',
           value: content.metadata.interactiveLessonUrl ?? '',
           isUploading: _isUploadingHtml,
@@ -676,6 +698,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final item = content.simpleOverview[idx];
             return Container(
+              key: ValueKey(item),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -699,18 +722,22 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'concept_${item.hashCode}_title',
                     label: 'Concept Title',
                     value: item.title,
                     onChanged: (val) {
                       item.title = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'concept_${item.hashCode}_explanation',
                     label: 'Explanation',
                     value: item.explanation,
                     maxLines: 3,
                     onChanged: (val) {
                       item.explanation = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -751,6 +778,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final sec = content.readMode[idx];
             return Container(
+              key: ValueKey(sec),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -774,36 +802,44 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'read_${sec.hashCode}_heading',
                     label: 'Heading',
                     value: sec.heading,
                     onChanged: (val) {
                       sec.heading = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'read_${sec.hashCode}_paragraphs',
                     label: 'Paragraphs (One paragraph per line)',
                     value: sec.paragraphs.join('\n'),
                     maxLines: 4,
                     hint: 'First paragraph...\nSecond paragraph...',
                     onChanged: (val) {
                       sec.paragraphs = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'read_${sec.hashCode}_key_points',
                     label: 'Key Points (One point per line)',
                     value: sec.keyPoints.join('\n'),
                     maxLines: 4,
                     hint: 'First key point...\nSecond key point...',
                     onChanged: (val) {
                       sec.keyPoints = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'read_${sec.hashCode}_example',
                     label: 'Example / Connection Case',
                     value: sec.example,
                     maxLines: 2,
                     onChanged: (val) {
                       sec.example = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -844,6 +880,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final item = content.mustKnow[idx];
             return Container(
+              key: ValueKey(item),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -867,26 +904,32 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'must_${item.hashCode}_term',
                     label: 'Term / Vocabulary Name',
                     value: item.term,
                     onChanged: (val) {
                       item.term = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'must_${item.hashCode}_definition',
                     label: 'Definition',
                     value: item.definition,
                     maxLines: 2,
                     onChanged: (val) {
                       item.definition = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'must_${item.hashCode}_importance',
                     label: 'Why is this Important / Exam Value',
                     value: item.importance,
                     maxLines: 2,
                     onChanged: (val) {
                       item.importance = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -927,6 +970,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final item = content.goodToKnow[idx];
             return Container(
+              key: ValueKey(item),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -950,26 +994,32 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'good_${item.hashCode}_title',
                     label: 'Insight Title',
                     value: item.title,
                     onChanged: (val) {
                       item.title = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'good_${item.hashCode}_content',
                     label: 'Insight Content / Description',
                     value: item.content,
                     maxLines: 3,
                     onChanged: (val) {
                       item.content = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'good_${item.hashCode}_connection',
                     label: 'Ecosystem Connection',
                     value: item.connection,
                     maxLines: 2,
                     onChanged: (val) {
                       item.connection = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -1010,6 +1060,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final item = content.preRequisite[idx];
             return Container(
+              key: ValueKey(item),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1033,26 +1084,32 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'pre_${item.hashCode}_concept',
                     label: 'Concept / Foundation name',
                     value: item.concept,
                     onChanged: (val) {
                       item.concept = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'pre_${item.hashCode}_explanation',
                     label: 'Brief explanation',
                     value: item.explanation,
                     maxLines: 2,
                     onChanged: (val) {
                       item.explanation = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'pre_${item.hashCode}_connection',
                     label: 'Connection to this Chapter',
                     value: item.connection,
                     maxLines: 2,
                     onChanged: (val) {
                       item.connection = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -1093,6 +1150,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final item = content.industryInsights[idx];
             return Container(
+              key: ValueKey(item),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1116,25 +1174,31 @@ class _ContentTabState extends State<ContentTab> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
+                    key: 'ind_${item.hashCode}_field',
                     label: 'Field / Industry Sector',
                     value: item.field,
                     onChanged: (val) {
                       item.field = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'ind_${item.hashCode}_application',
                     label: 'Real-world Application description',
                     value: item.application,
                     maxLines: 2,
                     onChanged: (val) {
                       item.application = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'ind_${item.hashCode}_example_role',
                     label: 'Example Professional Role',
                     value: item.exampleRole,
                     onChanged: (val) {
                       item.exampleRole = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -1176,6 +1240,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final chip = content.chips[idx];
             return Container(
+              key: ValueKey(chip),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1218,47 +1283,57 @@ class _ContentTabState extends State<ContentTab> {
                     children: [
                       Expanded(
                         child: _buildFormField(
+                          key: 'chip_${chip.hashCode}_id',
                           label: 'Unique ID',
                           value: chip.id,
                           onChanged: (val) {
                             chip.id = val;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildFormField(
+                          key: 'chip_${chip.hashCode}_title',
                           label: 'Chip Title',
                           value: chip.title,
                           onChanged: (val) {
                             chip.title = val;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
                     ],
                   ),
                   _buildFormField(
+                    key: 'chip_${chip.hashCode}_preview',
                     label: 'Preview text',
                     value: chip.preview,
                     maxLines: 2,
                     onChanged: (val) {
                       chip.preview = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'chip_${chip.hashCode}_paragraphs',
                     label: 'Detailed Paragraphs (One per line)',
                     value: chip.paragraphs.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
                       chip.paragraphs = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'chip_${chip.hashCode}_key_points',
                     label: 'Key points summary (One per line)',
                     value: chip.keyPoints.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
                       chip.keyPoints = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -1300,6 +1375,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final topic = content.plusPoints[idx];
             return Container(
+              key: ValueKey(topic),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1351,47 +1427,57 @@ class _ContentTabState extends State<ContentTab> {
                     children: [
                       Expanded(
                         child: _buildFormField(
+                          key: 'plus_${topic.hashCode}_id',
                           label: 'Unique Section Code ID',
                           value: topic.id,
                           onChanged: (val) {
                             topic.id = val;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildFormField(
+                          key: 'plus_${topic.hashCode}_title',
                           label: 'Topic Title',
                           value: topic.title,
                           onChanged: (val) {
                             topic.title = val;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
                     ],
                   ),
                   _buildFormField(
+                    key: 'plus_${topic.hashCode}_summary',
                     label: 'Summary explanation',
                     value: topic.summary,
                     maxLines: 2,
                     onChanged: (val) {
                       topic.summary = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'plus_${topic.hashCode}_key_facts',
                     label: 'Key Facts / Checkpoints (One per line)',
                     value: topic.keyFacts.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
                       topic.keyFacts = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
+                    key: 'plus_${topic.hashCode}_common_mistake',
                     label: 'Common Student Mistakes / Pitfalls',
                     value: topic.commonMistake,
                     maxLines: 2,
                     onChanged: (val) {
                       topic.commonMistake = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],
@@ -1425,6 +1511,7 @@ class _ContentTabState extends State<ContentTab> {
                 children: [
                   Expanded(
                     child: _buildFormField(
+                      key: 'quiz_settings_title',
                       label: 'Quiz Title',
                       value: content.quiz.title,
                       onChanged: (val) {
@@ -1436,6 +1523,7 @@ class _ContentTabState extends State<ContentTab> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildFormField(
+                      key: 'quiz_settings_passing_score',
                       label: 'Passing score (%)',
                       value: content.quiz.passingScore.toString(),
                       isNumeric: true,
@@ -1448,6 +1536,7 @@ class _ContentTabState extends State<ContentTab> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildFormField(
+                      key: 'quiz_settings_time_limit',
                       label: 'Time limit (Minutes)',
                       value: content.quiz.timeLimitMinutes.toString(),
                       isNumeric: true,
@@ -1460,6 +1549,7 @@ class _ContentTabState extends State<ContentTab> {
                 ],
               ),
               _buildFormField(
+                key: 'quiz_settings_instructions',
                 label: 'Instructions',
                 value: content.quiz.instructions,
                 onChanged: (val) {
@@ -1511,6 +1601,7 @@ class _ContentTabState extends State<ContentTab> {
           itemBuilder: (context, idx) {
             final q = content.quiz.questions[idx];
             return Container(
+              key: ValueKey(q),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -1538,21 +1629,25 @@ class _ContentTabState extends State<ContentTab> {
                     children: [
                       Expanded(
                         child: _buildFormField(
+                          key: 'quiz_${q.hashCode}_question_id',
                           label: 'Question ID (Number)',
                           value: q.id.toString(),
                           isNumeric: true,
                           onChanged: (val) {
                             q.id = int.tryParse(val) ?? q.id;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildFormField(
+                          key: 'quiz_${q.hashCode}_concept',
                           label: 'Tested Concept name',
                           value: q.concept,
                           onChanged: (val) {
                             q.concept = val;
+                            prov.updateActiveContent(content);
                           },
                         ),
                       ),
@@ -1595,11 +1690,13 @@ class _ContentTabState extends State<ContentTab> {
                     ],
                   ),
                   _buildFormField(
+                    key: 'quiz_${q.hashCode}_question_text',
                     label: 'Question Text',
                     value: q.questionText,
                     maxLines: 2,
                     onChanged: (val) {
                       q.questionText = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                   const SizedBox(height: 12),
@@ -1624,10 +1721,12 @@ class _ContentTabState extends State<ContentTab> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildFormField(
+                            key: 'quiz_${q.hashCode}_option_${opt.key}',
                             label: 'Option ${opt.key} Text',
                             value: opt.text,
                             onChanged: (val) {
                               opt.text = val;
+                              prov.updateActiveContent(content);
                             },
                           ),
                         ),
@@ -1646,11 +1745,13 @@ class _ContentTabState extends State<ContentTab> {
                     );
                   }),
                   _buildFormField(
+                    key: 'quiz_${q.hashCode}_explanation',
                     label: 'Explanation on Correct Option',
                     value: q.explanation,
                     maxLines: 2,
                     onChanged: (val) {
                       q.explanation = val;
+                      prov.updateActiveContent(content);
                     },
                   ),
                 ],

@@ -409,6 +409,18 @@ class AdminProvider with ChangeNotifier {
     }
   }
 
+  void setupMockData(Map<String, Grade> mockCurriculum, ChapterContent mockContent) {
+    _curriculum = mockCurriculum;
+    _selectedGradeKey = mockCurriculum.keys.first;
+    _selectedSubjectId = mockCurriculum[_selectedGradeKey]!.subjects.first.id;
+    _selectedChapterNumber = mockCurriculum[_selectedGradeKey]!.subjects.first.chapters.first.number;
+    _activeContent = mockContent;
+    _isAuthenticated = true;
+    _isInitializing = false;
+    _jsonString = const JsonEncoder.withIndent('  ').convert(mockContent.toJson());
+    notifyListeners();
+  }
+
   void updateActiveContent(ChapterContent content) {
     _activeContent = content;
     _jsonString = const JsonEncoder.withIndent('  ').convert(content.toJson());

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -439,8 +438,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
         // Bottom Commit Action bar
         Container(
-          height: 72,
-          padding: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(
@@ -450,52 +448,67 @@ class _CurriculumTabState extends State<CurriculumTab> {
               ),
             ),
           ),
-          child: Row(
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Icon(Icons.info_outline, color: AppColors.textMuted, size: 18),
-              const SizedBox(width: 12),
-              Text(
-                'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
-              ),
-              const Spacer(),
-              OutlinedButton(
-                onPressed: () {
-                  adminProv.loadCurriculum();
-                  _clearSelection();
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textSecondary,
-                  side: const BorderSide(color: AppColors.border),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.info_outline, color: AppColors.textMuted, size: 18),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Text(
+                      'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
+                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                ),
-                child: const Text('Discard Local Edits'),
+                ],
               ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
-                icon: _isSavingToDb
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Icon(Icons.cloud_upload_outlined, size: 16),
-                label: Text(
-                  _isSavingToDb ? 'Committing...' : 'Commit Changes to Firebase',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      adminProv.loadCurriculum();
+                      _clearSelection();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    ),
+                    child: const Text('Discard Local Edits'),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
+                    icon: _isSavingToDb
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Icon(Icons.cloud_upload_outlined, size: 16),
+                    label: Text(
+                      _isSavingToDb ? 'Committing...' : 'Commit Changes to Firebase',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

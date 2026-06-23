@@ -337,6 +337,16 @@ class _LoginViewState extends State<LoginView> {
                           color: AppColors.textMuted,
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'v1.0.0',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),

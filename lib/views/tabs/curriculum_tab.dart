@@ -398,7 +398,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               // Form Details editing pane
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(40.0),
+                  padding: const EdgeInsets.all(20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -831,133 +831,109 @@ class _CurriculumTabState extends State<CurriculumTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Card(
-          color: AppColors.surface,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: AppColors.divider, width: 1.5),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Chapter Structure Settings',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 100,
+                child: _buildTextField(
+                  controller: _chapterNumberController,
+                  label: 'Ch. Number',
+                  hint: '1',
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTextField(
+                  controller: _chapterTitleController,
+                  label: 'Chapter Title',
+                  hint: 'Nutrition in Plants',
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  final chNum = int.tryParse(_chapterNumberController.text);
+                  if (chNum == null || _chapterTitleController.text.isEmpty)
+                    return;
+
+                  // Retain existing interactive lesson URL if any
+                  final grade = prov.curriculum[_activeGradeKey!];
+                  final subject = grade?.subjects.firstWhere(
+                    (s) => s.id == _activeSubjectId,
+                  );
+                  final oldCh = subject?.chapters.firstWhere(
+                    (c) => c.number == _activeChapterNumber,
+                  );
+                  final existingUrl = oldCh?.interactiveLessonUrl;
+
+                  prov.updateChapter(
+                    _activeGradeKey!,
+                    _activeSubjectId!,
+                    _activeChapterNumber!,
+                    Chapter(
+                      number: chNum,
+                      title: _chapterTitleController.text,
+                      interactiveLessonUrl: existingUrl,
+                    ),
+                  );
+
+                  // Update selection to match new number
+                  setState(() {
+                    _activeChapterNumber = chNum;
+                  });
+                  prov.selectChapter(chNum);
+
+                  _showSavedIndicator();
+                },
+                icon: const Icon(Icons.save_outlined, size: 14),
+                label: const Text('Update Title', style: TextStyle(fontSize: 12)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: 140,
-                      child: _buildTextField(
-                        controller: _chapterNumberController,
-                        label: 'Chapter Number',
-                        hint: '1',
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildTextField(
-                        controller: _chapterTitleController,
-                        label: 'Chapter Title',
-                        hint: 'Nutrition in Plants',
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        final chNum = int.tryParse(_chapterNumberController.text);
-                        if (chNum == null || _chapterTitleController.text.isEmpty)
-                          return;
-
-                        // Retain existing interactive lesson URL if any
-                        final grade = prov.curriculum[_activeGradeKey!];
-                        final subject = grade?.subjects.firstWhere(
-                          (s) => s.id == _activeSubjectId,
-                        );
-                        final oldCh = subject?.chapters.firstWhere(
-                          (c) => c.number == _activeChapterNumber,
-                        );
-                        final existingUrl = oldCh?.interactiveLessonUrl;
-
-                        prov.updateChapter(
-                          _activeGradeKey!,
-                          _activeSubjectId!,
-                          _activeChapterNumber!,
-                          Chapter(
-                            number: chNum,
-                            title: _chapterTitleController.text,
-                            interactiveLessonUrl: existingUrl,
-                          ),
-                        );
-
-                        // Update selection to match new number
-                        setState(() {
-                          _activeChapterNumber = chNum;
-                        });
-                        prov.selectChapter(chNum);
-
-                        _showSavedIndicator();
-                      },
-                      icon: const Icon(Icons.save_outlined, size: 16),
-                      label: Text(
-                        'Update Title',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 18,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        _showDeleteConfirmDialog('Chapter', () {
-                          prov.removeChapter(
-                            _activeGradeKey!,
-                            _activeSubjectId!,
-                            _activeChapterNumber!,
-                          );
-                          _clearSelection();
-                        });
-                      },
-                      icon: const Icon(Icons.delete_outline, size: 16),
-                      label: const Text('Delete Chapter'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        side: const BorderSide(color: AppColors.error),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ],
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _showDeleteConfirmDialog('Chapter', () {
+                    prov.removeChapter(
+                      _activeGradeKey!,
+                      _activeSubjectId!,
+                      _activeChapterNumber!,
+                    );
+                    _clearSelection();
+                  });
+                },
+                icon: const Icon(Icons.delete_outline, size: 14),
+                label: const Text('Delete Chapter', style: TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  side: const BorderSide(color: AppColors.error),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 20),
+        const Divider(height: 1, color: AppColors.divider),
+        const SizedBox(height: 16),
         const Expanded(
           child: ChapterContentEditor(),
         ),

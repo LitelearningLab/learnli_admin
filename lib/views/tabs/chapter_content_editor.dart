@@ -100,130 +100,130 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   ],
                 ),
               )
-            : Row(
+            : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Left sidebar: categories selector
-                        Container(
-                          width: 250,
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              right: BorderSide(color: AppColors.divider, width: 1.5),
+                  // Horizontal scrollable categories selector
+                  SizedBox(
+                    height: 48,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _sections.length,
+                      itemBuilder: (context, idx) {
+                        final label = _sections[idx];
+                        final isActive = _activeSectionIndex == idx;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              label,
+                              style: GoogleFonts.inter(
+                                color: isActive ? Colors.white : AppColors.textSecondary,
+                                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                                fontSize: 12.5,
+                              ),
                             ),
-                          ),
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-                            itemCount: _sections.length,
-                            itemBuilder: (context, idx) {
-                              final isActive = _activeSectionIndex == idx;
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: ListTile(
-                                  onTap: () {
-                                    setState(() {
-                                      _activeSectionIndex = idx;
-                                    });
-                                  },
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  dense: true,
-                                  tileColor: isActive ? AppColors.primaryHighlight : Colors.transparent,
-                                  title: Text(
-                                    _sections[idx],
-                                    style: GoogleFonts.inter(
-                                      color: isActive ? AppColors.primary : AppColors.textSecondary,
-                                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                  ),
-                                ),
-                              );
+                            selected: isActive,
+                            selectedColor: AppColors.primary,
+                            backgroundColor: Colors.transparent,
+                            showCheckmark: false,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(
+                                color: isActive ? AppColors.primary : AppColors.border,
+                                width: 1,
+                              ),
+                            ),
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _activeSectionIndex = idx;
+                                });
+                              }
                             },
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                        // Right sidebar: editing forms
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(40),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                  // Main form area below
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Heading and publish action row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
                               children: [
-                                // Heading
-                                Wrap(
-                                  spacing: 16,
-                                  runSpacing: 16,
-                                  alignment: WrapAlignment.spaceBetween,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 6,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(3),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          _sections[_activeSectionIndex],
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Save Button
-                                        ElevatedButton.icon(
-                                          onPressed: () => _handleSave(adminProv),
-                                          icon: const Icon(Icons.cloud_done_outlined, size: 16),
-                                          label: const Text('Save Chapter Content'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.success,
-                                            foregroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        // Delete Button
-                                        OutlinedButton.icon(
-                                          onPressed: () => _handleDelete(adminProv),
-                                          icon: const Icon(Icons.delete_forever, size: 16),
-                                          label: const Text('Delete Payload'),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppColors.error,
-                                            side: BorderSide(color: AppColors.error.withOpacity(0.4)),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                Container(
+                                  width: 6,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
                                 ),
-                                const SizedBox(height: 24),
-                                const Divider(height: 1, color: AppColors.divider),
-                                const SizedBox(height: 24),
-
-                                // Render Active Section form
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: _buildFormBody(adminProv),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _sections[_activeSectionIndex],
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ],
                             ),
+                            Row(
+                              children: [
+                                // Save Button
+                                ElevatedButton.icon(
+                                  onPressed: () => _handleSave(adminProv),
+                                  icon: const Icon(Icons.cloud_done_outlined, size: 14),
+                                  label: const Text('Save Content', style: TextStyle(fontSize: 12)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.success,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Delete Button
+                                OutlinedButton.icon(
+                                  onPressed: () => _handleDelete(adminProv),
+                                  icon: const Icon(Icons.delete_forever, size: 14),
+                                  label: const Text('Delete Payload', style: TextStyle(fontSize: 12)),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.error,
+                                    side: BorderSide(color: AppColors.error.withOpacity(0.4)),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(height: 1, color: AppColors.divider),
+                        const SizedBox(height: 16),
+
+                        // Render Active Section form
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: _buildFormBody(adminProv),
                           ),
                         ),
                       ],
-                    );
+                    ),
+                  ),
+                ],
+              );
   }
 
   Widget _buildEmptyState() {

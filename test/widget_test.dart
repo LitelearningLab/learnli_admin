@@ -66,49 +66,70 @@ void main() {
     expect(find.text('Section #1'), findsOneWidget);
 
     // 3. Must Know Terms
-    await tester.tap(find.text('Must Know Terms'));
+    final mustKnowFinder = find.text('Must Know Terms');
+    await tester.ensureVisible(mustKnowFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(mustKnowFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Term'));
     await tester.pumpAndSettle();
     expect(find.text('Term #1'), findsOneWidget);
 
     // 4. Good to Know Insights
-    await tester.tap(find.text('Good to Know Insights'));
+    final goodToKnowFinder = find.text('Good to Know Insights');
+    await tester.ensureVisible(goodToKnowFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(goodToKnowFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Insight'));
     await tester.pumpAndSettle();
     expect(find.text('Insight #1'), findsOneWidget);
 
     // 5. Pre-requisite Concepts
-    await tester.tap(find.text('Pre-requisite Concepts'));
+    final prerequisiteFinder = find.text('Pre-requisite Concepts');
+    await tester.ensureVisible(prerequisiteFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(prerequisiteFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Prerequisite'));
     await tester.pumpAndSettle();
     expect(find.text('Prerequisite #1'), findsOneWidget);
 
     // 6. Industry Insights
-    await tester.tap(find.text('Industry Insights'));
+    final industryInsightsFinder = find.text('Industry Insights');
+    await tester.ensureVisible(industryInsightsFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(industryInsightsFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Application'));
     await tester.pumpAndSettle();
     expect(find.text('Application #1'), findsOneWidget);
 
     // 7. AI Learning Chips
-    await tester.tap(find.text('AI Learning Chips'));
+    final aiChipsFinder = find.text('AI Learning Chips');
+    await tester.ensureVisible(aiChipsFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(aiChipsFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Chip'));
     await tester.pumpAndSettle();
     expect(find.text('Chip #1'), findsOneWidget);
 
     // 8. Plus Points Topics
-    await tester.tap(find.text('Plus Points Topics'));
+    final plusPointsFinder = find.text('Plus Points Topics');
+    await tester.ensureVisible(plusPointsFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(plusPointsFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add Topic'));
     await tester.pumpAndSettle();
     expect(find.text('Topic #1'), findsOneWidget);
 
     // 9. Quiz & Questions
-    await tester.tap(find.text('Quiz & Questions'));
+    final quizFinder = find.text('Quiz & Questions');
+    await tester.ensureVisible(quizFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(quizFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add MCQ Question'));
     await tester.pumpAndSettle();

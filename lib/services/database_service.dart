@@ -124,8 +124,11 @@ class DatabaseService {
     }
   }
 
-  /// Save full curriculum
-  static Future<void> saveCurriculum(Map<String, Grade> curriculum) async {
+  /// Save full curriculum and initialize/update chapter contents
+  static Future<void> saveCurriculum(
+    Map<String, Grade> curriculum,
+    Map<String, Grade> originalCurriculum,
+  ) async {
     try {
       await authenticateFirebase();
       final Map<String, dynamic> dataToSave = {};
@@ -133,8 +136,69 @@ class DatabaseService {
         dataToSave[key] = value.toJson();
       });
 
+      // 1. Write the main curriculum node
       await _db.ref('curriculum').set(dataToSave);
       print('✅ Curriculum saved successfully');
+
+      // 2. Compare and sync corresponding chapter content nodes
+      for (var gradeEntry in curriculum.entries) {
+        final gradeKey = gradeEntry.key;
+        final grade = gradeEntry.value;
+        final gradeStr = gradeKey.replaceFirst('grade_', '');
+        final gradeVal = int.tryParse(gradeStr) ?? 7;
+
+        final originalGrade = originalCurriculum[gradeKey];
+
+        for (var subject in grade.subjects) {
+          final originalSubject = originalGrade?.subjects.firstWhere(
+            (s) => s.id == subject.id,
+            orElse: () => Subject(id: '', name: '', emoji: '', color: '', chapters: []),
+          );
+
+          for (var chapter in subject.chapters) {
+            final originalChapter = originalSubject?.chapters.firstWhere(
+              (c) => c.number == chapter.number,
+              orElse: () => Chapter(number: -1, title: ''),
+            );
+
+            final path = getChapterPath(gradeVal, subject.id, chapter.number);
+
+            if (originalChapter == null || originalChapter.number == -1) {
+              // This is a newly added chapter!
+              // Double check if it already exists in the database to prevent overwriting
+              final existingSnap = await _db.ref(path).get();
+              if (!existingSnap.exists) {
+                final prefix = getSubjectPrefix(subject.id);
+                final chapterStr = chapter.number.toString().padLeft(2, '0');
+                final idPattern = 'G${gradeVal}_${prefix}_CH$chapterStr';
+                print('Initializing empty chapter content for new chapter $idPattern at $path');
+                final newContent = ChapterContent.empty(
+                  gradeVal,
+                  subject.id,
+                  chapter.number,
+                  chapter.title,
+                  interactiveLessonUrl: chapter.interactiveLessonUrl,
+                );
+                await _db.ref(path).set(newContent.toJson());
+              } else {
+                // If it already exists, just make sure the name matches
+                final existingContent = ChapterContent.fromJson(
+                  _toStringDynamicMap(existingSnap.value),
+                );
+                if (existingContent.metadata.chapterName != chapter.title) {
+                  print('Updating title of existing chapter content at $path');
+                  await _db.ref('$path/metadata/chapter_name').set(chapter.title);
+                }
+              }
+            } else if (originalChapter.title != chapter.title) {
+              // The chapter exists but its title was renamed!
+              print('Updating chapter title from "${originalChapter.title}" to "${chapter.title}" at $path');
+              await _db.ref('$path/metadata/chapter_name').set(chapter.title);
+            }
+          }
+        }
+      }
+      print('✅ All chapters synced successfully in DatabaseService.saveCurriculum');
     } catch (e) {
       print('Error saving curriculum: $e');
       rethrow;

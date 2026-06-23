@@ -31,7 +31,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '462234740929',
     projectId: 'learnli-1ebd7',
     authDomain: 'learnli.in',
-    storageBucket: 'lite-learning-lab.appspot.com',
+    storageBucket: 'learnli-1ebd7.firebasestorage.app',
     measurementId: 'G-QQP37KDYV1',
     databaseURL: 'https://learnli-1ebd7-default-rtdb.firebaseio.com/',
   );
@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
     appId: '1:462234740929:android:fe9855730b855af6724c40',
     messagingSenderId: '462234740929',
     projectId: 'learnli-1ebd7',
-    storageBucket: 'lite-learning-lab.appspot.com',
+    storageBucket: 'learnli-1ebd7.firebasestorage.app',
     databaseURL: 'https://learnli-1ebd7-default-rtdb.firebaseio.com/',
   );
 
@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
     appId: '1:462234740929:ios:d4d4d210ff3a8695724c40',
     messagingSenderId: '462234740929',
     projectId: 'learnli-1ebd7',
-    storageBucket: 'lite-learning-lab.appspot.com',
+    storageBucket: 'learnli-1ebd7.firebasestorage.app',
     databaseURL: 'https://learnli-1ebd7-default-rtdb.firebaseio.com/',
     iosBundleId: 'com.example.studyBuddyFinal',
   );
@@ -60,7 +60,7 @@ class DefaultFirebaseOptions {
     appId: '1:462234740929:ios:697001d17cfb2adb724c40',
     messagingSenderId: '462234740929',
     projectId: 'learnli-1ebd7',
-    storageBucket: 'lite-learning-lab.appspot.com',
+    storageBucket: 'learnli-1ebd7.firebasestorage.app',
     databaseURL: 'https://learnli-1ebd7-default-rtdb.firebaseio.com/',
     iosBundleId: 'com.example.studyBuddy',
   );
@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '462234740929',
     projectId: 'learnli-1ebd7',
     authDomain: 'learnli.in',
-    storageBucket: 'lite-learning-lab.appspot.com',
+    storageBucket: 'learnli-1ebd7.firebasestorage.app',
     measurementId: 'G-STRJEWWFVG',
     databaseURL: 'https://learnli-1ebd7-default-rtdb.firebaseio.com/',
   );

@@ -12,6 +12,7 @@ class AdminProvider with ChangeNotifier {
   
   // Curriculum state
   Map<String, Grade> _curriculum = {};
+  Map<String, Grade> _originalCurriculum = {};
   bool _isLoadingCurriculum = false;
 
   // Active selections
@@ -33,6 +34,7 @@ class AdminProvider with ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
   bool get isInitializing => _isInitializing;
   Map<String, Grade> get curriculum => _curriculum;
+  Map<String, Grade> get originalCurriculum => _originalCurriculum;
   bool get isLoadingCurriculum => _isLoadingCurriculum;
   
   String? get selectedGradeKey => _selectedGradeKey;
@@ -117,12 +119,41 @@ class AdminProvider with ChangeNotifier {
   // CURRICULUM ACTIONS
   // ==========================================
 
+  Map<String, Grade> _cloneCurriculum(Map<String, Grade> source) {
+    return source.map((key, grade) {
+      return MapEntry(
+        key,
+        Grade(
+          name: grade.name,
+          description: grade.description,
+          emoji: grade.emoji,
+          subjects: grade.subjects.map((subject) {
+            return Subject(
+              id: subject.id,
+              name: subject.name,
+              emoji: subject.emoji,
+              color: subject.color,
+              chapters: subject.chapters.map((chapter) {
+                return Chapter(
+                  number: chapter.number,
+                  title: chapter.title,
+                  interactiveLessonUrl: chapter.interactiveLessonUrl,
+                );
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      );
+    });
+  }
+
   Future<void> loadCurriculum() async {
     _isLoadingCurriculum = true;
     notifyListeners();
 
     try {
       _curriculum = await DatabaseService.fetchCurriculum();
+      _originalCurriculum = _cloneCurriculum(_curriculum);
     } catch (e) {
       print('Error loading curriculum in provider: $e');
     } finally {
@@ -136,7 +167,8 @@ class AdminProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await DatabaseService.saveCurriculum(_curriculum);
+      await DatabaseService.saveCurriculum(_curriculum, _originalCurriculum);
+      _originalCurriculum = _cloneCurriculum(_curriculum);
     } catch (e) {
       print('Error saving curriculum in provider: $e');
       rethrow;
@@ -411,6 +443,7 @@ class AdminProvider with ChangeNotifier {
 
   void setupMockData(Map<String, Grade> mockCurriculum, ChapterContent mockContent) {
     _curriculum = mockCurriculum;
+    _originalCurriculum = _cloneCurriculum(mockCurriculum);
     _selectedGradeKey = mockCurriculum.keys.first;
     _selectedSubjectId = mockCurriculum[_selectedGradeKey]!.subjects.first.id;
     _selectedChapterNumber = mockCurriculum[_selectedGradeKey]!.subjects.first.chapters.first.number;

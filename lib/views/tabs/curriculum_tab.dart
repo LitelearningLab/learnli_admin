@@ -1,11 +1,9 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/curriculum_models.dart';
 import '../../constants/app_colors.dart';
-import '../../services/database_service.dart';
 
 class CurriculumTab extends StatefulWidget {
   const CurriculumTab({super.key});
@@ -33,63 +31,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
   final _chapterNumberController = TextEditingController();
   final _chapterTitleController = TextEditingController();
-  final _chapterUrlController = TextEditingController();
 
   bool _isSavingToDb = false;
-  bool _isUploadingHtml = false;
-
-  Future<String?> _pickAndUploadHtml() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['html'],
-      );
-
-      if (result != null && result.files.single.bytes != null) {
-        final bytes = result.files.single.bytes!;
-        final name = result.files.single.name;
-        
-        final downloadUrl = await DatabaseService.uploadHtmlFile(name, bytes);
-        if (downloadUrl != null && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Uploaded $name successfully!'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-        return downloadUrl;
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Upload failed: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-    return null;
-  }
-
-  Future<void> _uploadHtmlForCurriculum(AdminProvider prov) async {
-    setState(() {
-      _isUploadingHtml = true;
-    });
-    try {
-      final fileUrl = await _pickAndUploadHtml();
-      if (fileUrl != null) {
-        _chapterUrlController.text = fileUrl;
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isUploadingHtml = false;
-        });
-      }
-    }
-  }
 
   @override
   void dispose() {
@@ -102,7 +45,6 @@ class _CurriculumTabState extends State<CurriculumTab> {
     _subjectColorController.dispose();
     _chapterNumberController.dispose();
     _chapterTitleController.dispose();
-    _chapterUrlController.dispose();
     super.dispose();
   }
 
@@ -142,7 +84,6 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
       _chapterNumberController.text = chapter.number.toString();
       _chapterTitleController.text = chapter.title;
-      _chapterUrlController.text = chapter.interactiveLessonUrl ?? '';
     });
   }
 
@@ -206,10 +147,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 width: 340,
                 decoration: const BoxDecoration(
                   border: Border(
-                    right: BorderSide(
-                      color: AppColors.divider,
-                      width: 1.5,
-                    ),
+                    right: BorderSide(color: AppColors.divider, width: 1.5),
                   ),
                 ),
                 child: Column(
@@ -226,7 +164,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         icon: const Icon(Icons.add, size: 16),
                         label: Text(
                           'Add Grade Level',
-                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
@@ -242,12 +183,17 @@ class _CurriculumTabState extends State<CurriculumTab> {
                     // Tree list body
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 8,
+                        ),
                         itemCount: curriculum.length,
                         itemBuilder: (context, index) {
                           final gradeKey = curriculum.keys.elementAt(index);
                           final grade = curriculum[gradeKey]!;
-                          final isGradeSelected = _selectedNodeType == 'grade' && _activeGradeKey == gradeKey;
+                          final isGradeSelected =
+                              _selectedNodeType == 'grade' &&
+                              _activeGradeKey == gradeKey;
 
                           return ExpansionTile(
                             initiallyExpanded: true,
@@ -259,28 +205,45 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               onTap: () => _selectGradeNode(gradeKey, grade),
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isGradeSelected ? AppColors.primaryHighlight : Colors.transparent,
+                                  color: isGradeSelected
+                                      ? AppColors.primaryHighlight
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   children: [
-                                    Text(grade.emoji, style: const TextStyle(fontSize: 18)),
+                                    Text(
+                                      grade.emoji,
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         grade.name,
                                         style: GoogleFonts.inter(
-                                          fontWeight: isGradeSelected ? FontWeight.bold : FontWeight.w600,
-                                          color: isGradeSelected ? AppColors.primary : AppColors.textSecondary,
+                                          fontWeight: isGradeSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.w600,
+                                          color: isGradeSelected
+                                              ? AppColors.primary
+                                              : AppColors.textSecondary,
                                           fontSize: 13.5,
                                         ),
                                       ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
-                                      onPressed: () => _showAddSubjectDialog(gradeKey),
+                                      icon: const Icon(
+                                        Icons.add_circle_outline,
+                                        size: 16,
+                                        color: AppColors.primary,
+                                      ),
+                                      onPressed: () =>
+                                          _showAddSubjectDialog(gradeKey),
                                       tooltip: 'Add Subject',
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
@@ -290,7 +253,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               ),
                             ),
                             children: grade.subjects.map((subject) {
-                              final isSubjectSelected = _selectedNodeType == 'subject' &&
+                              final isSubjectSelected =
+                                  _selectedNodeType == 'subject' &&
                                   _activeGradeKey == gradeKey &&
                                   _activeSubjectId == subject.id;
 
@@ -299,33 +263,57 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                 child: ExpansionTile(
                                   initiallyExpanded: true,
                                   shape: const RoundedRectangleBorder(),
-                                  collapsedShape: const RoundedRectangleBorder(),
+                                  collapsedShape:
+                                      const RoundedRectangleBorder(),
                                   title: InkWell(
-                                    onTap: () => _selectSubjectNode(gradeKey, subject),
+                                    onTap: () =>
+                                        _selectSubjectNode(gradeKey, subject),
                                     borderRadius: BorderRadius.circular(8),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6,
+                                        horizontal: 8,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: isSubjectSelected ? AppColors.primaryHighlight : Colors.transparent,
+                                        color: isSubjectSelected
+                                            ? AppColors.primaryHighlight
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Row(
                                         children: [
-                                          Text(subject.emoji, style: const TextStyle(fontSize: 16)),
+                                          Text(
+                                            subject.emoji,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
                                               subject.name,
                                               style: GoogleFonts.inter(
-                                                fontWeight: isSubjectSelected ? FontWeight.bold : FontWeight.w500,
-                                                color: isSubjectSelected ? AppColors.primary : AppColors.textSecondary,
+                                                fontWeight: isSubjectSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSubjectSelected
+                                                    ? AppColors.primary
+                                                    : AppColors.textSecondary,
                                                 fontSize: 13,
                                               ),
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.post_add_outlined, size: 16, color: AppColors.secondary),
-                                            onPressed: () => _showAddChapterDialog(gradeKey, subject.id),
+                                            icon: const Icon(
+                                              Icons.post_add_outlined,
+                                              size: 16,
+                                              color: AppColors.secondary,
+                                            ),
+                                            onPressed: () =>
+                                                _showAddChapterDialog(
+                                                  gradeKey,
+                                                  subject.id,
+                                                ),
                                             tooltip: 'Add Chapter',
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(),
@@ -335,29 +323,49 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                     ),
                                   ),
                                   children: subject.chapters.map((chapter) {
-                                    final isChapterSelected = _selectedNodeType == 'chapter' &&
+                                    final isChapterSelected =
+                                        _selectedNodeType == 'chapter' &&
                                         _activeGradeKey == gradeKey &&
                                         _activeSubjectId == subject.id &&
                                         _activeChapterNumber == chapter.number;
 
                                     return Padding(
-                                      padding: const EdgeInsets.only(left: 32.0, bottom: 4.0),
+                                      padding: const EdgeInsets.only(
+                                        left: 32.0,
+                                        bottom: 4.0,
+                                      ),
                                       child: ListTile(
-                                        onTap: () => _selectChapterNode(gradeKey, subject.id, chapter),
+                                        onTap: () => _selectChapterNode(
+                                          gradeKey,
+                                          subject.id,
+                                          chapter,
+                                        ),
                                         dense: true,
                                         visualDensity: VisualDensity.compact,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
-                                        tileColor: isChapterSelected ? AppColors.primaryHighlight : Colors.transparent,
-                                        leading: const Icon(Icons.bookmark_outline, size: 14, color: AppColors.textMuted),
+                                        tileColor: isChapterSelected
+                                            ? AppColors.primaryHighlight
+                                            : Colors.transparent,
+                                        leading: const Icon(
+                                          Icons.bookmark_outline,
+                                          size: 14,
+                                          color: AppColors.textMuted,
+                                        ),
                                         title: Text(
                                           'Ch ${chapter.number}: ${chapter.title}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
-                                            color: isChapterSelected ? AppColors.primary : AppColors.textSecondary,
-                                            fontWeight: isChapterSelected ? FontWeight.bold : FontWeight.normal,
+                                            color: isChapterSelected
+                                                ? AppColors.primary
+                                                : AppColors.textSecondary,
+                                            fontWeight: isChapterSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -417,7 +425,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.textSecondary,
                               ),
-                            )
+                            ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -442,10 +450,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(
-              top: BorderSide(
-                color: AppColors.divider,
-                width: 1.5,
-              ),
+              top: BorderSide(color: AppColors.divider, width: 1.5),
             ),
           ),
           child: Wrap(
@@ -457,12 +462,19 @@ class _CurriculumTabState extends State<CurriculumTab> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.info_outline, color: AppColors.textMuted, size: 18),
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppColors.textMuted,
+                    size: 18,
+                  ),
                   const SizedBox(width: 12),
                   Flexible(
                     child: Text(
                       'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
-                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ),
                 ],
@@ -481,7 +493,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                     ),
                     child: const Text('Discard Local Edits'),
                   ),
@@ -492,11 +507,16 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Icon(Icons.cloud_upload_outlined, size: 16),
                     label: Text(
-                      _isSavingToDb ? 'Committing...' : 'Commit Changes to Firebase',
+                      _isSavingToDb
+                          ? 'Committing...'
+                          : 'Commit Changes to Firebase',
                       style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -505,14 +525,17 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
@@ -557,10 +580,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           Text(
             'Select a Grade, Subject, or Chapter from the tree sidebar to edit its properties, or create new elements.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppColors.textMuted,
-            ),
+            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -600,7 +620,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   Grade(
                     name: _gradeNameController.text,
                     description: _gradeDescController.text,
-                    emoji: _gradeEmojiController.text.isEmpty ? '🎓' : _gradeEmojiController.text,
+                    emoji: _gradeEmojiController.text.isEmpty
+                        ? '🎓'
+                        : _gradeEmojiController.text,
                     subjects: prov.curriculum[_activeGradeKey!]?.subjects ?? [],
                   ),
                 );
@@ -609,8 +631,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Update Grade Properties'),
             ),
@@ -624,9 +651,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               },
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Grade'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
             ),
           ],
         ),
@@ -639,12 +664,74 @@ class _CurriculumTabState extends State<CurriculumTab> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _buildTextField(
-                controller: _subjectEmojiController,
-                label: 'Emoji Icon',
-                hint: '🧬',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextField(
+                    controller: _subjectEmojiController,
+                    label: 'Emoji Icon',
+                    hint: '🧬',
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Quick Presets:',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildEmojiPresetChip(
+                        '🔬',
+                        'Science',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '🧬',
+                        'Science',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '🧮',
+                        'Maths',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '📐',
+                        'Maths',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '🇬🇧',
+                        'English',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '📚',
+                        'English',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '🌍',
+                        'Social',
+                        _subjectEmojiController,
+                      ),
+                      _buildEmojiPresetChip(
+                        '🗺️',
+                        'Social',
+                        _subjectEmojiController,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 20),
@@ -662,7 +749,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
           controller: _subjectIdController,
           label: 'Subject Unique ID (Code)',
           hint: 'science',
-          enabled: false, // Don't let users edit ID after creation as it forms the database folder structure
+          enabled:
+              false, // Don't let users edit ID after creation as it forms the database folder structure
         ),
         const SizedBox(height: 20),
         _buildTextField(
@@ -677,7 +765,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
               onPressed: () {
                 if (_subjectNameController.text.isEmpty) return;
                 final grade = prov.curriculum[_activeGradeKey!];
-                final oldSub = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
+                final oldSub = grade?.subjects.firstWhere(
+                  (s) => s.id == _activeSubjectId,
+                );
 
                 prov.updateSubject(
                   _activeGradeKey!,
@@ -685,8 +775,12 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   Subject(
                     id: _activeSubjectId!,
                     name: _subjectNameController.text,
-                    emoji: _subjectEmojiController.text.isEmpty ? '📚' : _subjectEmojiController.text,
-                    color: _subjectColorController.text.isEmpty ? '#4E7FFF' : _subjectColorController.text,
+                    emoji: _subjectEmojiController.text.isEmpty
+                        ? '📚'
+                        : _subjectEmojiController.text,
+                    color: _subjectColorController.text.isEmpty
+                        ? '#4E7FFF'
+                        : _subjectColorController.text,
                     chapters: oldSub?.chapters ?? [],
                   ),
                 );
@@ -695,8 +789,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Update Subject Properties'),
             ),
@@ -710,75 +809,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               },
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Subject'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUrlInputWithUpload(AdminProvider prov) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Interactive Web Lesson URL (Optional)',
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _chapterUrlController,
-                style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'https://h5p.org/h5p/embed/123456',
-                  hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                  filled: true,
-                  fillColor: AppColors.card,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton.icon(
-              onPressed: _isUploadingHtml ? null : () => _uploadHtmlForCurriculum(prov),
-              icon: _isUploadingHtml
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                    )
-                  : const Icon(Icons.cloud_upload_outlined, size: 16),
-              label: Text(_isUploadingHtml ? 'Uploading...' : 'Upload HTML'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
             ),
           ],
         ),
@@ -802,15 +833,24 @@ class _CurriculumTabState extends State<CurriculumTab> {
           label: 'Chapter Title',
           hint: 'Nutrition in Plants',
         ),
-        const SizedBox(height: 20),
-        _buildUrlInputWithUpload(prov),
         const SizedBox(height: 40),
         Row(
           children: [
             ElevatedButton(
               onPressed: () {
                 final chNum = int.tryParse(_chapterNumberController.text);
-                if (chNum == null || _chapterTitleController.text.isEmpty) return;
+                if (chNum == null || _chapterTitleController.text.isEmpty)
+                  return;
+
+                // Retain existing interactive lesson URL if any
+                final grade = prov.curriculum[_activeGradeKey!];
+                final subject = grade?.subjects.firstWhere(
+                  (s) => s.id == _activeSubjectId,
+                );
+                final oldCh = subject?.chapters.firstWhere(
+                  (c) => c.number == _activeChapterNumber,
+                );
+                final existingUrl = oldCh?.interactiveLessonUrl;
 
                 prov.updateChapter(
                   _activeGradeKey!,
@@ -819,22 +859,27 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   Chapter(
                     number: chNum,
                     title: _chapterTitleController.text,
-                    interactiveLessonUrl: _chapterUrlController.text.trim().isEmpty ? null : _chapterUrlController.text.trim(),
+                    interactiveLessonUrl: existingUrl,
                   ),
                 );
-                
+
                 // Update selection to match new number
                 setState(() {
                   _activeChapterNumber = chNum;
                 });
-                
+
                 _showSavedIndicator();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Update Chapter Properties'),
             ),
@@ -842,15 +887,17 @@ class _CurriculumTabState extends State<CurriculumTab> {
             TextButton.icon(
               onPressed: () {
                 _showDeleteConfirmDialog('Chapter', () {
-                  prov.removeChapter(_activeGradeKey!, _activeSubjectId!, _activeChapterNumber!);
+                  prov.removeChapter(
+                    _activeGradeKey!,
+                    _activeSubjectId!,
+                    _activeChapterNumber!,
+                  );
                   _clearSelection();
                 });
               },
               icon: const Icon(Icons.delete, size: 16),
               label: const Text('Delete Chapter'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
             ),
           ],
         ),
@@ -883,13 +930,19 @@ class _CurriculumTabState extends State<CurriculumTab> {
           enabled: enabled,
           maxLines: maxLines,
           keyboardType: keyboardType,
-          style: GoogleFonts.inter(color: enabled ? AppColors.textPrimary : AppColors.textSecondary, fontSize: 14),
+          style: GoogleFonts.inter(
+            color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
+            fontSize: 14,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
             filled: true,
             fillColor: AppColors.card,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: AppColors.border),
@@ -900,11 +953,55 @@ class _CurriculumTabState extends State<CurriculumTab> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmojiPresetChip(
+    String emoji,
+    String label,
+    TextEditingController controller, [
+    VoidCallback? onSelected,
+  ]) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          controller.text = emoji;
+        });
+        if (onSelected != null) {
+          onSelected();
+        }
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(20),
+          color: AppColors.card,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 14)),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -937,7 +1034,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
   void _showSavedIndicator() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Local tree updated! Use bottom Commit button to save in Firebase.'),
+        content: Text(
+          'Local tree updated! Use bottom Commit button to save in Firebase.',
+        ),
         duration: Duration(seconds: 2),
       ),
     );
@@ -958,7 +1057,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Add Grade Level', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
+          title: Text(
+            'Add Grade Level',
+            style: GoogleFonts.outfit(color: AppColors.textPrimary),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1002,7 +1104,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1012,13 +1117,17 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   Grade(
                     name: nameCtrl.text.trim(),
                     description: descCtrl.text.trim(),
-                    emoji: emojiCtrl.text.trim().isEmpty ? '🎓' : emojiCtrl.text.trim(),
+                    emoji: emojiCtrl.text.trim().isEmpty
+                        ? '🎓'
+                        : emojiCtrl.text.trim(),
                     subjects: [],
                   ),
                 );
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
               child: const Text('Add'),
             ),
           ],
@@ -1028,91 +1137,50 @@ class _CurriculumTabState extends State<CurriculumTab> {
   }
 
   void _showAddSubjectDialog(String gradeKey) {
-    final idCtrl = TextEditingController();
-    final nameCtrl = TextEditingController();
-    final emojiCtrl = TextEditingController();
-    final colorCtrl = TextEditingController(text: '#4E7FFF');
+    String selectedPreset = 'science';
+    final idCtrl = TextEditingController(text: 'science');
+    final nameCtrl = TextEditingController(text: 'Science');
+    final emojiCtrl = TextEditingController(text: '🔬');
+    final colorCtrl = TextEditingController(text: '#D1FAE5');
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          title: Text('Add Subject', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: idCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Subject ID/Code (e.g. science, math)',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nameCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Subject Name (e.g. Science)',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emojiCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Emoji Icon',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: colorCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Hex Color code',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (idCtrl.text.isEmpty || nameCtrl.text.isEmpty) return;
-                Provider.of<AdminProvider>(context, listen: false).addSubject(
-                  gradeKey,
-                  Subject(
-                    id: idCtrl.text.trim(),
-                    name: nameCtrl.text.trim(),
-                    emoji: emojiCtrl.text.trim().isEmpty ? '📚' : emojiCtrl.text.trim(),
-                    color: colorCtrl.text.trim(),
-                    chapters: [],
-                  ),
-                );
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Add'),
-            ),
-          ],
-        );
+    final Map<String, Map<String, String>> presets = {
+      'science': {
+        'id': 'science',
+        'name': 'Science',
+        'emoji': '🔬',
+        'color': '#D1FAE5',
       },
-    );
-  }
-
-  void _showAddChapterDialog(String gradeKey, String subjectId) {
-    final numCtrl = TextEditingController();
-    final titleCtrl = TextEditingController();
-    final urlCtrl = TextEditingController();
-    bool isUploadingHtml = false;
+      'math': {
+        'id': 'math',
+        'name': 'Maths',
+        'emoji': '🧮',
+        'color': '#DBEAFE',
+      },
+      'english': {
+        'id': 'english',
+        'name': 'English',
+        'emoji': '🇬🇧',
+        'color': '#FEF3C7',
+      },
+      'social': {
+        'id': 'social',
+        'name': 'Social Studies',
+        'emoji': '🌍',
+        'color': '#FCE7F3',
+      },
+      'hindi': {
+        'id': 'hindi',
+        'name': 'Hindi',
+        'emoji': '🇮🇳',
+        'color': '#FFF2E2',
+      },
+      'computer': {
+        'id': 'computer',
+        'name': 'Computer',
+        'emoji': '💻',
+        'color': '#E0F2FE',
+      },
+    };
 
     showDialog(
       context: context,
@@ -1121,100 +1189,316 @@ class _CurriculumTabState extends State<CurriculumTab> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppColors.card,
-              title: Text('Add Chapter', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: numCtrl,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(
-                      labelText: 'Chapter Number',
-                      labelStyle: TextStyle(color: AppColors.textSecondary),
+              title: Text(
+                'Add Subject',
+                style: GoogleFonts.outfit(color: AppColors.textPrimary),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select Subject ID',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: titleCtrl,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(
-                      labelText: 'Chapter Title',
-                      labelStyle: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: urlCtrl,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                          decoration: const InputDecoration(
-                            labelText: 'Interactive Lesson URL (Optional)',
-                            labelStyle: TextStyle(color: AppColors.textSecondary),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      dropdownColor: AppColors.card,
+                      initialValue: selectedPreset,
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColors.card,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: isUploadingHtml
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                              )
-                            : const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
-                        onPressed: isUploadingHtml
-                            ? null
-                            : () async {
-                                setDialogState(() {
-                                  isUploadingHtml = true;
-                                });
-                                try {
-                                  final fileUrl = await _pickAndUploadHtml();
-                                  if (fileUrl != null) {
-                                    urlCtrl.text = fileUrl;
-                                  }
-                                } finally {
-                                  setDialogState(() {
-                                    isUploadingHtml = false;
-                                  });
-                                }
-                              },
-                        tooltip: 'Upload HTML to Firebase Storage',
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'science',
+                          child: Text('Science (science)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'english',
+                          child: Text('English (english)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'math',
+                          child: Text('Maths (math)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'social',
+                          child: Text('Social Studies (social)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'hindi',
+                          child: Text('Hindi (hindi)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'computer',
+                          child: Text('Computer (computer)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'custom',
+                          child: Text('Custom Subject...'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() {
+                            selectedPreset = val;
+                            if (val != 'custom' && presets.containsKey(val)) {
+                              final preset = presets[val]!;
+                              idCtrl.text = preset['id']!;
+                              nameCtrl.text = preset['name']!;
+                              emojiCtrl.text = preset['emoji']!;
+                              colorCtrl.text = preset['color']!;
+                            } else {
+                              idCtrl.text = '';
+                              nameCtrl.text = '';
+                              emojiCtrl.text = '📚';
+                              colorCtrl.text = '#4E7FFF';
+                            }
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (selectedPreset == 'custom') ...[
+                      TextField(
+                        controller: idCtrl,
+                        style: const TextStyle(color: AppColors.textPrimary),
+                        decoration: const InputDecoration(
+                          labelText: 'Subject ID/Code (e.g. science, math)',
+                          labelStyle: TextStyle(color: AppColors.textSecondary),
+                        ),
                       ),
+                      const SizedBox(height: 16),
                     ],
-                  ),
-                ],
+
+                    TextField(
+                      controller: nameCtrl,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                      decoration: const InputDecoration(
+                        labelText: 'Subject Name',
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: emojiCtrl,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                      decoration: const InputDecoration(
+                        labelText: 'Emoji Icon',
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Quick Presets:',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildEmojiPresetChip(
+                          '🔬',
+                          'Science',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '🧬',
+                          'Science',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '🧮',
+                          'Maths',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '📐',
+                          'Maths',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '🇬🇧',
+                          'English',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '📚',
+                          'English',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '🌍',
+                          'Social',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                        _buildEmojiPresetChip(
+                          '🗺️',
+                          'Social',
+                          emojiCtrl,
+                          () => setDialogState(() {}),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: colorCtrl,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                      decoration: const InputDecoration(
+                        labelText: 'Hex Color code',
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final chNum = int.tryParse(numCtrl.text);
-                    if (chNum == null || titleCtrl.text.isEmpty) return;
-                    Provider.of<AdminProvider>(context, listen: false).addChapter(
+                    final idVal = idCtrl.text.trim();
+                    if (idVal.isEmpty || nameCtrl.text.isEmpty) return;
+                    Provider.of<AdminProvider>(
+                      context,
+                      listen: false,
+                    ).addSubject(
                       gradeKey,
-                      subjectId,
-                      Chapter(
-                        number: chNum,
-                        title: titleCtrl.text.trim(),
-                        interactiveLessonUrl: urlCtrl.text.trim().isEmpty ? null : urlCtrl.text.trim(),
+                      Subject(
+                        id: idVal,
+                        name: nameCtrl.text.trim(),
+                        emoji: emojiCtrl.text.trim().isEmpty
+                            ? '📚'
+                            : emojiCtrl.text.trim(),
+                        color: colorCtrl.text.trim(),
+                        chapters: [],
                       ),
                     );
                     Navigator.pop(context);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                  child: const Text('Add'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: Text('Add', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showAddChapterDialog(String gradeKey, String subjectId) {
+    final numCtrl = TextEditingController();
+    final titleCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.card,
+          title: Text(
+            'Add Chapter',
+            style: GoogleFonts.outfit(color: AppColors.textPrimary),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: numCtrl,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(
+                  labelText: 'Chapter Number',
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: titleCtrl,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: const InputDecoration(
+                  labelText: 'Chapter Title',
+                  labelStyle: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final chNum = int.tryParse(numCtrl.text);
+                if (chNum == null || titleCtrl.text.isEmpty) return;
+                Provider.of<AdminProvider>(context, listen: false).addChapter(
+                  gradeKey,
+                  subjectId,
+                  Chapter(number: chNum, title: titleCtrl.text.trim()),
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: Text('Add', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
       },
     );
@@ -1226,12 +1510,21 @@ class _CurriculumTabState extends State<CurriculumTab> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Confirm Deletion', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
-          content: Text('Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
+          title: Text(
+            'Confirm Deletion',
+            style: GoogleFonts.outfit(color: AppColors.textPrimary),
+          ),
+          content: Text(
+            'Are you sure you want to delete this $type? This will remove all nested items as well in the local tree view.',
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             ElevatedButton(
               onPressed: () {

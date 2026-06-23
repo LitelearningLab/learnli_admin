@@ -73,6 +73,7 @@ class Subject {
       'name': name,
       'emoji': emoji,
       'color': color,
+      'totalChapters': chapters.length,
       'chapters': chapters.map((c) => c.toJson()).toList(),
     };
   }
@@ -118,17 +119,11 @@ class Grade {
   }
 
   Map<String, dynamic> toJson() {
-    // Map subjects back to a key-value structure where key is the subject ID
-    final subjectsMap = <String, dynamic>{};
-    for (var subject in subjects) {
-      subjectsMap[subject.id] = subject.toJson();
-    }
-
     return {
       'name': name,
       'description': description,
       'emoji': emoji,
-      'subjects': subjectsMap,
+      'subjects': subjects.map((s) => s.toJson()).toList(),
     };
   }
 }

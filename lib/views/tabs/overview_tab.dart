@@ -59,7 +59,7 @@ class OverviewTab extends StatelessWidget {
                         'Manage, add, and publish structured education material. Your changes sync in real-time to the student mobile app.',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: AppColors.textLight,
+                          color: AppColors.background,
                         ),
                       ),
                     ],
@@ -69,8 +69,8 @@ class OverviewTab extends StatelessWidget {
                 const Icon(
                   Icons.auto_stories,
                   size: 64,
-                  color: AppColors.primary,
-                )
+                  color: AppColors.background,
+                ),
               ],
             ),
           ),
@@ -101,7 +101,10 @@ class OverviewTab extends StatelessWidget {
                 title: 'Total Chapters',
                 value: totalChapters.toString(),
                 icon: Icons.collections_bookmark_outlined,
-                gradientColors: [const Color(0xFF0EA5E9), const Color(0xFF2563EB)],
+                gradientColors: [
+                  const Color(0xFF0EA5E9),
+                  const Color(0xFF2563EB),
+                ],
               ),
               _buildStatCard(
                 title: 'Total Careers',
@@ -167,7 +170,8 @@ class OverviewTab extends StatelessWidget {
                     children: [
                       Container(
                         width: 5,
-                        height: 120, // Approximate height to align left border accent visually
+                        height:
+                            120, // Approximate height to align left border accent visually
                         decoration: BoxDecoration(
                           color: accentColor,
                           borderRadius: const BorderRadius.only(
@@ -210,64 +214,87 @@ class OverviewTab extends StatelessWidget {
                             if (grade.subjects.isEmpty)
                               Text(
                                 'No subjects defined.',
-                                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+                                style: GoogleFonts.inter(
+                                  color: AppColors.textMuted,
+                                  fontSize: 13,
+                                ),
                               )
                             else
                               Wrap(
                                 spacing: 16,
                                 runSpacing: 16,
                                 children: grade.subjects.map((sub) {
-                                  final subjectColor = _parseHexColor(sub.color);
+                                  final subjectColor = _parseHexColor(
+                                    sub.color,
+                                  );
                                   return IntrinsicHeight(
                                     child: Container(
                                       width: 320,
                                       decoration: BoxDecoration(
                                         color: AppColors.surface,
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: AppColors.border),
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
                                       ),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
                                         children: [
                                           Container(
                                             width: 4,
                                             decoration: BoxDecoration(
                                               color: subjectColor,
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(12),
-                                                bottomLeft: Radius.circular(12),
-                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                    topLeft: Radius.circular(
+                                                      12,
+                                                    ),
+                                                    bottomLeft: Radius.circular(
+                                                      12,
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                           Expanded(
                                             child: Padding(
                                               padding: const EdgeInsets.all(16),
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Row(
                                                     children: [
                                                       Text(
                                                         sub.emoji,
-                                                        style: const TextStyle(fontSize: 20),
+                                                        style: const TextStyle(
+                                                          fontSize: 20,
+                                                        ),
                                                       ),
                                                       const SizedBox(width: 8),
                                                       Expanded(
                                                         child: Text(
                                                           sub.name,
-                                                          style: GoogleFonts.inter(
-                                                            fontWeight: FontWeight.bold,
-                                                            color: AppColors.textPrimary,
-                                                          ),
+                                                          style:
+                                                              GoogleFonts.inter(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: AppColors
+                                                                    .textPrimary,
+                                                              ),
                                                         ),
                                                       ),
                                                       Container(
                                                         width: 12,
                                                         height: 12,
-                                                        decoration: BoxDecoration(
-                                                          shape: BoxShape.circle,
-                                                          color: subjectColor,
-                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              color:
+                                                                  subjectColor,
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -276,8 +303,10 @@ class OverviewTab extends StatelessWidget {
                                                     '${sub.chapters.length} Chapters registered:',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 12,
-                                                      color: AppColors.textSecondary,
-                                                      fontWeight: FontWeight.w600,
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 6),
@@ -285,20 +314,29 @@ class OverviewTab extends StatelessWidget {
                                                     Text(
                                                       'No chapters created.',
                                                       style: GoogleFonts.inter(
-                                                        color: AppColors.textMuted,
+                                                        color:
+                                                            AppColors.textMuted,
                                                         fontSize: 12,
-                                                        fontStyle: FontStyle.italic,
+                                                        fontStyle:
+                                                            FontStyle.italic,
                                                       ),
                                                     )
                                                   else
-                                                    ...sub.chapters.take(3).map((ch) {
+                                                    ...sub.chapters.take(3).map((
+                                                      ch,
+                                                    ) {
                                                       return Padding(
-                                                        padding: const EdgeInsets.only(top: 4.0),
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              top: 4.0,
+                                                            ),
                                                         child: Text(
                                                           'Ch ${ch.number}: ${ch.title}',
-                                                          overflow: TextOverflow.ellipsis,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style: GoogleFonts.inter(
-                                                            color: AppColors.textSecondary,
+                                                            color: AppColors
+                                                                .textSecondary,
                                                             fontSize: 12,
                                                           ),
                                                         ),
@@ -306,14 +344,21 @@ class OverviewTab extends StatelessWidget {
                                                     }),
                                                   if (sub.chapters.length > 3)
                                                     Padding(
-                                                      padding: const EdgeInsets.only(top: 4.0),
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                            top: 4.0,
+                                                          ),
                                                       child: Text(
                                                         '+ ${sub.chapters.length - 3} more...',
-                                                        style: GoogleFonts.inter(
-                                                          color: AppColors.primary,
-                                                          fontSize: 12,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                              color: AppColors
+                                                                  .primary,
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                       ),
                                                     ),
                                                 ],
@@ -325,7 +370,7 @@ class OverviewTab extends StatelessWidget {
                                     ),
                                   );
                                 }).toList(),
-                              )
+                              ),
                           ],
                         ),
                       ),
@@ -350,10 +395,7 @@ class OverviewTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.divider,
-          width: 1.5,
-        ),
+        border: Border.all(color: AppColors.divider, width: 1.5),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -391,11 +433,7 @@ class OverviewTab extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 28,
-            ),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
         ],
       ),

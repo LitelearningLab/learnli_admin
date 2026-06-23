@@ -74,66 +74,12 @@ class _ContentTabState extends State<ContentTab> {
     required VoidCallback onUploadPressed,
     bool isUploading = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  initialValue: value,
-                  key: ValueKey(key),
-                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
-                  decoration: InputDecoration(
-                    hintText: 'https://h5p.org/h5p/embed/123456',
-                    hintStyle: const TextStyle(color: AppColors.textMuted),
-                    filled: true,
-                    fillColor: AppColors.card,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                  onChanged: onChanged,
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: isUploading ? null : onUploadPressed,
-                icon: isUploading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Icon(Icons.cloud_upload_outlined, size: 16),
-                label: Text(isUploading ? 'Uploading...' : 'Upload HTML'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return UrlUploadField(
+      label: label,
+      value: value,
+      onChanged: onChanged,
+      onUploadPressed: onUploadPressed,
+      isUploading: isUploading,
     );
   }
 
@@ -1833,6 +1779,114 @@ class _ContentTabState extends State<ContentTab> {
           ],
         );
       },
+    );
+  }
+}
+
+class UrlUploadField extends StatefulWidget {
+  final String label;
+  final String value;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onUploadPressed;
+  final bool isUploading;
+
+  const UrlUploadField({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    required this.onUploadPressed,
+    required this.isUploading,
+  });
+
+  @override
+  State<UrlUploadField> createState() => _UrlUploadFieldState();
+}
+
+class _UrlUploadFieldState extends State<UrlUploadField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void didUpdateWidget(covariant UrlUploadField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && widget.value != _controller.text) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _controller,
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
+                  decoration: InputDecoration(
+                    hintText: 'https://h5p.org/h5p/embed/123456',
+                    hintStyle: const TextStyle(color: AppColors.textMuted),
+                    filled: true,
+                    fillColor: AppColors.card,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                    ),
+                  ),
+                  onChanged: widget.onChanged,
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: widget.isUploading ? null : widget.onUploadPressed,
+                icon: widget.isUploading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_upload_outlined, size: 16),
+                label: Text(widget.isUploading ? 'Uploading...' : 'Upload HTML'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

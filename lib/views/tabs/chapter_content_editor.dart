@@ -7,14 +7,14 @@ import '../../models/chapter_content_model.dart';
 import '../../constants/app_colors.dart';
 import '../../services/database_service.dart';
 
-class ContentTab extends StatefulWidget {
-  const ContentTab({super.key});
+class ChapterContentEditor extends StatefulWidget {
+  const ChapterContentEditor({super.key});
 
   @override
-  State<ContentTab> createState() => _ContentTabState();
+  State<ChapterContentEditor> createState() => _ChapterContentEditorState();
 }
 
-class _ContentTabState extends State<ContentTab> {
+class _ChapterContentEditorState extends State<ChapterContentEditor> {
   int _activeSectionIndex = 0;
   final List<String> _sections = [
     'General Metadata',
@@ -86,182 +86,24 @@ class _ContentTabState extends State<ContentTab> {
   @override
   Widget build(BuildContext context) {
     final adminProv = Provider.of<AdminProvider>(context);
-    final curriculum = adminProv.curriculum;
-    
-    // Build selections
-    final gradesList = curriculum.keys.toList();
-    final currentGrade = adminProv.selectedGradeKey != null && curriculum.containsKey(adminProv.selectedGradeKey)
-        ? curriculum[adminProv.selectedGradeKey]
-        : null;
 
-    final subjectsList = currentGrade?.subjects ?? [];
-    final currentSubject = adminProv.selectedSubjectId != null
-        ? subjectsList.where((s) => s.id == adminProv.selectedSubjectId).firstOrNull
-        : null;
-
-    final chaptersList = currentSubject?.chapters ?? [];
-
-    return Column(
-      children: [
-        // Top Selection Dropdowns Panel
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.divider,
-                width: 1.5,
-              ),
-            ),
-          ),
-          child: Row(
-            children: [
-              // Grade Select
-              Expanded(
+    return adminProv.selectedChapterNumber == null
+        ? _buildEmptyState()
+        : adminProv.isLoadingContent
+            ? const Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Select Grade', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: adminProv.selectedGradeKey,
-                          hint: const Text('Choose Grade', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                          dropdownColor: AppColors.card,
-                          isExpanded: true,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                          items: gradesList.map((key) {
-                            final g = curriculum[key]!;
-                            return DropdownMenuItem(
-                              value: key,
-                              child: Text('${g.emoji} ${g.name}'),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            adminProv.selectGrade(val);
-                            setState(() {
-                              _activeSectionIndex = 0;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
+                    CircularProgressIndicator(color: AppColors.primary),
+                    SizedBox(height: 16),
+                    Text('Downloading chapter payload from DB...', style: TextStyle(color: AppColors.textSecondary)),
                   ],
                 ),
-              ),
-              const SizedBox(width: 16),
-
-              // Subject Select
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Select Subject', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: adminProv.selectedSubjectId,
-                          hint: const Text('Choose Subject', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                          dropdownColor: AppColors.card,
-                          isExpanded: true,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                          items: subjectsList.map((s) {
-                            return DropdownMenuItem(
-                              value: s.id,
-                              child: Text('${s.emoji} ${s.name}'),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            adminProv.selectSubject(val);
-                            setState(() {
-                              _activeSectionIndex = 0;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Chapter Select
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Select Chapter', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<int>(
-                          value: adminProv.selectedChapterNumber,
-                          hint: const Text('Choose Chapter', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                          dropdownColor: AppColors.card,
-                          isExpanded: true,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                          items: chaptersList.map((c) {
-                            return DropdownMenuItem(
-                              value: c.number,
-                              child: Text('Ch ${c.number}: ${c.title}'),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            adminProv.selectChapter(val);
-                            setState(() {
-                              _activeSectionIndex = 0;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Body Content forms split panel
-        Expanded(
-          child: adminProv.selectedChapterNumber == null
-              ? _buildEmptyState()
-              : adminProv.isLoadingContent
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(color: AppColors.primary),
-                          SizedBox(height: 16),
-                          Text('Downloading chapter payload from DB...', style: TextStyle(color: AppColors.textSecondary)),
-                        ],
-                      ),
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Left sidebar: categories selector
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Left sidebar: categories selector
                         Container(
                           width: 250,
                           decoration: const BoxDecoration(
@@ -381,17 +223,13 @@ class _ContentTabState extends State<ContentTab> {
                           ),
                         ),
                       ],
-                    ),
-        )
-      ],
-    );
+                    );
   }
 
   Widget _buildEmptyState() {
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
               Icons.playlist_add_check,
@@ -418,8 +256,7 @@ class _ContentTabState extends State<ContentTab> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   // ==========================================

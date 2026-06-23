@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:learnli_admin/providers/admin_provider.dart';
 import 'package:learnli_admin/models/chapter_content_model.dart';
 import 'package:learnli_admin/models/curriculum_models.dart';
-import 'package:learnli_admin/views/tabs/content_tab.dart';
+import 'package:learnli_admin/views/tabs/chapter_content_editor.dart';
 
 void main() {
   testWidgets('Test ContentTab - All Add Buttons', (WidgetTester tester) async {
@@ -43,7 +43,7 @@ void main() {
         value: prov,
         child: const MaterialApp(
           home: Scaffold(
-            body: ContentTab(),
+            body: ChapterContentEditor(),
           ),
         ),
       ),

@@ -208,7 +208,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               _activeGradeKey == gradeKey;
 
                           return ExpansionTile(
-                            initiallyExpanded: true,
+                            initiallyExpanded: false,
                             shape: const RoundedRectangleBorder(),
                             collapsedShape: const RoundedRectangleBorder(),
                             iconColor: AppColors.primary,
@@ -273,7 +273,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               return Padding(
                                 padding: const EdgeInsets.only(left: 16.0),
                                 child: ExpansionTile(
-                                  initiallyExpanded: true,
+                                  initiallyExpanded: false,
                                   shape: const RoundedRectangleBorder(),
                                   collapsedShape:
                                       const RoundedRectangleBorder(),
@@ -443,9 +443,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       const SizedBox(height: 24),
 
                       // Form Body based on selected node
-                      Expanded(
-                        child: _buildEditingForm(adminProv),
-                      ),
+                      Expanded(child: _buildEditingForm(adminProv)),
                     ],
                   ),
                 ),
@@ -890,7 +888,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   _showSavedIndicator();
                 },
                 icon: const Icon(Icons.save_outlined, size: 14),
-                label: const Text('Update Title', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Update Title',
+                  style: TextStyle(fontSize: 12),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -916,7 +917,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   });
                 },
                 icon: const Icon(Icons.delete_outline, size: 14),
-                label: const Text('Delete Chapter', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Delete Chapter',
+                  style: TextStyle(fontSize: 12),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error),
@@ -934,9 +938,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
         ),
         const Divider(height: 1, color: AppColors.divider),
         const SizedBox(height: 16),
-        const Expanded(
-          child: ChapterContentEditor(),
-        ),
+        const Expanded(child: ChapterContentEditor()),
       ],
     );
   }

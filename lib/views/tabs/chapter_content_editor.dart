@@ -41,7 +41,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
       if (result != null && result.files.single.bytes != null) {
         final bytes = result.files.single.bytes!;
         final name = result.files.single.name;
-        
+
         final downloadUrl = await DatabaseService.uploadHtmlFile(name, bytes);
         if (downloadUrl != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -90,173 +90,200 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     return adminProv.selectedChapterNumber == null
         ? _buildEmptyState()
         : adminProv.isLoadingContent
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: AppColors.primary),
-                    SizedBox(height: 16),
-                    Text('Downloading chapter payload from DB...', style: TextStyle(color: AppColors.textSecondary)),
-                  ],
+        ? const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: AppColors.primary),
+                SizedBox(height: 16),
+                Text(
+                  'Downloading chapter payload from DB...',
+                  style: TextStyle(color: AppColors.textSecondary),
                 ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Horizontal scrollable categories selector
-                  SizedBox(
-                    height: 48,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _sections.length,
-                      itemBuilder: (context, idx) {
-                        final label = _sections[idx];
-                        final isActive = _activeSectionIndex == idx;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
-                          child: ChoiceChip(
-                            label: Text(
-                              label,
-                              style: GoogleFonts.inter(
-                                color: isActive ? Colors.white : AppColors.textSecondary,
-                                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                                fontSize: 12.5,
-                              ),
-                            ),
-                            selected: isActive,
-                            selectedColor: AppColors.primary,
-                            backgroundColor: Colors.transparent,
-                            showCheckmark: false,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(
-                                color: isActive ? AppColors.primary : AppColors.border,
-                                width: 1,
-                              ),
-                            ),
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() {
-                                  _activeSectionIndex = idx;
-                                });
-                              }
-                            },
+              ],
+            ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Horizontal scrollable categories selector
+              SizedBox(
+                height: 48,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _sections.length,
+                  itemBuilder: (context, idx) {
+                    final label = _sections[idx];
+                    final isActive = _activeSectionIndex == idx;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                      child: ChoiceChip(
+                        label: Text(
+                          label,
+                          style: GoogleFonts.inter(
+                            color: isActive
+                                ? Colors.white
+                                : AppColors.textSecondary,
+                            fontWeight: isActive
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            fontSize: 12.5,
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                        ),
+                        selected: isActive,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: Colors.transparent,
+                        showCheckmark: false,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isActive
+                                ? AppColors.primary
+                                : AppColors.border,
+                            width: 1,
+                          ),
+                        ),
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _activeSectionIndex = idx;
+                            });
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
 
-                  // Main form area below
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+              // Main form area below
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Heading and publish action row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Heading and publish action row
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  _sections[_activeSectionIndex],
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
+                            Container(
+                              width: 6,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
                             ),
-                            Row(
-                              children: [
-                                // Save Button
-                                ElevatedButton.icon(
-                                  onPressed: () => _handleSave(adminProv),
-                                  icon: const Icon(Icons.cloud_done_outlined, size: 14),
-                                  label: const Text('Save Content', style: TextStyle(fontSize: 12)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.success,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                // Delete Button
-                                OutlinedButton.icon(
-                                  onPressed: () => _handleDelete(adminProv),
-                                  icon: const Icon(Icons.delete_forever, size: 14),
-                                  label: const Text('Delete Payload', style: TextStyle(fontSize: 12)),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppColors.error,
-                                    side: BorderSide(color: AppColors.error.withOpacity(0.4)),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 12),
+                            Text(
+                              _sections[_activeSectionIndex],
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        const Divider(height: 1, color: AppColors.divider),
-                        const SizedBox(height: 16),
-
-                        // Render Active Section form
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: _buildFormBody(adminProv),
-                          ),
+                        Row(
+                          children: [
+                            // Save Button
+                            ElevatedButton.icon(
+                              onPressed: () => _handleSave(adminProv),
+                              icon: const Icon(
+                                Icons.cloud_done_outlined,
+                                size: 14,
+                              ),
+                              label: const Text(
+                                'Save Content',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Delete Button
+                            OutlinedButton.icon(
+                              onPressed: () => _handleDelete(adminProv),
+                              icon: const Icon(Icons.delete_forever, size: 14),
+                              label: const Text(
+                                'Delete Payload',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.error,
+                                side: BorderSide(
+                                  color: AppColors.error.withOpacity(0.4),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
-                ],
-              );
+                    const SizedBox(height: 16),
+                    const Divider(height: 1, color: AppColors.divider),
+                    const SizedBox(height: 16),
+
+                    // Render Active Section form
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: _buildFormBody(adminProv),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
   }
 
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.playlist_add_check,
-              size: 80,
-              color: AppColors.border,
+        children: [
+          const Icon(
+            Icons.playlist_add_check,
+            size: 80,
+            color: AppColors.border,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Chapter Selected',
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No Chapter Selected',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Select a Grade, Subject, and Chapter to load the content payload from the database.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: AppColors.textMuted,
-              ),
-            ),
-          ],
-        ),
-      );
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Select a Grade, Subject, and Chapter to load the content payload from the database.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
   }
 
   // ==========================================
@@ -308,20 +335,33 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 8),
           TextFormField(
             key: ValueKey(key),
             initialValue: value,
             maxLines: maxLines,
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
-            style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
+            style: GoogleFonts.inter(
+              color: AppColors.textPrimary,
+              fontSize: 13.5,
+            ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: AppColors.textMuted),
               filled: true,
               fillColor: AppColors.card,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppColors.border),
@@ -332,7 +372,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
               ),
             ),
             onChanged: onChanged,
@@ -426,7 +469,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           value: content.metadata.interactiveLessonUrl ?? '',
           isUploading: _isUploadingHtml,
           onChanged: (val) {
-            content.metadata.interactiveLessonUrl = val.trim().isEmpty ? null : val.trim();
+            content.metadata.interactiveLessonUrl = val.trim().isEmpty
+                ? null
+                : val.trim();
             prov.updateActiveContent(content);
           },
           onUploadPressed: () async {
@@ -460,16 +505,27 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Concepts list (${content.simpleOverview.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Concepts list (${content.simpleOverview.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.simpleOverview.add(ConceptItem(title: 'New Concept', explanation: ''));
+                content.simpleOverview.add(
+                  ConceptItem(title: 'New Concept', explanation: ''),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Concept'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -492,10 +548,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Concept #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Concept #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.simpleOverview.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -540,16 +606,32 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Sections list (${content.readMode.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Sections list (${content.readMode.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.readMode.add(ReadModeSection(heading: 'New Section', paragraphs: [], keyPoints: [], example: ''));
+                content.readMode.add(
+                  ReadModeSection(
+                    heading: 'New Section',
+                    paragraphs: [],
+                    keyPoints: [],
+                    example: '',
+                  ),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Section'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -572,10 +654,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Section #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Section #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.readMode.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -600,7 +692,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     maxLines: 4,
                     hint: 'First paragraph...\nSecond paragraph...',
                     onChanged: (val) {
-                      sec.paragraphs = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      sec.paragraphs = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -611,7 +706,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     maxLines: 4,
                     hint: 'First key point...\nSecond key point...',
                     onChanged: (val) {
-                      sec.keyPoints = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      sec.keyPoints = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -642,16 +740,27 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Terms list (${content.mustKnow.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Terms list (${content.mustKnow.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.mustKnow.add(MustKnowTerm(term: '', definition: '', importance: ''));
+                content.mustKnow.add(
+                  MustKnowTerm(term: '', definition: '', importance: ''),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Term'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -674,10 +783,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Term #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Term #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.mustKnow.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -732,16 +851,27 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Insights list (${content.goodToKnow.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Insights list (${content.goodToKnow.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.goodToKnow.add(GoodToKnowInsight(title: '', content: '', connection: ''));
+                content.goodToKnow.add(
+                  GoodToKnowInsight(title: '', content: '', connection: ''),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Insight'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -764,10 +894,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Insight #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Insight #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.goodToKnow.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -822,16 +962,31 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Prerequisites list (${content.preRequisite.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Prerequisites list (${content.preRequisite.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.preRequisite.add(PreRequisiteItem(concept: '', explanation: '', connection: ''));
+                content.preRequisite.add(
+                  PreRequisiteItem(
+                    concept: '',
+                    explanation: '',
+                    connection: '',
+                  ),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Prerequisite'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -854,10 +1009,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Prerequisite #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Prerequisite #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.preRequisite.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -912,16 +1077,31 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Industry Applications list (${content.industryInsights.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Industry Applications list (${content.industryInsights.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                content.industryInsights.add(IndustryInsightItem(field: '', application: '', exampleRole: ''));
+                content.industryInsights.add(
+                  IndustryInsightItem(
+                    field: '',
+                    application: '',
+                    exampleRole: '',
+                  ),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Application'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -944,10 +1124,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Application #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Application #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.industryInsights.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1001,17 +1191,36 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Chips List (${content.chips.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Chips List (${content.chips.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                final idStr = '${content.metadata.chapterNumber}_chip_${content.chips.length + 1}';
-                content.chips.add(ChipItem(id: idStr, title: 'New Chip', preview: '', paragraphs: [], keyPoints: [], aiEnabled: true));
+                final idStr =
+                    '${content.metadata.chapterNumber}_chip_${content.chips.length + 1}';
+                content.chips.add(
+                  ChipItem(
+                    id: idStr,
+                    title: 'New Chip',
+                    preview: '',
+                    paragraphs: [],
+                    keyPoints: [],
+                    aiEnabled: true,
+                  ),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Chip'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -1035,12 +1244,24 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Chip #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Chip #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('AI Enabled', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
+                          const Text(
+                            'AI Enabled',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                            ),
+                          ),
                           Checkbox(
                             value: chip.aiEnabled,
                             activeColor: AppColors.primary,
@@ -1053,7 +1274,11 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.chips.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1105,7 +1330,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     value: chip.paragraphs.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
-                      chip.paragraphs = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      chip.paragraphs = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -1115,7 +1343,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     value: chip.keyPoints.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
-                      chip.keyPoints = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      chip.keyPoints = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -1136,17 +1367,37 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Topics list (${content.plusPoints.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Topics list (${content.plusPoints.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
-                final idStr = '${content.metadata.chapterNumber}.${content.plusPoints.length + 1}';
-                content.plusPoints.add(PlusPointTopic(id: idStr, title: 'New Topic', summary: '', keyFacts: [], commonMistake: '', aiEnabled: true, evaluationReady: true));
+                final idStr =
+                    '${content.metadata.chapterNumber}.${content.plusPoints.length + 1}';
+                content.plusPoints.add(
+                  PlusPointTopic(
+                    id: idStr,
+                    title: 'New Topic',
+                    summary: '',
+                    keyFacts: [],
+                    commonMistake: '',
+                    aiEnabled: true,
+                    evaluationReady: true,
+                  ),
+                );
                 prov.updateActiveContent(content);
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add Topic'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -1170,12 +1421,24 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Topic #${idx + 1}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Topic #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('AI Mode', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
+                          const Text(
+                            'AI Mode',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                            ),
+                          ),
                           Checkbox(
                             value: topic.aiEnabled,
                             activeColor: AppColors.primary,
@@ -1185,7 +1448,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                             },
                           ),
                           const SizedBox(width: 12),
-                          const Text('Eval Ready', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
+                          const Text(
+                            'Eval Ready',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                            ),
+                          ),
                           Checkbox(
                             value: topic.evaluationReady,
                             activeColor: AppColors.primary,
@@ -1197,7 +1466,11 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.plusPoints.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1249,7 +1522,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     value: topic.keyFacts.join('\n'),
                     maxLines: 4,
                     onChanged: (val) {
-                      topic.keyFacts = val.split('\n').where((line) => line.trim().isNotEmpty).toList();
+                      topic.keyFacts = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -1288,7 +1564,14 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Quiz Settings', style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(
+                'Quiz Settings',
+                style: GoogleFonts.outfit(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -1349,7 +1632,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Questions list (${content.quiz.questions.length})', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+            Text(
+              'Questions list (${content.quiz.questions.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             ElevatedButton.icon(
               onPressed: () {
                 final newQ = QuizQuestion(
@@ -1371,8 +1660,11 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               },
               icon: const Icon(Icons.add, size: 14),
               label: const Text('Add MCQ Question'),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -1396,10 +1688,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 children: [
                   Row(
                     children: [
-                      Text('Question #${idx + 1} (ID: ${q.id})', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(
+                        'Question #${idx + 1} (ID: ${q.id})',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.error, size: 18),
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
                         onPressed: () {
                           content.quiz.questions.removeAt(idx);
                           prov.updateActiveContent(content);
@@ -1439,10 +1741,20 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Difficulty', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'Difficulty',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.card,
                                 borderRadius: BorderRadius.circular(8),
@@ -1453,9 +1765,15 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                                   value: q.difficulty,
                                   dropdownColor: AppColors.card,
                                   isExpanded: true,
-                                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                                  style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 13,
+                                  ),
                                   items: ['easy', 'medium', 'hard'].map((d) {
-                                    return DropdownMenuItem(value: d, child: Text(d.toUpperCase()));
+                                    return DropdownMenuItem(
+                                      value: d,
+                                      child: Text(d.toUpperCase()),
+                                    );
                                   }).toList(),
                                   onChanged: (val) {
                                     if (val != null) {
@@ -1483,7 +1801,14 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  Text('Answers Options & Correct Choice', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Answers Options & Correct Choice',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   // Render options A, B, C, D fields
                   ...q.options.map((opt) {
@@ -1499,7 +1824,16 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                                 ? AppColors.success
                                 : AppColors.divider,
                           ),
-                          child: Text(opt.key, style: TextStyle(color: q.correctAnswer == opt.key ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                          child: Text(
+                            opt.key,
+                            style: TextStyle(
+                              color: q.correctAnswer == opt.key
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -1556,7 +1890,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Chapter content successfully published to Firebase RTDB!'),
+            content: Text(
+              'Chapter content successfully published to Firebase RTDB!',
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -1579,12 +1915,21 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text('Confirm Database Deletion', style: GoogleFonts.outfit(color: AppColors.textPrimary)),
-          content: Text('Are you sure you want to permanently delete the content payload for Chapter ${prov.selectedChapterNumber} from Firebase? This action cannot be undone.', style: GoogleFonts.inter(color: AppColors.textSecondary)),
+          title: Text(
+            'Confirm Database Deletion',
+            style: GoogleFonts.outfit(color: AppColors.textPrimary),
+          ),
+          content: Text(
+            'Are you sure you want to permanently delete the content payload for Chapter ${prov.selectedChapterNumber} from Firebase? This action cannot be undone.',
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -1670,20 +2015,33 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          Text(
+            widget.label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: TextFormField(
                   controller: _controller,
-                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13.5),
+                  style: GoogleFonts.inter(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.5,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'https://h5p.org/h5p/embed/123456',
                     hintStyle: const TextStyle(color: AppColors.textMuted),
                     filled: true,
                     fillColor: AppColors.card,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: AppColors.border),
@@ -1694,7 +2052,10 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                   onChanged: widget.onChanged,
@@ -1707,17 +2068,25 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : const Icon(Icons.cloud_upload_outlined, size: 16),
-                label: Text(widget.isUploading ? 'Uploading...' : 'Upload HTML'),
+                label: Text(
+                  widget.isUploading ? 'Uploading...' : 'Upload HTML',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
                 ),
               ),
             ],

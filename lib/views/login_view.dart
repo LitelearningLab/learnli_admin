@@ -54,7 +54,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -104,10 +104,7 @@ class _LoginViewState extends State<LoginView> {
                 decoration: BoxDecoration(
                   color: AppColors.card,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: AppColors.border,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: AppColors.border, width: 1.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.06),
@@ -130,7 +127,10 @@ class _LoginViewState extends State<LoginView> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [AppColors.primary, AppColors.secondary],
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.secondary,
+                                ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -162,11 +162,14 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Error Message Banner
                       if (_errorMessage != null) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.error.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -176,7 +179,11 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                              const Icon(
+                                Icons.error_outline,
+                                color: AppColors.error,
+                                size: 20,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -205,26 +212,45 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailController,
-                        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
+                        style: GoogleFonts.inter(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'admin@gmail.com',
-                          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                          prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textMuted, size: 18),
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.textMuted,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.email_outlined,
+                            color: AppColors.textMuted,
+                            size: 18,
+                          ),
                           filled: true,
                           fillColor: AppColors.surface,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         validator: (value) {
@@ -252,25 +278,44 @@ class _LoginViewState extends State<LoginView> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
-                        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 14),
+                        style: GoogleFonts.inter(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
                         decoration: InputDecoration(
                           hintText: '••••••••',
-                          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 18),
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.textMuted,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: AppColors.textMuted,
+                            size: 18,
+                          ),
                           filled: true,
                           fillColor: AppColors.surface,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         validator: (value) {
@@ -299,8 +344,11 @@ class _LoginViewState extends State<LoginView> {
                           child: Ink(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: _isLoading 
-                                    ? [AppColors.primary.withOpacity(0.5), AppColors.secondary.withOpacity(0.5)]
+                                colors: _isLoading
+                                    ? [
+                                        AppColors.primary.withOpacity(0.5),
+                                        AppColors.secondary.withOpacity(0.5),
+                                      ]
                                     : [AppColors.primary, AppColors.secondary],
                               ),
                               borderRadius: BorderRadius.circular(12),
@@ -339,7 +387,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'v1.0.0',
+                        'v1.0.1',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 11,

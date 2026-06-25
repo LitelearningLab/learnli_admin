@@ -191,14 +191,27 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                           children: [
                             // Save Button
                             ElevatedButton.icon(
-                              onPressed: () => _handleSave(adminProv),
-                              icon: const Icon(
-                                Icons.cloud_done_outlined,
-                                size: 14,
-                              ),
-                              label: const Text(
-                                'Save Content',
-                                style: TextStyle(fontSize: 12),
+                              onPressed: adminProv.isLoadingContent
+                                  ? null
+                                  : () => _handleSave(adminProv),
+                              icon: adminProv.isLoadingContent
+                                  ? const SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.cloud_done_outlined,
+                                      size: 14,
+                                    ),
+                              label: Text(
+                                adminProv.isLoadingContent
+                                    ? 'Publishing Content...'
+                                    : 'Publish Lesson Content',
+                                style: const TextStyle(fontSize: 12),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.success,
@@ -215,10 +228,12 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                             const SizedBox(width: 8),
                             // Delete Button
                             OutlinedButton.icon(
-                              onPressed: () => _handleDelete(adminProv),
-                              icon: const Icon(Icons.delete_forever, size: 14),
+                              onPressed: adminProv.isLoadingContent
+                                  ? null
+                                  : () => _handleDelete(adminProv),
+                              icon: const Icon(Icons.delete_outline, size: 14),
                               label: const Text(
-                                'Delete Payload',
+                                'Clear Lesson Content',
                                 style: TextStyle(fontSize: 12),
                               ),
                               style: OutlinedButton.styleFrom(

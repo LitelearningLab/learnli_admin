@@ -54,10 +54,7 @@ class _DashboardViewState extends State<DashboardView> {
             decoration: const BoxDecoration(
               color: AppColors.surface,
               border: Border(
-                right: BorderSide(
-                  color: AppColors.divider,
-                  width: 1.5,
-                ),
+                right: BorderSide(color: AppColors.divider, width: 1.5),
               ),
             ),
             child: Column(
@@ -65,7 +62,10 @@ class _DashboardViewState extends State<DashboardView> {
               children: [
                 // Brand Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -191,11 +191,16 @@ class _DashboardViewState extends State<DashboardView> {
                           icon: const Icon(Icons.logout, size: 16),
                           label: Text(
                             'Logout',
-                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.error,
-                            side: BorderSide(color: AppColors.error.withOpacity(0.4)),
+                            side: BorderSide(
+                              color: AppColors.error.withOpacity(0.4),
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -205,7 +210,7 @@ class _DashboardViewState extends State<DashboardView> {
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
-                          'v1.0.0',
+                          'v1.0.1',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             color: AppColors.textMuted,
@@ -231,10 +236,7 @@ class _DashboardViewState extends State<DashboardView> {
                   decoration: const BoxDecoration(
                     color: AppColors.surface,
                     border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.divider,
-                        width: 1.5,
-                      ),
+                      bottom: BorderSide(color: AppColors.divider, width: 1.5),
                     ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -251,7 +253,10 @@ class _DashboardViewState extends State<DashboardView> {
                       const Spacer(),
                       // Firebase Database Online Status Dot
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -299,8 +304,10 @@ class _DashboardViewState extends State<DashboardView> {
                               SizedBox(height: 16),
                               Text(
                                 'Loading curriculum structure from Firebase...',
-                                style: TextStyle(color: AppColors.textSecondary),
-                              )
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
                             ],
                           ),
                         )
@@ -363,7 +370,9 @@ class _DashboardViewState extends State<DashboardView> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                      color: isActive ? AppColors.primary : AppColors.textSecondary,
+                      color: isActive
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],

@@ -478,7 +478,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   const SizedBox(width: 12),
                   Flexible(
                     child: Text(
-                      'Remember: Tree modifications are local until committed. Commit to write changes to Firebase DB.',
+                      'Draft Mode: Structural changes are saved locally. Click "Publish Layout Changes" below to sync with the live database.',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.textMuted,
@@ -506,7 +506,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         vertical: 16,
                       ),
                     ),
-                    child: const Text('Discard Local Edits'),
+                    child: const Text('Discard Layout Changes'),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
@@ -523,8 +523,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         : const Icon(Icons.cloud_upload_outlined, size: 16),
                     label: Text(
                       _isSavingToDb
-                          ? 'Committing...'
-                          : 'Commit Changes to Firebase',
+                          ? 'Publishing Layout...'
+                          : 'Publish Layout Changes',
                       style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -595,6 +595,72 @@ class _CurriculumTabState extends State<CurriculumTab> {
     );
   }
 
+  void _autoUpdateGrade(AdminProvider prov) {
+    if (_activeGradeKey == null) return;
+    prov.updateGrade(
+      _activeGradeKey!,
+      Grade(
+        name: _gradeNameController.text.isEmpty ? 'Unnamed Grade' : _gradeNameController.text,
+        description: _gradeDescController.text,
+        emoji: _gradeEmojiController.text.isEmpty ? '🎓' : _gradeEmojiController.text,
+        subjects: prov.curriculum[_activeGradeKey!]?.subjects ?? [],
+      ),
+    );
+  }
+
+  void _autoUpdateSubject(AdminProvider prov) {
+    if (_activeGradeKey == null || _activeSubjectId == null) return;
+    final grade = prov.curriculum[_activeGradeKey!];
+    final oldSub = grade?.subjects.firstWhere(
+      (s) => s.id == _activeSubjectId,
+    );
+
+    prov.updateSubject(
+      _activeGradeKey!,
+      _activeSubjectId!,
+      Subject(
+        id: _activeSubjectId!,
+        name: _subjectNameController.text.isEmpty ? 'Unnamed Subject' : _subjectNameController.text,
+        emoji: _subjectEmojiController.text.isEmpty ? '📚' : _subjectEmojiController.text,
+        color: _subjectColorController.text.isEmpty ? '#4E7FFF' : _subjectColorController.text,
+        chapters: oldSub?.chapters ?? [],
+      ),
+    );
+  }
+
+  void _autoUpdateChapter(AdminProvider prov) {
+    if (_activeGradeKey == null || _activeSubjectId == null || _activeChapterNumber == null) return;
+    final chNum = int.tryParse(_chapterNumberController.text);
+    if (chNum == null || _chapterTitleController.text.isEmpty) return;
+
+    final grade = prov.curriculum[_activeGradeKey!];
+    final subject = grade?.subjects.firstWhere(
+      (s) => s.id == _activeSubjectId,
+    );
+    final oldCh = subject?.chapters.firstWhere(
+      (c) => c.number == _activeChapterNumber,
+    );
+    final existingUrl = oldCh?.interactiveLessonUrl;
+
+    prov.updateChapter(
+      _activeGradeKey!,
+      _activeSubjectId!,
+      _activeChapterNumber!,
+      Chapter(
+        number: chNum,
+        title: _chapterTitleController.text,
+        interactiveLessonUrl: existingUrl,
+      ),
+    );
+
+    if (chNum != _activeChapterNumber) {
+      setState(() {
+        _activeChapterNumber = chNum;
+      });
+      prov.selectChapter(chNum);
+    }
+  }
+
   Widget _buildGradeForm(AdminProvider prov) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -603,12 +669,14 @@ class _CurriculumTabState extends State<CurriculumTab> {
           controller: _gradeEmojiController,
           label: 'Emoji Icon',
           hint: '🎓',
+          onChanged: (_) => _autoUpdateGrade(prov),
         ),
         const SizedBox(height: 20),
         _buildTextField(
           controller: _gradeNameController,
           label: 'Grade Level Name',
           hint: 'Grade 7',
+          onChanged: (_) => _autoUpdateGrade(prov),
         ),
         const SizedBox(height: 20),
         _buildTextField(
@@ -616,50 +684,32 @@ class _CurriculumTabState extends State<CurriculumTab> {
           label: 'Curriculum Description',
           hint: 'CBSE (NCERT Syllabus)',
           maxLines: 3,
+          onChanged: (_) => _autoUpdateGrade(prov),
         ),
         const SizedBox(height: 40),
         Row(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                if (_gradeNameController.text.isEmpty) return;
-                prov.updateGrade(
-                  _activeGradeKey!,
-                  Grade(
-                    name: _gradeNameController.text,
-                    description: _gradeDescController.text,
-                    emoji: _gradeEmojiController.text.isEmpty
-                        ? '🎓'
-                        : _gradeEmojiController.text,
-                    subjects: prov.curriculum[_activeGradeKey!]?.subjects ?? [],
-                  ),
-                );
-                _showSavedIndicator();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('Update Grade Properties'),
-            ),
             const Spacer(),
-            TextButton.icon(
+            OutlinedButton.icon(
               onPressed: () {
                 _showDeleteConfirmDialog('Grade Level', () {
                   prov.removeGrade(_activeGradeKey!);
                   _clearSelection();
                 });
               },
-              icon: const Icon(Icons.delete, size: 16),
-              label: const Text('Delete Grade'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              icon: const Icon(Icons.delete_outline, size: 16),
+              label: const Text('Delete Grade Level'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: const BorderSide(color: AppColors.error),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),
@@ -682,6 +732,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                     controller: _subjectEmojiController,
                     label: 'Emoji Icon',
                     hint: '🧬',
+                    onChanged: (_) => _autoUpdateSubject(prov),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -701,41 +752,49 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         '🔬',
                         'Science',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '🧬',
                         'Science',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '🧮',
                         'Maths',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '📐',
                         'Maths',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '🇬🇧',
                         'English',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '📚',
                         'English',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '🌍',
                         'Social',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                       _buildEmojiPresetChip(
                         '🗺️',
                         'Social',
                         _subjectEmojiController,
+                        () => _autoUpdateSubject(prov),
                       ),
                     ],
                   ),
@@ -748,6 +807,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 controller: _subjectColorController,
                 label: 'Subject Color (HEX)',
                 hint: '#4E7FFF',
+                onChanged: (_) => _autoUpdateSubject(prov),
               ),
             ),
           ],
@@ -765,59 +825,32 @@ class _CurriculumTabState extends State<CurriculumTab> {
           controller: _subjectNameController,
           label: 'Subject Name',
           hint: 'Science',
+          onChanged: (_) => _autoUpdateSubject(prov),
         ),
         const SizedBox(height: 40),
         Row(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                if (_subjectNameController.text.isEmpty) return;
-                final grade = prov.curriculum[_activeGradeKey!];
-                final oldSub = grade?.subjects.firstWhere(
-                  (s) => s.id == _activeSubjectId,
-                );
-
-                prov.updateSubject(
-                  _activeGradeKey!,
-                  _activeSubjectId!,
-                  Subject(
-                    id: _activeSubjectId!,
-                    name: _subjectNameController.text,
-                    emoji: _subjectEmojiController.text.isEmpty
-                        ? '📚'
-                        : _subjectEmojiController.text,
-                    color: _subjectColorController.text.isEmpty
-                        ? '#4E7FFF'
-                        : _subjectColorController.text,
-                    chapters: oldSub?.chapters ?? [],
-                  ),
-                );
-                _showSavedIndicator();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('Update Subject Properties'),
-            ),
             const Spacer(),
-            TextButton.icon(
+            OutlinedButton.icon(
               onPressed: () {
                 _showDeleteConfirmDialog('Subject', () {
                   prov.removeSubject(_activeGradeKey!, _activeSubjectId!);
                   _clearSelection();
                 });
               },
-              icon: const Icon(Icons.delete, size: 16),
+              icon: const Icon(Icons.delete_outline, size: 16),
               label: const Text('Delete Subject'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: const BorderSide(color: AppColors.error),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),
@@ -841,6 +874,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   label: 'Ch. Number',
                   hint: '1',
                   keyboardType: TextInputType.number,
+                  onChanged: (_) => _autoUpdateChapter(prov),
                 ),
               ),
               const SizedBox(width: 12),
@@ -849,62 +883,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   controller: _chapterTitleController,
                   label: 'Chapter Title',
                   hint: 'Nutrition in Plants',
+                  onChanged: (_) => _autoUpdateChapter(prov),
                 ),
               ),
               const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  final chNum = int.tryParse(_chapterNumberController.text);
-                  if (chNum == null || _chapterTitleController.text.isEmpty)
-                    return;
-
-                  // Retain existing interactive lesson URL if any
-                  final grade = prov.curriculum[_activeGradeKey!];
-                  final subject = grade?.subjects.firstWhere(
-                    (s) => s.id == _activeSubjectId,
-                  );
-                  final oldCh = subject?.chapters.firstWhere(
-                    (c) => c.number == _activeChapterNumber,
-                  );
-                  final existingUrl = oldCh?.interactiveLessonUrl;
-
-                  prov.updateChapter(
-                    _activeGradeKey!,
-                    _activeSubjectId!,
-                    _activeChapterNumber!,
-                    Chapter(
-                      number: chNum,
-                      title: _chapterTitleController.text,
-                      interactiveLessonUrl: existingUrl,
-                    ),
-                  );
-
-                  // Update selection to match new number
-                  setState(() {
-                    _activeChapterNumber = chNum;
-                  });
-                  prov.selectChapter(chNum);
-
-                  _showSavedIndicator();
-                },
-                icon: const Icon(Icons.save_outlined, size: 14),
-                label: const Text(
-                  'Update Title',
-                  style: TextStyle(fontSize: 12),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
               OutlinedButton.icon(
                 onPressed: () {
                   _showDeleteConfirmDialog('Chapter', () {
@@ -925,7 +907,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: 14,
                     vertical: 16,
                   ),
                   shape: RoundedRectangleBorder(
@@ -950,6 +932,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
     int maxLines = 1,
     bool enabled = true,
     TextInputType keyboardType = TextInputType.text,
+    ValueChanged<String>? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -968,6 +951,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
           enabled: enabled,
           maxLines: maxLines,
           keyboardType: keyboardType,
+          onChanged: onChanged,
           style: GoogleFonts.inter(
             color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
             fontSize: 14,
@@ -1069,16 +1053,6 @@ class _CurriculumTabState extends State<CurriculumTab> {
     }
   }
 
-  void _showSavedIndicator() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Local tree updated! Use bottom Commit button to save in Firebase.',
-        ),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
 
   // ==========================================
   // DIALOG BUILDERS

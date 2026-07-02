@@ -9,6 +9,7 @@ import '../services/database_service.dart';
 class AdminProvider with ChangeNotifier {
   bool _isAuthenticated = false;
   bool _isInitializing = true;
+  String _loggedInEmail = 'admin@gmail.com';
   
   // Curriculum state
   Map<String, Grade> _curriculum = {};
@@ -33,6 +34,7 @@ class AdminProvider with ChangeNotifier {
   // Getters
   bool get isAuthenticated => _isAuthenticated;
   bool get isInitializing => _isInitializing;
+  String get loggedInEmail => _loggedInEmail;
   Map<String, Grade> get curriculum => _curriculum;
   Map<String, Grade> get originalCurriculum => _originalCurriculum;
   bool get isLoadingCurriculum => _isLoadingCurriculum;
@@ -67,6 +69,7 @@ class AdminProvider with ChangeNotifier {
         final success = await DatabaseService.authenticateFirebase();
         if (success) {
           _isAuthenticated = true;
+          _loggedInEmail = prefs.getString('admin_email') ?? 'admin@gmail.com';
           // Preload curriculum & careers
           await loadCurriculum();
           await loadCareers();
@@ -81,12 +84,15 @@ class AdminProvider with ChangeNotifier {
   }
 
   Future<bool> login(String email, String password) async {
-    if (email.trim().toLowerCase() == 'admin@gmail.com' && password == 'password') {
+    final emailLower = email.trim().toLowerCase();
+    if ((emailLower == 'admin@gmail.com' || emailLower == 'badusha' || emailLower == 'badusha@gmail.com') && password == 'password') {
       final success = await DatabaseService.authenticateFirebase();
       if (success) {
         _isAuthenticated = true;
+        _loggedInEmail = email;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('admin_logged_in', true);
+        await prefs.setString('admin_email', email);
         notifyListeners();
         // Load curriculum & careers
         await loadCurriculum();
@@ -110,6 +116,7 @@ class AdminProvider with ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('admin_logged_in');
+    await prefs.remove('admin_email');
     
     await DatabaseService.signOut();
     notifyListeners();

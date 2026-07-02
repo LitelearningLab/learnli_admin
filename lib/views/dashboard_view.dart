@@ -170,7 +170,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   ),
                                 ),
                                 Text(
-                                  'admin@gmail.com',
+                                  adminProv.loggedInEmail,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.inter(
                                     fontSize: 11,

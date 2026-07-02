@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/admin_provider.dart';
@@ -47,6 +48,8 @@ class _LoginViewState extends State<LoginView> {
         setState(() {
           _errorMessage = 'Invalid email or password. Access Denied.';
         });
+      } else {
+        TextInput.finishAutofillContext(shouldSave: true);
       }
     }
   }
@@ -115,10 +118,11 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 child: Form(
                   key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                  child: AutofillGroup(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       // Logo / Title
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -212,6 +216,7 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailController,
+                        autofillHints: const [AutofillHints.email, AutofillHints.username],
                         style: GoogleFonts.inter(
                           color: AppColors.textPrimary,
                           fontSize: 14,
@@ -257,7 +262,8 @@ class _LoginViewState extends State<LoginView> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter email';
                           }
-                          if (!value.contains('@')) {
+                          final lowerVal = value.trim().toLowerCase();
+                          if (!value.contains('@') && lowerVal != 'badusha') {
                             return 'Enter a valid email address';
                           }
                           return null;
@@ -278,6 +284,7 @@ class _LoginViewState extends State<LoginView> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
+                        autofillHints: const [AutofillHints.password],
                         style: GoogleFonts.inter(
                           color: AppColors.textPrimary,
                           fontSize: 14,
@@ -396,6 +403,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ],
+                    ),
                   ),
                 ),
               ),

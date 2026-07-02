@@ -478,7 +478,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   const SizedBox(width: 12),
                   Flexible(
                     child: Text(
-                      'Draft Mode: Structural changes are saved locally. Click "Publish Layout Changes" below to sync with the live database.',
+                      'Structure Draft: Tree changes (Grades/Subjects/Chapters) are saved locally. Click "Publish Layout Changes" to sync. Chapter details (quizzes, read mode) are published independently above.',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.textMuted,
@@ -509,33 +509,36 @@ class _CurriculumTabState extends State<CurriculumTab> {
                     child: const Text('Discard Layout Changes'),
                   ),
                   const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
-                    icon: _isSavingToDb
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.cloud_upload_outlined, size: 16),
-                    label: Text(
-                      _isSavingToDb
-                          ? 'Publishing Layout...'
-                          : 'Publish Layout Changes',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  Tooltip(
+                    message: "Publishes the Grades, Subjects, and Chapters hierarchy. This does not modify chapter lesson contents.",
+                    child: ElevatedButton.icon(
+                      onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
+                      icon: _isSavingToDb
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.cloud_upload_outlined, size: 16),
+                      label: Text(
+                        _isSavingToDb
+                            ? 'Publishing Layout...'
+                            : 'Publish Layout Changes',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -600,9 +603,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
     prov.updateGrade(
       _activeGradeKey!,
       Grade(
-        name: _gradeNameController.text.isEmpty ? 'Unnamed Grade' : _gradeNameController.text,
+        name: _gradeNameController.text.isEmpty
+            ? 'Unnamed Grade'
+            : _gradeNameController.text,
         description: _gradeDescController.text,
-        emoji: _gradeEmojiController.text.isEmpty ? '🎓' : _gradeEmojiController.text,
+        emoji: _gradeEmojiController.text.isEmpty
+            ? '🎓'
+            : _gradeEmojiController.text,
         subjects: prov.curriculum[_activeGradeKey!]?.subjects ?? [],
       ),
     );
@@ -611,32 +618,37 @@ class _CurriculumTabState extends State<CurriculumTab> {
   void _autoUpdateSubject(AdminProvider prov) {
     if (_activeGradeKey == null || _activeSubjectId == null) return;
     final grade = prov.curriculum[_activeGradeKey!];
-    final oldSub = grade?.subjects.firstWhere(
-      (s) => s.id == _activeSubjectId,
-    );
+    final oldSub = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
 
     prov.updateSubject(
       _activeGradeKey!,
       _activeSubjectId!,
       Subject(
         id: _activeSubjectId!,
-        name: _subjectNameController.text.isEmpty ? 'Unnamed Subject' : _subjectNameController.text,
-        emoji: _subjectEmojiController.text.isEmpty ? '📚' : _subjectEmojiController.text,
-        color: _subjectColorController.text.isEmpty ? '#4E7FFF' : _subjectColorController.text,
+        name: _subjectNameController.text.isEmpty
+            ? 'Unnamed Subject'
+            : _subjectNameController.text,
+        emoji: _subjectEmojiController.text.isEmpty
+            ? '📚'
+            : _subjectEmojiController.text,
+        color: _subjectColorController.text.isEmpty
+            ? '#4E7FFF'
+            : _subjectColorController.text,
         chapters: oldSub?.chapters ?? [],
       ),
     );
   }
 
   void _autoUpdateChapter(AdminProvider prov) {
-    if (_activeGradeKey == null || _activeSubjectId == null || _activeChapterNumber == null) return;
+    if (_activeGradeKey == null ||
+        _activeSubjectId == null ||
+        _activeChapterNumber == null)
+      return;
     final chNum = int.tryParse(_chapterNumberController.text);
     if (chNum == null || _chapterTitleController.text.isEmpty) return;
 
     final grade = prov.curriculum[_activeGradeKey!];
-    final subject = grade?.subjects.firstWhere(
-      (s) => s.id == _activeSubjectId,
-    );
+    final subject = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
     final oldCh = subject?.chapters.firstWhere(
       (c) => c.number == _activeChapterNumber,
     );
@@ -1053,7 +1065,6 @@ class _CurriculumTabState extends State<CurriculumTab> {
     }
   }
 
-
   // ==========================================
   // DIALOG BUILDERS
   // ==========================================
@@ -1140,7 +1151,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text('Add'),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -1544,7 +1555,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-              child: const Text('Delete'),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );

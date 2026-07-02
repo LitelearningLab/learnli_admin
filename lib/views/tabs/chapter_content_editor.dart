@@ -162,6 +162,48 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.15),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'Editing content for '),
+                                  TextSpan(
+                                    text: 'Grade ${adminProv.selectedGradeKey?.replaceAll('grade_', '')} > ${adminProv.selectedSubjectId?.toUpperCase()} > Ch ${adminProv.selectedChapterNumber}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const TextSpan(text: '. Changes here apply to the selected chapter\'s lessons. Structural hierarchy changes are published using the bottom button.'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     // Heading and publish action row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -190,38 +232,41 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         Row(
                           children: [
                             // Save Button
-                            ElevatedButton.icon(
-                              onPressed: adminProv.isLoadingContent
-                                  ? null
-                                  : () => _handleSave(adminProv),
-                              icon: adminProv.isLoadingContent
-                                  ? const SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
+                            Tooltip(
+                              message: 'Publishes lesson content (Read Mode, Quizzes, etc.) for this chapter. Structure layout is published at the bottom.',
+                              child: ElevatedButton.icon(
+                                onPressed: adminProv.isLoadingContent
+                                    ? null
+                                    : () => _handleSave(adminProv),
+                                icon: adminProv.isLoadingContent
+                                    ? const SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.cloud_done_outlined,
+                                        size: 14,
                                       ),
-                                    )
-                                  : const Icon(
-                                      Icons.cloud_done_outlined,
-                                      size: 14,
-                                    ),
-                              label: Text(
-                                adminProv.isLoadingContent
-                                    ? 'Publishing Content...'
-                                    : 'Publish Lesson Content',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.success,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                label: Text(
+                                  adminProv.isLoadingContent
+                                      ? 'Publishing Content...'
+                                      : 'Publish Lesson Content',
+                                  style: const TextStyle(fontSize: 12),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 14,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.success,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
                                 ),
                               ),
                             ),

@@ -1003,37 +1003,43 @@ class _CurriculumTabState extends State<CurriculumTab> {
     String label,
     TextEditingController controller, [
     VoidCallback? onSelected,
+    bool enabled = true,
   ]) {
     return InkWell(
-      onTap: () {
-        setState(() {
-          controller.text = emoji;
-        });
-        if (onSelected != null) {
-          onSelected();
-        }
-      },
+      onTap: enabled
+          ? () {
+              setState(() {
+                controller.text = emoji;
+              });
+              if (onSelected != null) {
+                onSelected();
+              }
+            }
+          : null,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(20),
-          color: AppColors.card,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 14)),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                color: AppColors.textSecondary,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.5,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(20),
+            color: AppColors.card,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1160,13 +1166,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
   }
 
   void _showAddSubjectDialog(String gradeKey) {
-    String selectedPreset = 'science';
-    final idCtrl = TextEditingController(text: 'science');
-    final nameCtrl = TextEditingController(text: 'Science');
-    final emojiCtrl = TextEditingController(text: '🔬');
-    final colorCtrl = TextEditingController(text: '#D1FAE5');
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
 
-    final Map<String, Map<String, String>> presets = {
+    final Map<String, Map<String, String>> defaultPresets = {
       'science': {
         'id': 'science',
         'name': 'Science',
@@ -1205,11 +1207,54 @@ class _CurriculumTabState extends State<CurriculumTab> {
       },
     };
 
+    final Map<String, Map<String, String>> presets = {
+      ...defaultPresets,
+      ...adminProvider.customPresets,
+      ...adminProvider.getAllCurriculumSubjects(),
+    };
+
+    // Safely determine initial preset
+    String selectedPreset = presets.containsKey('science') ? 'science' : presets.keys.first;
+    final initialPreset = presets[selectedPreset]!;
+
+    final idCtrl = TextEditingController(text: initialPreset['id']);
+    final nameCtrl = TextEditingController(text: initialPreset['name']);
+    final emojiCtrl = TextEditingController(text: initialPreset['emoji']);
+    final colorCtrl = TextEditingController(text: initialPreset['color']);
+
+    bool isIdExistingPreset = false;
+    VoidCallback? dialogUpdater;
+
+    idCtrl.addListener(() {
+      final idVal = idCtrl.text.trim().toLowerCase();
+      if (selectedPreset == 'custom') {
+        final hasKey = presets.containsKey(idVal);
+        if (hasKey) {
+          final preset = presets[idVal]!;
+          if (nameCtrl.text != preset['name']) nameCtrl.text = preset['name']!;
+          if (emojiCtrl.text != preset['emoji']) emojiCtrl.text = preset['emoji']!;
+          if (colorCtrl.text != preset['color']) colorCtrl.text = preset['color']!;
+          if (!isIdExistingPreset) {
+            isIdExistingPreset = true;
+            if (dialogUpdater != null) dialogUpdater!();
+          }
+        } else {
+          if (isIdExistingPreset) {
+            isIdExistingPreset = false;
+            if (dialogUpdater != null) dialogUpdater!();
+          }
+        }
+      }
+    });
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            dialogUpdater = () => setDialogState(() {});
+            final bool isReadOnly = (selectedPreset != 'custom') || isIdExistingPreset;
+
             return AlertDialog(
               backgroundColor: AppColors.card,
               title: Text(
@@ -1260,32 +1305,15 @@ class _CurriculumTabState extends State<CurriculumTab> {
                           ),
                         ),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'science',
-                          child: Text('Science (science)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'english',
-                          child: Text('English (english)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'math',
-                          child: Text('Maths (math)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'social',
-                          child: Text('Social Studies (social)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'hindi',
-                          child: Text('Hindi (hindi)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'computer',
-                          child: Text('Computer (computer)'),
-                        ),
-                        DropdownMenuItem(
+                      items: [
+                        ...presets.entries.map((entry) {
+                          final preset = entry.value;
+                          return DropdownMenuItem<String>(
+                            value: entry.key,
+                            child: Text('${preset['name']} (${preset['id']})'),
+                          );
+                        }),
+                        const DropdownMenuItem<String>(
                           value: 'custom',
                           child: Text('Custom Subject...'),
                         ),
@@ -1326,7 +1354,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
                     TextField(
                       controller: nameCtrl,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      readOnly: isReadOnly,
+                      style: TextStyle(
+                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Subject Name',
                         labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -1336,7 +1367,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
                     TextField(
                       controller: emojiCtrl,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      readOnly: isReadOnly,
+                      style: TextStyle(
+                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Emoji Icon',
                         labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -1361,48 +1395,56 @@ class _CurriculumTabState extends State<CurriculumTab> {
                           'Science',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '🧬',
                           'Science',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '🧮',
                           'Maths',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '📐',
                           'Maths',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '🇬🇧',
                           'English',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '📚',
                           'English',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '🌍',
                           'Social',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                         _buildEmojiPresetChip(
                           '🗺️',
                           'Social',
                           emojiCtrl,
                           () => setDialogState(() {}),
+                          !isReadOnly,
                         ),
                       ],
                     ),
@@ -1410,7 +1452,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
 
                     TextField(
                       controller: colorCtrl,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      readOnly: isReadOnly,
+                      style: TextStyle(
+                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Hex Color code',
                         labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -1431,6 +1476,19 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   onPressed: () {
                     final idVal = idCtrl.text.trim();
                     if (idVal.isEmpty || nameCtrl.text.isEmpty) return;
+
+                    if (selectedPreset == 'custom') {
+                      final idLower = idVal.toLowerCase();
+                      if (!presets.containsKey(idLower)) {
+                        adminProvider.saveCustomPreset(
+                          idVal,
+                          nameCtrl.text.trim(),
+                          emojiCtrl.text.trim().isEmpty ? '📚' : emojiCtrl.text.trim(),
+                          colorCtrl.text.trim(),
+                        );
+                      }
+                    }
+
                     Provider.of<AdminProvider>(
                       context,
                       listen: false,
@@ -1451,7 +1509,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),
-                  child: Text('Add', style: TextStyle(color: Colors.white)),
+                  child: const Text('Add', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );

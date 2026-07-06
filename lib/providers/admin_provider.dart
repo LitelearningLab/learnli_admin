@@ -31,6 +31,9 @@ class AdminProvider with ChangeNotifier {
   bool _isLoadingCareers = false;
   String? _selectedCareerId;
 
+  // Custom subject presets
+  Map<String, Map<String, String>> _customPresets = {};
+
   // Getters
   bool get isAuthenticated => _isAuthenticated;
   bool get isInitializing => _isInitializing;
@@ -52,9 +55,12 @@ class AdminProvider with ChangeNotifier {
   String? get selectedCareerId => _selectedCareerId;
   Career? get selectedCareer => _selectedCareerId != null ? _careers[_selectedCareerId] : null;
 
+  Map<String, Map<String, String>> get customPresets => _customPresets;
+
   // Constructor - triggers auto login check
   AdminProvider() {
     _checkSavedLogin();
+    loadCustomPresets();
   }
 
   // ==========================================
@@ -715,5 +721,57 @@ class AdminProvider with ChangeNotifier {
       _isLoadingCareers = false;
       notifyListeners();
     }
+  }
+
+  Future<void> loadCustomPresets() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? customPresetsJson = prefs.getString('custom_subject_presets');
+      if (customPresetsJson != null) {
+        final decoded = jsonDecode(customPresetsJson) as Map<String, dynamic>;
+        _customPresets = decoded.map((key, value) {
+          final valMap = Map<String, String>.from(value as Map);
+          return MapEntry(key, valMap);
+        });
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading custom presets: $e');
+    }
+  }
+
+  Future<void> saveCustomPreset(String id, String name, String emoji, String color) async {
+    final idLower = id.trim().toLowerCase();
+    _customPresets[idLower] = {
+      'id': id.trim(),
+      'name': name.trim(),
+      'emoji': emoji.trim(),
+      'color': color.trim(),
+    };
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('custom_subject_presets', jsonEncode(_customPresets));
+    } catch (e) {
+      print('Error saving custom presets: $e');
+    }
+  }
+
+  Map<String, Map<String, String>> getAllCurriculumSubjects() {
+    final Map<String, Map<String, String>> subjectsMap = {};
+    _curriculum.forEach((gradeKey, grade) {
+      for (var subject in grade.subjects) {
+        final idLower = subject.id.trim().toLowerCase();
+        if (!subjectsMap.containsKey(idLower)) {
+          subjectsMap[idLower] = {
+            'id': subject.id,
+            'name': subject.name,
+            'emoji': subject.emoji,
+            'color': subject.color,
+          };
+        }
+      }
+    });
+    return subjectsMap;
   }
 }

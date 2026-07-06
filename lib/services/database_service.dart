@@ -178,7 +178,14 @@ class DatabaseService {
                   chapter.number,
                   chapter.title,
                   interactiveLessonUrl: chapter.interactiveLessonUrl,
-                  interactiveDiagramUrl: chapter.interactiveDiagramUrl,
+                  interactiveDiagrams: chapter.interactiveDiagrams != null
+                      ? chapter.interactiveDiagrams!.map((d) => InteractiveDiagram(
+                          id: d.id,
+                          title: d.title,
+                          thumbnail: d.thumbnail,
+                          url: d.url,
+                        )).toList()
+                      : null,
                 );
                 await _db.ref(path).set(newContent.toJson());
               } else {
@@ -288,6 +295,34 @@ class DatabaseService {
       return downloadUrl;
     } catch (e) {
       print('❌ Error uploading HTML file: $e');
+      rethrow;
+    }
+  }
+
+  /// Upload image file to Firebase Storage and return its download URL
+  static Future<String?> uploadImageFile(String fileName, Uint8List fileBytes) async {
+    try {
+      await authenticateFirebase();
+      String contentType = 'image/png';
+      if (fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg')) {
+        contentType = 'image/jpeg';
+      } else if (fileName.toLowerCase().endsWith('.gif')) {
+        contentType = 'image/gif';
+      } else if (fileName.toLowerCase().endsWith('.webp')) {
+        contentType = 'image/webp';
+      }
+
+      final storageRef = FirebaseStorage.instance.ref().child('thumbnails/$fileName');
+      final uploadTask = storageRef.putData(
+        fileBytes,
+        SettableMetadata(contentType: contentType),
+      );
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print('✅ Image file uploaded successfully: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      print('❌ Error uploading image file: $e');
       rethrow;
     }
   }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/curriculum_models.dart';
+import '../../models/chapter_content_model.dart';
 import '../../constants/app_colors.dart';
 import 'chapter_content_editor.dart';
 
@@ -653,7 +654,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
       (c) => c.number == _activeChapterNumber,
     );
     final existingUrl = oldCh?.interactiveLessonUrl;
-    final existingDiagramUrl = oldCh?.interactiveDiagramUrl;
+    final existingDiagrams = oldCh?.interactiveDiagrams;
 
     prov.updateChapter(
       _activeGradeKey!,
@@ -663,7 +664,12 @@ class _CurriculumTabState extends State<CurriculumTab> {
         number: chNum,
         title: _chapterTitleController.text,
         interactiveLessonUrl: existingUrl,
-        interactiveDiagramUrl: existingDiagramUrl,
+        interactiveDiagrams: existingDiagrams?.map((d) => InteractiveDiagram(
+              id: d.id,
+              title: d.title,
+              thumbnail: d.thumbnail,
+              url: d.url,
+            )).toList(),
       ),
     );
 

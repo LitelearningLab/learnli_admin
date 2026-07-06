@@ -151,7 +151,14 @@ class AdminProvider with ChangeNotifier {
                   number: chapter.number,
                   title: chapter.title,
                   interactiveLessonUrl: chapter.interactiveLessonUrl,
-                  interactiveDiagramUrl: chapter.interactiveDiagramUrl,
+                  interactiveDiagrams: chapter.interactiveDiagrams != null
+                      ? chapter.interactiveDiagrams!.map((d) => InteractiveDiagram(
+                          id: d.id,
+                          title: d.title,
+                          thumbnail: d.thumbnail,
+                          url: d.url,
+                        )).toList()
+                      : null,
                 );
               }).toList(),
             );
@@ -435,11 +442,18 @@ class AdminProvider with ChangeNotifier {
             chapter!.interactiveLessonUrl!.isNotEmpty) {
           _activeContent!.metadata.interactiveLessonUrl = chapter.interactiveLessonUrl;
         }
-        if ((_activeContent!.metadata.interactiveDiagramUrl == null ||
-             _activeContent!.metadata.interactiveDiagramUrl!.isEmpty) &&
-            chapter?.interactiveDiagramUrl != null &&
-            chapter!.interactiveDiagramUrl!.isNotEmpty) {
-          _activeContent!.metadata.interactiveDiagramUrl = chapter.interactiveDiagramUrl;
+        if ((_activeContent!.metadata.interactiveDiagrams == null ||
+             _activeContent!.metadata.interactiveDiagrams!.isEmpty) &&
+            chapter?.interactiveDiagrams != null &&
+            chapter!.interactiveDiagrams!.isNotEmpty) {
+          _activeContent!.metadata.interactiveDiagrams = chapter.interactiveDiagrams != null
+              ? chapter.interactiveDiagrams!.map((d) => InteractiveDiagram(
+                  id: d.id,
+                  title: d.title,
+                  thumbnail: d.thumbnail,
+                  url: d.url,
+                )).toList()
+              : null;
         }
         _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       } else {
@@ -450,7 +464,14 @@ class AdminProvider with ChangeNotifier {
           _selectedChapterNumber!,
           chapter?.title ?? 'Chapter $_selectedChapterNumber',
           interactiveLessonUrl: chapter?.interactiveLessonUrl,
-          interactiveDiagramUrl: chapter?.interactiveDiagramUrl,
+          interactiveDiagrams: chapter?.interactiveDiagrams != null
+              ? chapter!.interactiveDiagrams!.map((d) => InteractiveDiagram(
+                  id: d.id,
+                  title: d.title,
+                  thumbnail: d.thumbnail,
+                  url: d.url,
+                )).toList()
+              : null,
         );
         _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       }

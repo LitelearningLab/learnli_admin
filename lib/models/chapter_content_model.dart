@@ -179,7 +179,7 @@ class ChapterContent {
   }
 
   // Helper factory to create empty content
-  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title, {String? interactiveLessonUrl, String? interactiveDiagramUrl}) {
+  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title, {String? interactiveLessonUrl, List<InteractiveDiagram>? interactiveDiagrams}) {
     final prefix = _getSubjectPrefix(subject);
     final subjectDisplayMap = {
       'SCI': 'Science',
@@ -199,7 +199,7 @@ class ChapterContent {
         chapterName: title,
         chapterNumber: chapterNum,
         interactiveLessonUrl: interactiveLessonUrl,
-        interactiveDiagramUrl: interactiveDiagramUrl,
+        interactiveDiagrams: interactiveDiagrams,
       ),
       simpleOverview: [],
       readMode: [],
@@ -220,6 +220,38 @@ class ChapterContent {
   }
 }
 
+class InteractiveDiagram {
+  String id;
+  String title;
+  String thumbnail;
+  String url;
+
+  InteractiveDiagram({
+    required this.id,
+    required this.title,
+    required this.thumbnail,
+    required this.url,
+  });
+
+  factory InteractiveDiagram.fromJson(Map<String, dynamic> json) {
+    return InteractiveDiagram(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      thumbnail: json['thumbnail'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'thumbnail': thumbnail,
+      'url': url,
+    };
+  }
+}
+
 class ChapterMetadata {
   int grade;
   String subject;
@@ -229,7 +261,7 @@ class ChapterMetadata {
   String formatVersion;
   String outputType;
   String? interactiveLessonUrl;
-  String? interactiveDiagramUrl;
+  List<InteractiveDiagram>? interactiveDiagrams;
 
   ChapterMetadata({
     required this.grade,
@@ -237,23 +269,43 @@ class ChapterMetadata {
     required this.chapterId,
     required this.chapterName,
     required this.chapterNumber,
-    this.formatVersion = '2.0',
+    this.formatVersion = '2.1',
     this.outputType = 'structured_json',
     this.interactiveLessonUrl,
-    this.interactiveDiagramUrl,
+    this.interactiveDiagrams,
   });
 
   factory ChapterMetadata.fromJson(Map<String, dynamic> json) {
+    var diagramsJson = json['interactiveDiagrams'] as List?;
+    List<InteractiveDiagram>? diagramsList;
+    if (diagramsJson != null) {
+      diagramsList = diagramsJson
+          .map((d) => InteractiveDiagram.fromJson(Map<String, dynamic>.from(d)))
+          .toList();
+    } else if (json['interactive_diagram_url'] != null || json['interactiveDiagramUrl'] != null) {
+      final singleUrl = json['interactive_diagram_url'] ?? json['interactiveDiagramUrl'];
+      if (singleUrl != null && singleUrl.toString().isNotEmpty) {
+        diagramsList = [
+          InteractiveDiagram(
+            id: 'diagram_001',
+            title: 'Interactive Diagram',
+            thumbnail: '',
+            url: singleUrl.toString(),
+          )
+        ];
+      }
+    }
+
     return ChapterMetadata(
       grade: json['grade'] ?? 7,
       subject: json['subject'] ?? '',
       chapterId: json['chapter_id'] ?? '',
       chapterName: json['chapter_name'] ?? '',
       chapterNumber: json['chapter_number'] ?? 0,
-      formatVersion: json['format_version'] ?? '2.0',
+      formatVersion: json['format_version'] ?? '2.1',
       outputType: json['output_type'] ?? 'structured_json',
       interactiveLessonUrl: json['interactive_lesson_url'] ?? json['interactiveLessonUrl'],
-      interactiveDiagramUrl: json['interactive_diagram_url'] ?? json['interactiveDiagramUrl'],
+      interactiveDiagrams: diagramsList,
     );
   }
 
@@ -270,9 +322,8 @@ class ChapterMetadata {
         'interactive_lesson_url': interactiveLessonUrl,
         'interactiveLessonUrl': interactiveLessonUrl,
       },
-      if (interactiveDiagramUrl != null) ...{
-        'interactive_diagram_url': interactiveDiagramUrl,
-        'interactiveDiagramUrl': interactiveDiagramUrl,
+      if (interactiveDiagrams != null) ...{
+        'interactiveDiagrams': interactiveDiagrams!.map((d) => d.toJson()).toList(),
       }
     };
   }

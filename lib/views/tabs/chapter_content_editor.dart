@@ -30,7 +30,42 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
   ];
 
   bool _isUploadingHtml = false;
-  bool _isUploadingDiagramHtml = false;
+  final Map<int, bool> _isUploadingDiagramHtmlMap = {};
+  final Map<int, bool> _isUploadingDiagramThumbnailMap = {};
+
+  Future<String?> _pickAndUploadImage() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final name = result.files.single.name;
+
+        final downloadUrl = await DatabaseService.uploadImageFile(name, bytes);
+        if (downloadUrl != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Uploaded $name successfully!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+        return downloadUrl;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+    return null;
+  }
 
   Future<String?> _pickAndUploadHtml() async {
     try {
@@ -554,37 +589,166 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
             }
           },
         ),
-        const SizedBox(height: 16),
-        _buildUrlFormField(
-          key: 'meta_interactive_diagram_url',
-          label: 'Interactive Diagram URL (Optional)',
-          value: content.metadata.interactiveDiagramUrl ?? '',
-          isUploading: _isUploadingDiagramHtml,
-          onChanged: (val) {
-            content.metadata.interactiveDiagramUrl = val.trim().isEmpty
-                ? null
-                : val.trim();
-            prov.updateActiveContent(content);
-          },
-          onUploadPressed: () async {
-            setState(() {
-              _isUploadingDiagramHtml = true;
-            });
-            try {
-              final fileUrl = await _pickAndUploadHtml();
-              if (fileUrl != null) {
-                content.metadata.interactiveDiagramUrl = fileUrl;
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Interactive Diagrams (${(content.metadata.interactiveDiagrams ?? []).length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                final list = content.metadata.interactiveDiagrams ?? [];
+                int maxNum = 0;
+                for (final d in list) {
+                  final parts = d.id.split('_');
+                  if (parts.length == 2) {
+                    final num = int.tryParse(parts[1]);
+                    if (num != null && num > maxNum) {
+                      maxNum = num;
+                    }
+                  }
+                }
+                final newId = 'diagram_${(maxNum + 1).toString().padLeft(3, '0')}';
+                list.add(
+                  InteractiveDiagram(
+                    id: newId,
+                    title: 'New Diagram',
+                    thumbnail: '',
+                    url: '',
+                  ),
+                );
+                content.metadata.interactiveDiagrams = list;
                 prov.updateActiveContent(content);
-              }
-            } finally {
-              if (mounted) {
-                setState(() {
-                  _isUploadingDiagramHtml = false;
-                });
-              }
-            }
-          },
+              },
+              icon: const Icon(Icons.add, size: 14),
+              label: const Text('Add Diagram'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 10),
+        if (content.metadata.interactiveDiagrams != null && content.metadata.interactiveDiagrams!.isNotEmpty)
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: content.metadata.interactiveDiagrams!.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemBuilder: (context, idx) {
+              final diagram = content.metadata.interactiveDiagrams![idx];
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.divider),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Diagram #${idx + 1}',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete,
+                            color: AppColors.error,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            content.metadata.interactiveDiagrams!.removeAt(idx);
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildFormField(
+                      key: 'diagram_title_$idx',
+                      label: 'Title',
+                      value: diagram.title,
+                      onChanged: (val) {
+                        diagram.title = val.trim();
+                        prov.updateActiveContent(content);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildUrlFormField(
+                      key: 'diagram_thumb_$idx',
+                      label: 'Thumbnail URL',
+                      value: diagram.thumbnail,
+                      isUploading: _isUploadingDiagramThumbnailMap[idx] ?? false,
+                      onChanged: (val) {
+                        diagram.thumbnail = val.trim();
+                        prov.updateActiveContent(content);
+                      },
+                      onUploadPressed: () async {
+                        setState(() {
+                          _isUploadingDiagramThumbnailMap[idx] = true;
+                        });
+                        try {
+                          final fileUrl = await _pickAndUploadImage();
+                          if (fileUrl != null) {
+                            diagram.thumbnail = fileUrl;
+                            prov.updateActiveContent(content);
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isUploadingDiagramThumbnailMap[idx] = false;
+                            });
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildUrlFormField(
+                      key: 'diagram_url_$idx',
+                      label: 'Interactive HTML URL',
+                      value: diagram.url,
+                      isUploading: _isUploadingDiagramHtmlMap[idx] ?? false,
+                      onChanged: (val) {
+                        diagram.url = val.trim();
+                        prov.updateActiveContent(content);
+                      },
+                      onUploadPressed: () async {
+                        setState(() {
+                          _isUploadingDiagramHtmlMap[idx] = true;
+                        });
+                        try {
+                          final fileUrl = await _pickAndUploadHtml();
+                          if (fileUrl != null) {
+                            diagram.url = fileUrl;
+                            prov.updateActiveContent(content);
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isUploadingDiagramHtmlMap[idx] = false;
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
@@ -2084,6 +2248,13 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
+    _controller.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -2096,6 +2267,7 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -2134,6 +2306,20 @@ class _UrlUploadFieldState extends State<UrlUploadField> {
                       horizontal: 16,
                       vertical: 14,
                     ),
+                    suffixIcon: _controller.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
+                            tooltip: 'Clear URL',
+                            onPressed: () {
+                              _controller.clear();
+                              widget.onChanged('');
+                            },
+                          )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: AppColors.border),

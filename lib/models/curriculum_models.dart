@@ -1,22 +1,44 @@
+import 'chapter_content_model.dart';
+
 class Chapter {
   final int number;
   final String title;
   final String? interactiveLessonUrl;
-  final String? interactiveDiagramUrl;
+  final List<InteractiveDiagram>? interactiveDiagrams;
 
   Chapter({
     required this.number,
     required this.title,
     this.interactiveLessonUrl,
-    this.interactiveDiagramUrl,
+    this.interactiveDiagrams,
   });
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
+    var diagramsJson = json['interactiveDiagrams'] as List?;
+    List<InteractiveDiagram>? diagramsList;
+    if (diagramsJson != null) {
+      diagramsList = diagramsJson
+          .map((d) => InteractiveDiagram.fromJson(Map<String, dynamic>.from(d)))
+          .toList();
+    } else if (json['interactive_diagram_url'] != null || json['interactiveDiagramUrl'] != null) {
+      final singleUrl = json['interactive_diagram_url'] ?? json['interactiveDiagramUrl'];
+      if (singleUrl != null && singleUrl.toString().isNotEmpty) {
+        diagramsList = [
+          InteractiveDiagram(
+            id: 'diagram_001',
+            title: 'Interactive Diagram',
+            thumbnail: '',
+            url: singleUrl.toString(),
+          )
+        ];
+      }
+    }
+
     return Chapter(
       number: json['number'] ?? 0,
       title: json['title'] ?? '',
       interactiveLessonUrl: json['interactiveLessonUrl'] ?? json['interactive_lesson_url'],
-      interactiveDiagramUrl: json['interactiveDiagramUrl'] ?? json['interactive_diagram_url'],
+      interactiveDiagrams: diagramsList,
     );
   }
 
@@ -28,9 +50,8 @@ class Chapter {
         'interactiveLessonUrl': interactiveLessonUrl,
         'interactive_lesson_url': interactiveLessonUrl,
       },
-      if (interactiveDiagramUrl != null && interactiveDiagramUrl!.isNotEmpty) ...{
-        'interactiveDiagramUrl': interactiveDiagramUrl,
-        'interactive_diagram_url': interactiveDiagramUrl,
+      if (interactiveDiagrams != null) ...{
+        'interactiveDiagrams': interactiveDiagrams!.map((d) => d.toJson()).toList(),
       }
     };
   }

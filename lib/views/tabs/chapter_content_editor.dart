@@ -30,6 +30,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
   ];
 
   bool _isUploadingHtml = false;
+  bool _isUploadingDiagramHtml = false;
 
   Future<String?> _pickAndUploadHtml() async {
     try {
@@ -548,6 +549,37 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               if (mounted) {
                 setState(() {
                   _isUploadingHtml = false;
+                });
+              }
+            }
+          },
+        ),
+        const SizedBox(height: 16),
+        _buildUrlFormField(
+          key: 'meta_interactive_diagram_url',
+          label: 'Interactive Diagram URL (Optional)',
+          value: content.metadata.interactiveDiagramUrl ?? '',
+          isUploading: _isUploadingDiagramHtml,
+          onChanged: (val) {
+            content.metadata.interactiveDiagramUrl = val.trim().isEmpty
+                ? null
+                : val.trim();
+            prov.updateActiveContent(content);
+          },
+          onUploadPressed: () async {
+            setState(() {
+              _isUploadingDiagramHtml = true;
+            });
+            try {
+              final fileUrl = await _pickAndUploadHtml();
+              if (fileUrl != null) {
+                content.metadata.interactiveDiagramUrl = fileUrl;
+                prov.updateActiveContent(content);
+              }
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _isUploadingDiagramHtml = false;
                 });
               }
             }

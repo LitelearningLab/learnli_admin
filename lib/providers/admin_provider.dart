@@ -151,6 +151,7 @@ class AdminProvider with ChangeNotifier {
                   number: chapter.number,
                   title: chapter.title,
                   interactiveLessonUrl: chapter.interactiveLessonUrl,
+                  interactiveDiagramUrl: chapter.interactiveDiagramUrl,
                 );
               }).toList(),
             );
@@ -434,6 +435,12 @@ class AdminProvider with ChangeNotifier {
             chapter!.interactiveLessonUrl!.isNotEmpty) {
           _activeContent!.metadata.interactiveLessonUrl = chapter.interactiveLessonUrl;
         }
+        if ((_activeContent!.metadata.interactiveDiagramUrl == null ||
+             _activeContent!.metadata.interactiveDiagramUrl!.isEmpty) &&
+            chapter?.interactiveDiagramUrl != null &&
+            chapter!.interactiveDiagramUrl!.isNotEmpty) {
+          _activeContent!.metadata.interactiveDiagramUrl = chapter.interactiveDiagramUrl;
+        }
         _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       } else {
         // Create an empty configuration ready for upload
@@ -443,6 +450,7 @@ class AdminProvider with ChangeNotifier {
           _selectedChapterNumber!,
           chapter?.title ?? 'Chapter $_selectedChapterNumber',
           interactiveLessonUrl: chapter?.interactiveLessonUrl,
+          interactiveDiagramUrl: chapter?.interactiveDiagramUrl,
         );
         _jsonString = const JsonEncoder.withIndent('  ').convert(_activeContent!.toJson());
       }

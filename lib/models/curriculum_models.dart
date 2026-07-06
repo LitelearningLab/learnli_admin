@@ -2,11 +2,13 @@ class Chapter {
   final int number;
   final String title;
   final String? interactiveLessonUrl;
+  final String? interactiveDiagramUrl;
 
   Chapter({
     required this.number,
     required this.title,
     this.interactiveLessonUrl,
+    this.interactiveDiagramUrl,
   });
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
@@ -14,6 +16,7 @@ class Chapter {
       number: json['number'] ?? 0,
       title: json['title'] ?? '',
       interactiveLessonUrl: json['interactiveLessonUrl'] ?? json['interactive_lesson_url'],
+      interactiveDiagramUrl: json['interactiveDiagramUrl'] ?? json['interactive_diagram_url'],
     );
   }
 
@@ -24,6 +27,10 @@ class Chapter {
       if (interactiveLessonUrl != null && interactiveLessonUrl!.isNotEmpty) ...{
         'interactiveLessonUrl': interactiveLessonUrl,
         'interactive_lesson_url': interactiveLessonUrl,
+      },
+      if (interactiveDiagramUrl != null && interactiveDiagramUrl!.isNotEmpty) ...{
+        'interactiveDiagramUrl': interactiveDiagramUrl,
+        'interactive_diagram_url': interactiveDiagramUrl,
       }
     };
   }

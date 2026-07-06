@@ -179,7 +179,7 @@ class ChapterContent {
   }
 
   // Helper factory to create empty content
-  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title, {String? interactiveLessonUrl}) {
+  factory ChapterContent.empty(int grade, String subject, int chapterNum, String title, {String? interactiveLessonUrl, String? interactiveDiagramUrl}) {
     final prefix = _getSubjectPrefix(subject);
     final subjectDisplayMap = {
       'SCI': 'Science',
@@ -199,6 +199,7 @@ class ChapterContent {
         chapterName: title,
         chapterNumber: chapterNum,
         interactiveLessonUrl: interactiveLessonUrl,
+        interactiveDiagramUrl: interactiveDiagramUrl,
       ),
       simpleOverview: [],
       readMode: [],
@@ -228,6 +229,7 @@ class ChapterMetadata {
   String formatVersion;
   String outputType;
   String? interactiveLessonUrl;
+  String? interactiveDiagramUrl;
 
   ChapterMetadata({
     required this.grade,
@@ -238,6 +240,7 @@ class ChapterMetadata {
     this.formatVersion = '2.0',
     this.outputType = 'structured_json',
     this.interactiveLessonUrl,
+    this.interactiveDiagramUrl,
   });
 
   factory ChapterMetadata.fromJson(Map<String, dynamic> json) {
@@ -250,6 +253,7 @@ class ChapterMetadata {
       formatVersion: json['format_version'] ?? '2.0',
       outputType: json['output_type'] ?? 'structured_json',
       interactiveLessonUrl: json['interactive_lesson_url'] ?? json['interactiveLessonUrl'],
+      interactiveDiagramUrl: json['interactive_diagram_url'] ?? json['interactiveDiagramUrl'],
     );
   }
 
@@ -265,6 +269,10 @@ class ChapterMetadata {
       if (interactiveLessonUrl != null) ...{
         'interactive_lesson_url': interactiveLessonUrl,
         'interactiveLessonUrl': interactiveLessonUrl,
+      },
+      if (interactiveDiagramUrl != null) ...{
+        'interactive_diagram_url': interactiveDiagramUrl,
+        'interactiveDiagramUrl': interactiveDiagramUrl,
       }
     };
   }

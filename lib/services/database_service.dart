@@ -178,6 +178,7 @@ class DatabaseService {
                   chapter.number,
                   chapter.title,
                   interactiveLessonUrl: chapter.interactiveLessonUrl,
+                  interactiveDiagramUrl: chapter.interactiveDiagramUrl,
                 );
                 await _db.ref(path).set(newContent.toJson());
               } else {

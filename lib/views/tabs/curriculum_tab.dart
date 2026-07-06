@@ -653,6 +653,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
       (c) => c.number == _activeChapterNumber,
     );
     final existingUrl = oldCh?.interactiveLessonUrl;
+    final existingDiagramUrl = oldCh?.interactiveDiagramUrl;
 
     prov.updateChapter(
       _activeGradeKey!,
@@ -662,6 +663,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
         number: chNum,
         title: _chapterTitleController.text,
         interactiveLessonUrl: existingUrl,
+        interactiveDiagramUrl: existingDiagramUrl,
       ),
     );
 

@@ -134,5 +134,15 @@ void main() {
     await tester.tap(find.text('Add MCQ Question'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Question #1'), findsOneWidget);
+
+    // 10. Pronunciation Lab
+    final pronunciationFinder = find.text('Pronunciation Lab');
+    await tester.ensureVisible(pronunciationFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(pronunciationFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Vocabulary Word'));
+    await tester.pumpAndSettle();
+    expect(find.text('Word #1'), findsOneWidget);
   });
 }

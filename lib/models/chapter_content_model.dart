@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 String _getSubjectPrefix(String subject) {
   final s = subject.trim().toLowerCase();
   if (s.startsWith('sci')) {
@@ -27,6 +29,7 @@ class ChapterContent {
   final List<ChipItem> chips;
   final List<PlusPointTopic> plusPoints;
   final QuizSection quiz;
+  final List<PronunciationWord> pronunciationLab;
 
   ChapterContent({
     required this.metadata,
@@ -39,6 +42,7 @@ class ChapterContent {
     required this.chips,
     required this.plusPoints,
     required this.quiz,
+    required this.pronunciationLab,
   });
 
   factory ChapterContent.fromJson(Map<String, dynamic> json) {
@@ -123,6 +127,16 @@ class ChapterContent {
     final quizJson = sections['quiz'] ?? {};
     final quizSection = QuizSection.fromJson(Map<String, dynamic>.from(quizJson));
 
+    // Parse pronunciation_lab
+    final pronunciationJson = sections['pronunciation_lab'] ?? {};
+    final List<PronunciationWord> pronunciationList = [];
+    final pronunciationData = pronunciationJson['data'] ?? pronunciationJson['items'];
+    if (pronunciationData is List) {
+      for (var item in pronunciationData) {
+        pronunciationList.add(PronunciationWord.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
+
     return ChapterContent(
       metadata: ChapterMetadata.fromJson(metadataJson),
       simpleOverview: simpleOverviewList,
@@ -134,6 +148,7 @@ class ChapterContent {
       chips: chipsList,
       plusPoints: plusPointsList,
       quiz: quizSection,
+      pronunciationLab: pronunciationList,
     );
   }
 
@@ -174,6 +189,10 @@ class ChapterContent {
           'items': plusPoints.map((item) => item.toJson()).toList(),
         },
         'quiz': quiz.toJson(),
+        'pronunciation_lab': {
+          'type': 'array_of_words',
+          'data': pronunciationLab.map((item) => item.toJson()).toList(),
+        },
       }
     };
   }
@@ -216,6 +235,7 @@ class ChapterContent {
         passingScore: 60,
         questions: [],
       ),
+      pronunciationLab: [],
     );
   }
 }
@@ -688,6 +708,66 @@ class QuizOption {
     return {
       'key': key,
       'text': text,
+    };
+  }
+}
+
+class PronunciationWord {
+  String file;
+  String isPriority;
+  String syllables;
+  String text;
+  String pronun;
+  bool downloadStatus;
+  String localPath;
+  List<String> sentenceSamples;
+  List<String> meaningSamples;
+
+  PronunciationWord({
+    this.file = '',
+    this.isPriority = 'false',
+    this.syllables = '',
+    this.text = '',
+    this.pronun = '',
+    this.downloadStatus = false,
+    this.localPath = '',
+    required this.sentenceSamples,
+    required this.meaningSamples,
+  });
+
+  factory PronunciationWord.fromJson(Map<String, dynamic> json) {
+    return PronunciationWord(
+      file: json['file'] ?? '',
+      isPriority: json['isPriority']?.toString() ?? 'false',
+      syllables: json['syllables']?.toString() ?? '',
+      text: json['text']?.toString() ?? '',
+      pronun: json['pronun']?.toString() ?? '',
+      downloadStatus: json['downloadStatus'] == 1 || json['downloadStatus'] == true,
+      localPath: json['localPath'] ?? '',
+      sentenceSamples: json['sentenceSamples'] is List
+          ? List<String>.from(json['sentenceSamples'])
+          : json['sentenceSamples'] is String && json['sentenceSamples'].toString().isNotEmpty
+              ? List<String>.from(jsonDecode(json['sentenceSamples']))
+              : [],
+      meaningSamples: json['meaningSamples'] is List
+          ? List<String>.from(json['meaningSamples'])
+          : json['meaningSamples'] is String && json['meaningSamples'].toString().isNotEmpty
+              ? List<String>.from(jsonDecode(json['meaningSamples']))
+              : [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'file': file,
+      'isPriority': isPriority,
+      'syllables': syllables,
+      'text': text,
+      'pronun': pronun,
+      'downloadStatus': downloadStatus,
+      'localPath': localPath,
+      'sentenceSamples': sentenceSamples,
+      'meaningSamples': meaningSamples,
     };
   }
 }

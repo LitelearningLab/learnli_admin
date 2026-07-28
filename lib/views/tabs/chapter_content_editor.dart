@@ -27,6 +27,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     'AI Learning Chips',
     'Plus Points Topics',
     'Quiz & Questions',
+    'Pronunciation Lab',
   ];
 
   bool _isUploadingHtml = false;
@@ -411,6 +412,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         return _buildPlusPointsForm(prov, active);
       case 9: // Quiz
         return _buildQuizForm(prov, active);
+      case 10: // Pronunciation Lab
+        return _buildPronunciationForm(prov, active);
       default:
         return const Text('Form Index Error');
     }
@@ -2217,6 +2220,204 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           ],
         );
       },
+    );
+  }
+
+  // 11. Pronunciation Lab Form
+  Widget _buildPronunciationForm(AdminProvider prov, ChapterContent content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Vocabulary list (${content.pronunciationLab.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                content.pronunciationLab.insert(
+                  0,
+                  PronunciationWord(
+                    text: 'newword',
+                    pronun: '',
+                    syllables: '',
+                    sentenceSamples: [],
+                    meaningSamples: [],
+                  ),
+                );
+                prov.updateActiveContent(content);
+              },
+              icon: const Icon(Icons.add, size: 14),
+              label: const Text('Add Vocabulary Word'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: content.pronunciationLab.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 20),
+          itemBuilder: (context, idx) {
+            final item = content.pronunciationLab[idx];
+            return Container(
+              key: ValueKey(item),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Word #${idx + 1}',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          content.pronunciationLab.removeAt(idx);
+                          prov.updateActiveContent(content);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pron_${item.hashCode}_text',
+                          label: 'Word',
+                          value: item.text,
+                          onChanged: (val) {
+                            item.text = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pron_${item.hashCode}_pronun',
+                          label: 'Pronunciation Guide (Phonetic)',
+                          value: item.pronun,
+                          onChanged: (val) {
+                            item.pronun = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pron_${item.hashCode}_syllables',
+                          label: 'Syllables breakdown (hyphen-separated, e.g. nu-tri-tion)',
+                          value: item.syllables,
+                          onChanged: (val) {
+                            item.syllables = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Priority Status',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<String>(
+                              value: item.isPriority == 'true' || item.downloadStatus ? 'true' : 'false',
+                              items: const [
+                                DropdownMenuItem(value: 'false', child: Text('Regular Vocabulary')),
+                                DropdownMenuItem(value: 'true', child: Text('Priority (Starred)')),
+                              ],
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.card,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: AppColors.border),
+                                ),
+                              ),
+                              onChanged: (val) {
+                                item.isPriority = val ?? 'false';
+                                item.downloadStatus = val == 'true';
+                                prov.updateActiveContent(content);
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  _buildFormField(
+                    key: 'pron_${item.hashCode}_meanings',
+                    label: 'Meanings (One meaning per line)',
+                    value: item.meaningSamples.join('\n'),
+                    maxLines: 3,
+                    hint: 'Definition of the word...',
+                    onChanged: (val) {
+                      item.meaningSamples = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
+                      prov.updateActiveContent(content);
+                    },
+                  ),
+                  _buildFormField(
+                    key: 'pron_${item.hashCode}_sentences',
+                    label: 'Usage Examples / Sentences (One sentence per line)',
+                    value: item.sentenceSamples.join('\n'),
+                    maxLines: 3,
+                    hint: 'Example sentence using the word...',
+                    onChanged: (val) {
+                      item.sentenceSamples = val
+                          .split('\n')
+                          .where((line) => line.trim().isNotEmpty)
+                          .toList();
+                      prov.updateActiveContent(content);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

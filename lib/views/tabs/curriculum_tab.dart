@@ -511,9 +511,12 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   ),
                   const SizedBox(width: 16),
                   Tooltip(
-                    message: "Publishes the Grades, Subjects, and Chapters hierarchy. This does not modify chapter lesson contents.",
+                    message:
+                        "Publishes the Grades, Subjects, and Chapters hierarchy. This does not modify chapter lesson contents.",
                     child: ElevatedButton.icon(
-                      onPressed: _isSavingToDb ? null : _commitCurriculumChanges,
+                      onPressed: _isSavingToDb
+                          ? null
+                          : _commitCurriculumChanges,
                       icon: _isSavingToDb
                           ? const SizedBox(
                               width: 16,
@@ -664,12 +667,16 @@ class _CurriculumTabState extends State<CurriculumTab> {
         number: chNum,
         title: _chapterTitleController.text,
         interactiveLessonUrl: existingUrl,
-        interactiveDiagrams: existingDiagrams?.map((d) => InteractiveDiagram(
-              id: d.id,
-              title: d.title,
-              thumbnail: d.thumbnail,
-              url: d.url,
-            )).toList(),
+        interactiveDiagrams: existingDiagrams
+            ?.map(
+              (d) => InteractiveDiagram(
+                id: d.id,
+                title: d.title,
+                thumbnail: d.thumbnail,
+                url: d.url,
+              ),
+            )
+            .toList(),
       ),
     );
 
@@ -1222,7 +1229,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
     };
 
     // Safely determine initial preset
-    String selectedPreset = presets.containsKey('science') ? 'science' : presets.keys.first;
+    String selectedPreset = presets.containsKey('science')
+        ? 'science'
+        : presets.keys.first;
     final initialPreset = presets[selectedPreset]!;
 
     final idCtrl = TextEditingController(text: initialPreset['id']);
@@ -1240,8 +1249,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
         if (hasKey) {
           final preset = presets[idVal]!;
           if (nameCtrl.text != preset['name']) nameCtrl.text = preset['name']!;
-          if (emojiCtrl.text != preset['emoji']) emojiCtrl.text = preset['emoji']!;
-          if (colorCtrl.text != preset['color']) colorCtrl.text = preset['color']!;
+          if (emojiCtrl.text != preset['emoji'])
+            emojiCtrl.text = preset['emoji']!;
+          if (colorCtrl.text != preset['color'])
+            colorCtrl.text = preset['color']!;
           if (!isIdExistingPreset) {
             isIdExistingPreset = true;
             if (dialogUpdater != null) dialogUpdater!();
@@ -1261,7 +1272,8 @@ class _CurriculumTabState extends State<CurriculumTab> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             dialogUpdater = () => setDialogState(() {});
-            final bool isReadOnly = (selectedPreset != 'custom') || isIdExistingPreset;
+            final bool isReadOnly =
+                (selectedPreset != 'custom') || isIdExistingPreset;
 
             return AlertDialog(
               backgroundColor: AppColors.card,
@@ -1364,7 +1376,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       controller: nameCtrl,
                       readOnly: isReadOnly,
                       style: TextStyle(
-                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                        color: isReadOnly
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
                       ),
                       decoration: const InputDecoration(
                         labelText: 'Subject Name',
@@ -1377,7 +1391,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       controller: emojiCtrl,
                       readOnly: isReadOnly,
                       style: TextStyle(
-                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                        color: isReadOnly
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
                       ),
                       decoration: const InputDecoration(
                         labelText: 'Emoji Icon',
@@ -1462,7 +1478,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                       controller: colorCtrl,
                       readOnly: isReadOnly,
                       style: TextStyle(
-                        color: isReadOnly ? AppColors.textSecondary : AppColors.textPrimary,
+                        color: isReadOnly
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
                       ),
                       decoration: const InputDecoration(
                         labelText: 'Hex Color code',
@@ -1491,7 +1509,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         adminProvider.saveCustomPreset(
                           idVal,
                           nameCtrl.text.trim(),
-                          emojiCtrl.text.trim().isEmpty ? '📚' : emojiCtrl.text.trim(),
+                          emojiCtrl.text.trim().isEmpty
+                              ? '📚'
+                              : emojiCtrl.text.trim(),
                           colorCtrl.text.trim(),
                         );
                       }
@@ -1517,7 +1537,10 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),
-                  child: const Text('Add', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             );

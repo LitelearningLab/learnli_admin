@@ -400,7 +400,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'v1.0.3',
+                          'v1.0.4',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 11,

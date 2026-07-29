@@ -19,9 +19,6 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
   final List<String> _sections = [
     'General Metadata',
     'Simple Overview',
-    'Read Mode',
-    'Must Know Terms',
-    'Good to Know Insights',
     'Pre-requisite Concepts',
     'Industry Insights',
     'AI Learning Chips',
@@ -397,23 +394,17 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         return _buildMetadataForm(prov, active);
       case 1: // Simple Overview
         return _buildSimpleOverviewForm(prov, active);
-      case 2: // Read Mode
-        return _buildReadModeForm(prov, active);
-      case 3: // Must Know
-        return _buildMustKnowForm(prov, active);
-      case 4: // Good to Know
-        return _buildGoodToKnowForm(prov, active);
-      case 5: // Pre-requisite
+      case 2: // Pre-requisite
         return _buildPrerequisiteForm(prov, active);
-      case 6: // Industry Insights
+      case 3: // Industry Insights
         return _buildIndustryForm(prov, active);
-      case 7: // AI Chips
+      case 4: // AI Chips
         return _buildChipsForm(prov, active);
-      case 8: // Plus Points
+      case 5: // Plus Points
         return _buildPlusPointsForm(prov, active);
-      case 9: // Quiz
+      case 6: // Quiz
         return _buildQuizForm(prov, active);
-      case 10: // Pronunciation Lab
+      case 7: // Pronunciation Lab
         return _buildPronunciationForm(prov, active);
       default:
         return const Text('Form Index Error');
@@ -811,363 +802,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 3. Read Mode Form
-  Widget _buildReadModeForm(AdminProvider prov, ChapterContent content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Sections list (${content.readMode.length})',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.readMode.add(
-                  ReadModeSection(
-                    heading: 'New Section',
-                    paragraphs: [],
-                    keyPoints: [],
-                    example: '',
-                  ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Section'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.readMode.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, idx) {
-            final sec = content.readMode[idx];
-            return Container(
-              key: ValueKey(sec),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Section #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          content.readMode.removeAt(idx);
-                          prov.updateActiveContent(content);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFormField(
-                    key: 'read_${sec.hashCode}_heading',
-                    label: 'Heading',
-                    value: sec.heading,
-                    onChanged: (val) {
-                      sec.heading = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'read_${sec.hashCode}_paragraphs',
-                    label: 'Paragraphs (One paragraph per line)',
-                    value: sec.paragraphs.join('\n'),
-                    maxLines: 4,
-                    hint: 'First paragraph...\nSecond paragraph...',
-                    onChanged: (val) {
-                      sec.paragraphs = val
-                          .split('\n')
-                          .where((line) => line.trim().isNotEmpty)
-                          .toList();
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'read_${sec.hashCode}_key_points',
-                    label: 'Key Points (One point per line)',
-                    value: sec.keyPoints.join('\n'),
-                    maxLines: 4,
-                    hint: 'First key point...\nSecond key point...',
-                    onChanged: (val) {
-                      sec.keyPoints = val
-                          .split('\n')
-                          .where((line) => line.trim().isNotEmpty)
-                          .toList();
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'read_${sec.hashCode}_example',
-                    label: 'Example / Connection Case',
-                    value: sec.example,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      sec.example = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
 
-  // 4. Must Know Terms Form
-  Widget _buildMustKnowForm(AdminProvider prov, ChapterContent content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Terms list (${content.mustKnow.length})',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.mustKnow.add(
-                  MustKnowTerm(term: '', definition: '', importance: ''),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Term'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.mustKnow.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, idx) {
-            final item = content.mustKnow[idx];
-            return Container(
-              key: ValueKey(item),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Term #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          content.mustKnow.removeAt(idx);
-                          prov.updateActiveContent(content);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFormField(
-                    key: 'must_${item.hashCode}_term',
-                    label: 'Term / Vocabulary Name',
-                    value: item.term,
-                    onChanged: (val) {
-                      item.term = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'must_${item.hashCode}_definition',
-                    label: 'Definition',
-                    value: item.definition,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.definition = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'must_${item.hashCode}_importance',
-                    label: 'Why is this Important / Exam Value',
-                    value: item.importance,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.importance = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // 5. Good to Know Insights Form
-  Widget _buildGoodToKnowForm(AdminProvider prov, ChapterContent content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Insights list (${content.goodToKnow.length})',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.goodToKnow.add(
-                  GoodToKnowInsight(title: '', content: '', connection: ''),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Insight'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.goodToKnow.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, idx) {
-            final item = content.goodToKnow[idx];
-            return Container(
-              key: ValueKey(item),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Insight #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          content.goodToKnow.removeAt(idx);
-                          prov.updateActiveContent(content);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFormField(
-                    key: 'good_${item.hashCode}_title',
-                    label: 'Insight Title',
-                    value: item.title,
-                    onChanged: (val) {
-                      item.title = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'good_${item.hashCode}_content',
-                    label: 'Insight Content / Description',
-                    value: item.content,
-                    maxLines: 3,
-                    onChanged: (val) {
-                      item.content = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'good_${item.hashCode}_connection',
-                    label: 'Ecosystem Connection',
-                    value: item.connection,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.connection = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // 6. Pre-requisite Form
+  // 3. Pre-requisite Form
   Widget _buildPrerequisiteForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1282,7 +918,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 7. Industry Insights Form
+  // 4. Industry Insights Form
   Widget _buildIndustryForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1396,7 +1032,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 8. AI Learning Chips Form
+  // 5. AI Learning Chips Form
   Widget _buildChipsForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1572,7 +1208,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 9. Plus Points Form
+  // 6. Plus Points Form
   Widget _buildPlusPointsForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1761,7 +1397,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 10. Quiz and Questions Form
+  // 7. Quiz and Questions Form
   Widget _buildQuizForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2177,7 +1813,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 11. Pronunciation Lab Form
+  // 8. Pronunciation Lab Form
   Widget _buildPronunciationForm(AdminProvider prov, ChapterContent content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

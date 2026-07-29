@@ -56,34 +56,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Simple Overview HTML URL'), findsOneWidget);
 
-    // 2. Read Mode
-    await tester.tap(find.text('Read Mode'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Section'));
-    await tester.pumpAndSettle();
-    expect(find.text('Section #1'), findsOneWidget);
 
-    // 3. Must Know Terms
-    final mustKnowFinder = find.text('Must Know Terms');
-    await tester.ensureVisible(mustKnowFinder);
-    await tester.pumpAndSettle();
-    await tester.tap(mustKnowFinder);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Term'));
-    await tester.pumpAndSettle();
-    expect(find.text('Term #1'), findsOneWidget);
 
-    // 4. Good to Know Insights
-    final goodToKnowFinder = find.text('Good to Know Insights');
-    await tester.ensureVisible(goodToKnowFinder);
-    await tester.pumpAndSettle();
-    await tester.tap(goodToKnowFinder);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Insight'));
-    await tester.pumpAndSettle();
-    expect(find.text('Insight #1'), findsOneWidget);
-
-    // 5. Pre-requisite Concepts
+    // 2. Pre-requisite Concepts
     final prerequisiteFinder = find.text('Pre-requisite Concepts');
     await tester.ensureVisible(prerequisiteFinder);
     await tester.pumpAndSettle();
@@ -93,7 +68,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Prerequisite #1'), findsOneWidget);
 
-    // 6. Industry Insights
+    // 3. Industry Insights
     final industryInsightsFinder = find.text('Industry Insights');
     await tester.ensureVisible(industryInsightsFinder);
     await tester.pumpAndSettle();
@@ -103,7 +78,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Application #1'), findsOneWidget);
 
-    // 7. AI Learning Chips
+    // 4. AI Learning Chips
     final aiChipsFinder = find.text('AI Learning Chips');
     await tester.ensureVisible(aiChipsFinder);
     await tester.pumpAndSettle();
@@ -113,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Chip #1'), findsOneWidget);
 
-    // 8. Plus Points Topics
+    // 5. Plus Points Topics
     final plusPointsFinder = find.text('Plus Points Topics');
     await tester.ensureVisible(plusPointsFinder);
     await tester.pumpAndSettle();
@@ -123,7 +98,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Topic #1'), findsOneWidget);
 
-    // 9. Quiz & Questions
+    // 6. Quiz & Questions
     final quizFinder = find.text('Quiz & Questions');
     await tester.ensureVisible(quizFinder);
     await tester.pumpAndSettle();
@@ -133,7 +108,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Question #1'), findsOneWidget);
 
-    // 10. Pronunciation Lab
+    // 7. Pronunciation Lab
     final pronunciationFinder = find.text('Pronunciation Lab');
     await tester.ensureVisible(pronunciationFinder);
     await tester.pumpAndSettle();

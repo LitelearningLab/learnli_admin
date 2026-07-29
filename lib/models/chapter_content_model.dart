@@ -21,9 +21,6 @@ String _getSubjectPrefix(String subject) {
 class ChapterContent {
   final ChapterMetadata metadata;
   String? simpleOverviewUrl;
-  final List<ReadModeSection> readMode;
-  final List<MustKnowTerm> mustKnow;
-  final List<GoodToKnowInsight> goodToKnow;
   final List<PreRequisiteItem> preRequisite;
   final List<IndustryInsightItem> industryInsights;
   final List<ChipItem> chips;
@@ -34,9 +31,6 @@ class ChapterContent {
   ChapterContent({
     required this.metadata,
     this.simpleOverviewUrl,
-    required this.readMode,
-    required this.mustKnow,
-    required this.goodToKnow,
     required this.preRequisite,
     required this.industryInsights,
     required this.chips,
@@ -56,32 +50,7 @@ class ChapterContent {
       simpleOverviewUrl = simpleOverviewJson['url'] as String?;
     }
 
-    // Parse read_mode
-    final readModeJson = sections['read_mode'] ?? {};
-    final List<ReadModeSection> readModeList = [];
-    if (readModeJson['data'] is List) {
-      for (var item in readModeJson['data']) {
-        readModeList.add(ReadModeSection.fromJson(Map<String, dynamic>.from(item)));
-      }
-    }
 
-    // Parse must_know
-    final mustKnowJson = sections['must_know'] ?? {};
-    final List<MustKnowTerm> mustKnowList = [];
-    if (mustKnowJson['data'] is List) {
-      for (var item in mustKnowJson['data']) {
-        mustKnowList.add(MustKnowTerm.fromJson(Map<String, dynamic>.from(item)));
-      }
-    }
-
-    // Parse good_to_know
-    final goodToKnowJson = sections['good_to_know'] ?? {};
-    final List<GoodToKnowInsight> goodToKnowList = [];
-    if (goodToKnowJson['data'] is List) {
-      for (var item in goodToKnowJson['data']) {
-        goodToKnowList.add(GoodToKnowInsight.fromJson(Map<String, dynamic>.from(item)));
-      }
-    }
 
     // Parse pre_requisite
     final prerequisiteJson = sections['pre_requisite'] ?? {};
@@ -138,9 +107,6 @@ class ChapterContent {
     return ChapterContent(
       metadata: ChapterMetadata.fromJson(metadataJson),
       simpleOverviewUrl: simpleOverviewUrl,
-      readMode: readModeList,
-      mustKnow: mustKnowList,
-      goodToKnow: goodToKnowList,
       preRequisite: preRequisiteList,
       industryInsights: industryList,
       chips: chipsList,
@@ -158,18 +124,7 @@ class ChapterContent {
           'type': 'html',
           'url': simpleOverviewUrl,
         },
-        'read_mode': {
-          'type': 'array_of_sections',
-          'data': readMode.map((item) => item.toJson()).toList(),
-        },
-        'must_know': {
-          'type': 'array_of_terms',
-          'data': mustKnow.map((item) => item.toJson()).toList(),
-        },
-        'good_to_know': {
-          'type': 'array_of_insights',
-          'data': goodToKnow.map((item) => item.toJson()).toList(),
-        },
+
         'pre_requisite': {
           'type': 'array_of_prerequisites',
           'data': preRequisite.map((item) => item.toJson()).toList(),
@@ -219,9 +174,6 @@ class ChapterContent {
         interactiveDiagrams: interactiveDiagrams,
       ),
       simpleOverviewUrl: null,
-      readMode: [],
-      mustKnow: [],
-      goodToKnow: [],
       preRequisite: [],
       industryInsights: [],
       chips: [],
@@ -368,85 +320,6 @@ class ConceptItem {
   }
 }
 
-class ReadModeSection {
-  String heading;
-  List<String> paragraphs;
-  List<String> keyPoints;
-  String example;
-
-  ReadModeSection({
-    required this.heading,
-    required this.paragraphs,
-    required this.keyPoints,
-    required this.example,
-  });
-
-  factory ReadModeSection.fromJson(Map<String, dynamic> json) {
-    return ReadModeSection(
-      heading: json['heading'] ?? '',
-      paragraphs: List<String>.from(json['paragraphs'] ?? []),
-      keyPoints: List<String>.from(json['key_points'] ?? []),
-      example: json['example'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'heading': heading,
-      'paragraphs': paragraphs,
-      'key_points': keyPoints,
-      'example': example,
-    };
-  }
-}
-
-class MustKnowTerm {
-  String term;
-  String definition;
-  String importance;
-
-  MustKnowTerm({required this.term, required this.definition, required this.importance});
-
-  factory MustKnowTerm.fromJson(Map<String, dynamic> json) {
-    return MustKnowTerm(
-      term: json['term'] ?? '',
-      definition: json['definition'] ?? '',
-      importance: json['importance'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'term': term,
-      'definition': definition,
-      'importance': importance,
-    };
-  }
-}
-
-class GoodToKnowInsight {
-  String title;
-  String content;
-  String connection;
-
-  GoodToKnowInsight({required this.title, required this.content, required this.connection});
-
-  factory GoodToKnowInsight.fromJson(Map<String, dynamic> json) {
-    return GoodToKnowInsight(
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
-      connection: json['connection'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'content': content,
-      'connection': connection,
-    };
-  }
-}
 
 class PreRequisiteItem {
   String concept;

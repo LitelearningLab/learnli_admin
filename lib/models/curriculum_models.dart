@@ -69,8 +69,8 @@ class Subject {
     required this.name,
     required this.emoji,
     required this.color,
-    required this.chapters,
-  });
+    required List<Chapter> chapters,
+  }) : chapters = List<Chapter>.from(chapters)..sort((a, b) => a.number.compareTo(b.number));
 
   factory Subject.fromJson(Map<String, dynamic> json) {
     List<Chapter> chaptersList = [];

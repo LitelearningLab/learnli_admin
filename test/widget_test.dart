@@ -54,9 +54,7 @@ void main() {
     // 1. Simple Overview
     await tester.tap(find.text('Simple Overview'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Concept'));
-    await tester.pumpAndSettle();
-    expect(find.text('Concept #1'), findsOneWidget);
+    expect(find.text('Simple Overview HTML URL'), findsOneWidget);
 
     // 2. Read Mode
     await tester.tap(find.text('Read Mode'));

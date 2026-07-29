@@ -20,7 +20,7 @@ String _getSubjectPrefix(String subject) {
 
 class ChapterContent {
   final ChapterMetadata metadata;
-  final List<ConceptItem> simpleOverview;
+  String? simpleOverviewUrl;
   final List<ReadModeSection> readMode;
   final List<MustKnowTerm> mustKnow;
   final List<GoodToKnowInsight> goodToKnow;
@@ -33,7 +33,7 @@ class ChapterContent {
 
   ChapterContent({
     required this.metadata,
-    required this.simpleOverview,
+    this.simpleOverviewUrl,
     required this.readMode,
     required this.mustKnow,
     required this.goodToKnow,
@@ -51,11 +51,9 @@ class ChapterContent {
 
     // Parse simple_overview
     final simpleOverviewJson = sections['simple_overview'] ?? {};
-    final List<ConceptItem> simpleOverviewList = [];
-    if (simpleOverviewJson['data'] is List) {
-      for (var item in simpleOverviewJson['data']) {
-        simpleOverviewList.add(ConceptItem.fromJson(Map<String, dynamic>.from(item)));
-      }
+    String? simpleOverviewUrl;
+    if (simpleOverviewJson is Map) {
+      simpleOverviewUrl = simpleOverviewJson['url'] as String?;
     }
 
     // Parse read_mode
@@ -139,7 +137,7 @@ class ChapterContent {
 
     return ChapterContent(
       metadata: ChapterMetadata.fromJson(metadataJson),
-      simpleOverview: simpleOverviewList,
+      simpleOverviewUrl: simpleOverviewUrl,
       readMode: readModeList,
       mustKnow: mustKnowList,
       goodToKnow: goodToKnowList,
@@ -157,8 +155,8 @@ class ChapterContent {
       'metadata': metadata.toJson(),
       'sections': {
         'simple_overview': {
-          'type': 'array_of_concepts',
-          'data': simpleOverview.map((item) => item.toJson()).toList(),
+          'type': 'html',
+          'url': simpleOverviewUrl,
         },
         'read_mode': {
           'type': 'array_of_sections',
@@ -220,7 +218,7 @@ class ChapterContent {
         interactiveLessonUrl: interactiveLessonUrl,
         interactiveDiagrams: interactiveDiagrams,
       ),
-      simpleOverview: [],
+      simpleOverviewUrl: null,
       readMode: [],
       mustKnow: [],
       goodToKnow: [],

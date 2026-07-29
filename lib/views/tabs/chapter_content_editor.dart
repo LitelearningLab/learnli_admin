@@ -31,6 +31,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
   ];
 
   bool _isUploadingHtml = false;
+  bool _isUploadingSimpleOverviewHtml = false;
   final Map<int, bool> _isUploadingDiagramHtmlMap = {};
   final Map<int, bool> _isUploadingDiagramThumbnailMap = {};
 
@@ -761,96 +762,49 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Concepts list (${content.simpleOverview.length})',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.simpleOverview.add(
-                  ConceptItem(title: 'New Concept', explanation: ''),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Concept'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
+        Text(
+          'Simple Overview HTML File',
+          style: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Upload an HTML file containing the simple overview of this chapter.',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.simpleOverview.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, idx) {
-            final item = content.simpleOverview[idx];
-            return Container(
-              key: ValueKey(item),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Concept #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          content.simpleOverview.removeAt(idx);
-                          prov.updateActiveContent(content);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFormField(
-                    key: 'concept_${item.hashCode}_title',
-                    label: 'Concept Title',
-                    value: item.title,
-                    onChanged: (val) {
-                      item.title = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'concept_${item.hashCode}_explanation',
-                    label: 'Explanation',
-                    value: item.explanation,
-                    maxLines: 3,
-                    onChanged: (val) {
-                      item.explanation = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                ],
-              ),
-            );
+        _buildUrlFormField(
+          key: 'simple_overview_html_url',
+          label: 'Simple Overview HTML URL',
+          value: content.simpleOverviewUrl ?? '',
+          isUploading: _isUploadingSimpleOverviewHtml,
+          onChanged: (val) {
+            content.simpleOverviewUrl = val.trim().isEmpty ? null : val.trim();
+            prov.updateActiveContent(content);
+          },
+          onUploadPressed: () async {
+            setState(() {
+              _isUploadingSimpleOverviewHtml = true;
+            });
+            try {
+              final fileUrl = await _pickAndUploadHtml();
+              if (fileUrl != null) {
+                content.simpleOverviewUrl = fileUrl;
+                prov.updateActiveContent(content);
+              }
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _isUploadingSimpleOverviewHtml = false;
+                });
+              }
+            }
           },
         ),
       ],

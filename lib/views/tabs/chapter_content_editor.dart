@@ -1,3 +1,5 @@
+import 'dart:convert';
+import '../../utils/json_export_helper.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -379,6 +381,209 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         ],
       ),
     );
+  }
+
+  Future<String?> _showUploadModeDialog(BuildContext context, String sectionName, int incomingCount, int existingCount) async {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Text(
+                'Bulk Upload - $sectionName',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You are uploading $incomingCount items. There are currently $existingCount items in this section.',
+                style: GoogleFonts.inter(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'How would you like to apply the uploaded data?',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '• Replace: Clears all $existingCount existing items and imports only the $incomingCount uploaded items (useful for re-uploading edited files).',
+                style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '• Merge: Keeps the existing items and appends the $incomingCount new items to the end of the list.',
+                style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('cancel'),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop('merge'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text(
+                'Merge (Keep Existing)',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop('replace'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text(
+                'Replace Existing',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _handleBulkUpload({
+    required BuildContext context,
+    required AdminProvider prov,
+    required ChapterContent content,
+    required String sectionName,
+    required String mapKey,
+    required List<String> alternativeMapKeys,
+    required int existingCount,
+    required Function() onClear,
+    required Function(List<dynamic>) onDataLoaded,
+  }) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final rawText = utf8.decode(bytes);
+        final decoded = json.decode(rawText);
+        
+        List<dynamic>? list;
+        if (decoded is List) {
+          list = decoded;
+        } else if (decoded is Map) {
+          final possibleKeys = [mapKey, ...alternativeMapKeys, 'data', 'items'];
+          for (var key in possibleKeys) {
+            if (decoded.containsKey(key) && decoded[key] is List) {
+              list = decoded[key] as List;
+              break;
+            }
+          }
+        }
+
+        if (list == null) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Invalid JSON format. Expected a List or a Map containing a List under "$mapKey".'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
+        if (!context.mounted) return;
+        
+        final mode = await _showUploadModeDialog(context, sectionName, list.length, existingCount);
+        if (mode == null || mode == 'cancel') {
+          return;
+        }
+
+        if (mode == 'replace') {
+          onClear();
+        }
+
+        onDataLoaded(list);
+        prov.updateActiveContent(content);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully ${mode == 'replace' ? 'replaced with' : 'merged'} ${list.length} items for $sectionName!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to parse JSON: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleExport({
+    required BuildContext context,
+    required List<dynamic> list,
+    required String fileName,
+  }) {
+    try {
+      final jsonList = list.map((item) {
+        try {
+          return (item as dynamic).toJson();
+        } catch (_) {
+          return item;
+        }
+      }).toList();
+
+      final encoder = const JsonEncoder.withIndent('  ');
+      final rawText = encoder.convert(jsonList);
+      downloadJsonFile(rawText, fileName);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Exported successfully as $fileName'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to export: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  String _getExportFileName(ChapterContent content, String sectionName) {
+    final grade = content.metadata.grade;
+    final subject = content.metadata.subject.replaceAll(' ', '_').toLowerCase();
+    final chNum = content.metadata.chapterNumber.toString().padLeft(2, '0');
+    return 'G${grade}_${subject}_CH${chNum}_$sectionName.json';
   }
 
   // ==========================================
@@ -818,23 +1023,65 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.preRequisite.add(
-                  PreRequisiteItem(
-                    concept: '',
-                    explanation: '',
-                    connection: '',
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    content.preRequisite.add(
+                      PreRequisiteItem(
+                        concept: '',
+                        explanation: '',
+                        connection: '',
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Prerequisite'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Prerequisite'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Prerequisites',
+                    mapKey: 'pre_requisite',
+                    alternativeMapKeys: ['preRequisite', 'prerequisites'],
+                    existingCount: content.preRequisite.length,
+                    onClear: () => content.preRequisite.clear(),
+                    onDataLoaded: (list) {
+                      content.preRequisite.addAll(
+                        list.map((item) => PreRequisiteItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.preRequisite,
+                    fileName: _getExportFileName(content, 'prerequisites'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -933,23 +1180,65 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.industryInsights.add(
-                  IndustryInsightItem(
-                    field: '',
-                    application: '',
-                    exampleRole: '',
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    content.industryInsights.add(
+                      IndustryInsightItem(
+                        field: '',
+                        application: '',
+                        exampleRole: '',
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Application'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Application'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Industry Insights',
+                    mapKey: 'industry_insights',
+                    alternativeMapKeys: ['industryInsights', 'industry_insights_list'],
+                    existingCount: content.industryInsights.length,
+                    onClear: () => content.industryInsights.clear(),
+                    onDataLoaded: (list) {
+                      content.industryInsights.addAll(
+                        list.map((item) => IndustryInsightItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.industryInsights,
+                    fileName: _getExportFileName(content, 'industry_insights'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1047,28 +1336,70 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                final idStr =
-                    '${content.metadata.chapterNumber}_chip_${content.chips.length + 1}';
-                content.chips.add(
-                  ChipItem(
-                    id: idStr,
-                    title: 'New Chip',
-                    preview: '',
-                    paragraphs: [],
-                    keyPoints: [],
-                    aiEnabled: true,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final idStr =
+                        '${content.metadata.chapterNumber}_chip_${content.chips.length + 1}';
+                    content.chips.add(
+                      ChipItem(
+                        id: idStr,
+                        title: 'New Chip',
+                        preview: '',
+                        paragraphs: [],
+                        keyPoints: [],
+                        aiEnabled: true,
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Chip'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Chip'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'AI Chips',
+                    mapKey: 'chips',
+                    alternativeMapKeys: ['ai_chips', 'aiChips', 'items'],
+                    existingCount: content.chips.length,
+                    onClear: () => content.chips.clear(),
+                    onDataLoaded: (list) {
+                      content.chips.addAll(
+                        list.map((item) => ChipItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.chips,
+                    fileName: _getExportFileName(content, 'chips'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1223,29 +1554,71 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                final idStr =
-                    '${content.metadata.chapterNumber}.${content.plusPoints.length + 1}';
-                content.plusPoints.add(
-                  PlusPointTopic(
-                    id: idStr,
-                    title: 'New Topic',
-                    summary: '',
-                    keyFacts: [],
-                    commonMistake: '',
-                    aiEnabled: true,
-                    evaluationReady: true,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final idStr =
+                        '${content.metadata.chapterNumber}.${content.plusPoints.length + 1}';
+                    content.plusPoints.add(
+                      PlusPointTopic(
+                        id: idStr,
+                        title: 'New Topic',
+                        summary: '',
+                        keyFacts: [],
+                        commonMistake: '',
+                        aiEnabled: true,
+                        evaluationReady: true,
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Topic'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Topic'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Plus Points Topics',
+                    mapKey: 'plus_points',
+                    alternativeMapKeys: ['plusPoints', 'topics', 'items'],
+                    existingCount: content.plusPoints.length,
+                    onClear: () => content.plusPoints.clear(),
+                    onDataLoaded: (list) {
+                      content.plusPoints.addAll(
+                        list.map((item) => PlusPointTopic.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.plusPoints,
+                    fileName: _getExportFileName(content, 'plus_points'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1488,31 +1861,73 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                final newQ = QuizQuestion(
-                  id: content.quiz.questions.length + 1,
-                  questionText: 'New Question',
-                  options: [
-                    QuizOption(key: 'A', text: ''),
-                    QuizOption(key: 'B', text: ''),
-                    QuizOption(key: 'C', text: ''),
-                    QuizOption(key: 'D', text: ''),
-                  ],
-                  correctAnswer: 'A',
-                  explanation: '',
-                  difficulty: 'easy',
-                  concept: '',
-                );
-                content.quiz.questions.add(newQ);
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add MCQ Question'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final newQ = QuizQuestion(
+                      id: content.quiz.questions.length + 1,
+                      questionText: 'New Question',
+                      options: [
+                        QuizOption(key: 'A', text: ''),
+                        QuizOption(key: 'B', text: ''),
+                        QuizOption(key: 'C', text: ''),
+                        QuizOption(key: 'D', text: ''),
+                      ],
+                      correctAnswer: 'A',
+                      explanation: '',
+                      difficulty: 'easy',
+                      concept: '',
+                    );
+                    content.quiz.questions.add(newQ);
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add MCQ Question'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Quiz Questions',
+                    mapKey: 'questions',
+                    alternativeMapKeys: ['quiz_questions', 'quizQuestions'],
+                    existingCount: content.quiz.questions.length,
+                    onClear: () => content.quiz.questions.clear(),
+                    onDataLoaded: (list) {
+                      content.quiz.questions.addAll(
+                        list.map((item) => QuizQuestion.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.quiz.questions,
+                    fileName: _getExportFileName(content, 'quiz_questions'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1828,26 +2243,68 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                content.pronunciationLab.insert(
-                  0,
-                  PronunciationWord(
-                    text: 'newword',
-                    pronun: '',
-                    syllables: '',
-                    sentenceSamples: [],
-                    meaningSamples: [],
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    content.pronunciationLab.insert(
+                      0,
+                      PronunciationWord(
+                        text: 'newword',
+                        pronun: '',
+                        syllables: '',
+                        sentenceSamples: [],
+                        meaningSamples: [],
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Vocabulary Word'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                );
-                prov.updateActiveContent(content);
-              },
-              icon: const Icon(Icons.add, size: 14),
-              label: const Text('Add Vocabulary Word'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Pronunciation Lab',
+                    mapKey: 'pronunciation_lab',
+                    alternativeMapKeys: ['pronunciationLab', 'words', 'items'],
+                    existingCount: content.pronunciationLab.length,
+                    onClear: () => content.pronunciationLab.clear(),
+                    onDataLoaded: (list) {
+                      content.pronunciationLab.addAll(
+                        list.map((item) => PronunciationWord.fromJson(Map<String, dynamic>.from(item))).toList(),
+                      );
+                    },
+                  ),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExport(
+                    context: context,
+                    list: content.pronunciationLab,
+                    fileName: _getExportFileName(content, 'pronunciation_lab'),
+                  ),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -1738,19 +1738,132 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       prov.updateActiveContent(content);
                     },
                   ),
-                  _buildFormField(
-                    key: 'plus_${topic.hashCode}_key_facts',
-                    label: 'Key Facts / Checkpoints (One per line)',
-                    value: topic.keyFacts.join('\n'),
-                    maxLines: 4,
-                    onChanged: (val) {
-                      topic.keyFacts = val
-                          .split('\n')
-                          .where((line) => line.trim().isNotEmpty)
-                          .toList();
-                      prov.updateActiveContent(content);
+                  // Key Facts / Checkpoints Section
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Key Facts / Checkpoints (${topic.keyFacts.length})',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            topic.keyFacts.add(KeyFact(title: ''));
+                            prov.updateActiveContent(content);
+                          },
+                          icon: const Icon(Icons.add, size: 14),
+                          label: const Text('Add Checkpoint / Fact', style: TextStyle(fontSize: 11)),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: topic.keyFacts.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, fIdx) {
+                      final fact = topic.keyFacts[fIdx];
+                      return Row(
+                        children: [
+                          // ID Field
+                          SizedBox(
+                            width: 120,
+                            child: TextFormField(
+                              key: ValueKey('fact_${fact.hashCode}_id'),
+                              initialValue: fact.id ?? '',
+                              style: GoogleFonts.inter(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'ID (e.g. 7.2.1)',
+                                hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                filled: true,
+                                fillColor: AppColors.card,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.border),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.border),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.primary),
+                                ),
+                              ),
+                              onChanged: (val) {
+                                fact.id = val.trim().isEmpty ? null : val.trim();
+                                prov.updateActiveContent(content);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Title / Fact text field
+                          Expanded(
+                            child: TextFormField(
+                              key: ValueKey('fact_${fact.hashCode}_title'),
+                              initialValue: fact.title,
+                              maxLines: null,
+                              style: GoogleFonts.inter(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Fact description / Title',
+                                hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                filled: true,
+                                fillColor: AppColors.card,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.border),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.border),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: AppColors.primary),
+                                ),
+                              ),
+                              onChanged: (val) {
+                                fact.title = val;
+                                prov.updateActiveContent(content);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              topic.keyFacts.removeAt(fIdx);
+                              prov.updateActiveContent(content);
+                            },
+                          ),
+                        ],
+                      );
                     },
                   ),
+                  const SizedBox(height: 20),
                   _buildFormField(
                     key: 'plus_${topic.hashCode}_common_mistake',
                     label: 'Common Student Mistakes / Pitfalls',

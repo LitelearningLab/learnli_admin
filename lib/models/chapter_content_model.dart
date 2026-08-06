@@ -412,11 +412,40 @@ class ChipItem {
   }
 }
 
+class KeyFact {
+  String? id;
+  String title;
+
+  KeyFact({this.id, required this.title});
+
+  factory KeyFact.fromJson(dynamic json) {
+    if (json is String) {
+      return KeyFact(title: json);
+    } else if (json is Map) {
+      return KeyFact(
+        id: json['id']?.toString(),
+        title: json['title']?.toString() ?? '',
+      );
+    }
+    return KeyFact(title: '');
+  }
+
+  dynamic toJson() {
+    if (id == null || id!.trim().isEmpty) {
+      return title;
+    }
+    return {
+      'id': id,
+      'title': title,
+    };
+  }
+}
+
 class PlusPointTopic {
   String id;
   String title;
   String summary;
-  List<String> keyFacts;
+  List<KeyFact> keyFacts;
   String commonMistake;
   bool aiEnabled;
   bool evaluationReady;
@@ -433,11 +462,18 @@ class PlusPointTopic {
 
   factory PlusPointTopic.fromJson(Map<String, dynamic> json) {
     final content = Map<String, dynamic>.from(json['content'] ?? {});
+    final rawFacts = content['key_facts'] ?? [];
+    final List<KeyFact> parsedFacts = [];
+    if (rawFacts is List) {
+      for (var item in rawFacts) {
+        parsedFacts.add(KeyFact.fromJson(item));
+      }
+    }
     return PlusPointTopic(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       summary: content['summary'] ?? '',
-      keyFacts: List<String>.from(content['key_facts'] ?? []),
+      keyFacts: parsedFacts,
       commonMistake: content['common_mistake'] ?? '',
       aiEnabled: json['ai_enabled'] ?? true,
       evaluationReady: json['evaluation_ready'] ?? true,
@@ -450,7 +486,7 @@ class PlusPointTopic {
       'title': title,
       'content': {
         'summary': summary,
-        'key_facts': keyFacts,
+        'key_facts': keyFacts.map((e) => e.toJson()).toList(),
         'common_mistake': commonMistake,
       },
       'ai_enabled': aiEnabled,

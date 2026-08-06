@@ -118,4 +118,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Word #1'), findsOneWidget);
   });
+
+  test('Test PlusPointTopic.fromJson with Math and Science formats', () {
+    final mathJson = {
+      "id": "7.2",
+      "title": "Integration as an Inverse Process of Differentiation",
+      "ai_enabled": true,
+      "evaluation_ready": true,
+      "content": {
+        "key_facts": [
+          {
+            "id": "7.2.1",
+            "title": "Direct Inspection and Standard Formula"
+          },
+          {
+            "id": "7.2.2",
+            "title": "Algebraic Simplification Before Integration"
+          }
+        ]
+      }
+    };
+
+    final topic = PlusPointTopic.fromJson(mathJson);
+    expect(topic.id, '7.2');
+    expect(topic.title, 'Integration as an Inverse Process of Differentiation');
+    expect(topic.keyFacts.length, 2);
+    expect(topic.keyFacts[0].id, '7.2.1');
+    expect(topic.keyFacts[0].title, 'Direct Inspection and Standard Formula');
+    expect(topic.keyFacts[1].id, '7.2.2');
+    expect(topic.keyFacts[1].title, 'Algebraic Simplification Before Integration');
+
+    // Test serialization back to JSON
+    final serialized = topic.toJson();
+    expect(serialized['id'], '7.2');
+    expect(serialized['content']['key_facts'][0]['id'], '7.2.1');
+    expect(serialized['content']['key_facts'][0]['title'], 'Direct Inspection and Standard Formula');
+
+    // Test with Science format (strings)
+    final scienceJson = {
+      "id": "9.1",
+      "title": "Soil Profile",
+      "content": {
+        "key_facts": [
+          "The soil profile consists of several layers.",
+          "The topmost layer is rich in organic matter."
+        ]
+      }
+    };
+
+    final scienceTopic = PlusPointTopic.fromJson(scienceJson);
+    expect(scienceTopic.id, '9.1');
+    expect(scienceTopic.keyFacts.length, 2);
+    expect(scienceTopic.keyFacts[0].id, isNull);
+    expect(scienceTopic.keyFacts[0].title, 'The soil profile consists of several layers.');
+
+    final scienceSerialized = scienceTopic.toJson();
+    expect(scienceSerialized['content']['key_facts'][0], 'The soil profile consists of several layers.');
+  });
 }

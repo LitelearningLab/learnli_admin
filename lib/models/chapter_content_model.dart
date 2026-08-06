@@ -444,18 +444,14 @@ class KeyFact {
 class PlusPointTopic {
   String id;
   String title;
-  String summary;
   List<KeyFact> keyFacts;
-  String commonMistake;
   bool aiEnabled;
   bool evaluationReady;
 
   PlusPointTopic({
     required this.id,
     required this.title,
-    required this.summary,
     required this.keyFacts,
-    required this.commonMistake,
     required this.aiEnabled,
     required this.evaluationReady,
   });
@@ -472,9 +468,7 @@ class PlusPointTopic {
     return PlusPointTopic(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
-      summary: content['summary'] ?? '',
       keyFacts: parsedFacts,
-      commonMistake: content['common_mistake'] ?? '',
       aiEnabled: json['ai_enabled'] ?? true,
       evaluationReady: json['evaluation_ready'] ?? true,
     );
@@ -485,9 +479,7 @@ class PlusPointTopic {
       'id': id,
       'title': title,
       'content': {
-        'summary': summary,
         'key_facts': keyFacts.map((e) => e.toJson()).toList(),
-        'common_mistake': commonMistake,
       },
       'ai_enabled': aiEnabled,
       'evaluation_ready': evaluationReady,

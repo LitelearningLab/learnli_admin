@@ -1566,9 +1566,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       PlusPointTopic(
                         id: idStr,
                         title: 'New Topic',
-                        summary: '',
                         keyFacts: [],
-                        commonMistake: '',
                         aiEnabled: true,
                         evaluationReady: true,
                       ),
@@ -1728,16 +1726,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       ),
                     ],
                   ),
-                  _buildFormField(
-                    key: 'plus_${topic.hashCode}_summary',
-                    label: 'Summary explanation',
-                    value: topic.summary,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      topic.summary = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
+
                   // Key Facts / Checkpoints Section
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
@@ -1864,16 +1853,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  _buildFormField(
-                    key: 'plus_${topic.hashCode}_common_mistake',
-                    label: 'Common Student Mistakes / Pitfalls',
-                    value: topic.commonMistake,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      topic.commonMistake = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
+
                 ],
               ),
             );

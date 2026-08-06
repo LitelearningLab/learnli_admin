@@ -27,6 +27,7 @@ class ChapterContent {
   final List<PlusPointTopic> plusPoints;
   final QuizSection quiz;
   final List<PronunciationWord> pronunciationLab;
+  final PlusPointQuestionBank plusPointQuestionBank;
 
   ChapterContent({
     required this.metadata,
@@ -37,6 +38,7 @@ class ChapterContent {
     required this.plusPoints,
     required this.quiz,
     required this.pronunciationLab,
+    required this.plusPointQuestionBank,
   });
 
   factory ChapterContent.fromJson(Map<String, dynamic> json) {
@@ -104,6 +106,10 @@ class ChapterContent {
       }
     }
 
+    // Parse plus_point_question_bank
+    final ppbJson = sections['plus_point_question_bank'] ?? {};
+    final plusPointQB = PlusPointQuestionBank.fromJson(Map<String, dynamic>.from(ppbJson));
+
     return ChapterContent(
       metadata: ChapterMetadata.fromJson(metadataJson),
       simpleOverviewUrl: simpleOverviewUrl,
@@ -113,6 +119,7 @@ class ChapterContent {
       plusPoints: plusPointsList,
       quiz: quizSection,
       pronunciationLab: pronunciationList,
+      plusPointQuestionBank: plusPointQB,
     );
   }
 
@@ -146,6 +153,7 @@ class ChapterContent {
           'type': 'array_of_words',
           'data': pronunciationLab.map((item) => item.toJson()).toList(),
         },
+        'plus_point_question_bank': plusPointQuestionBank.toJson(),
       }
     };
   }
@@ -186,6 +194,11 @@ class ChapterContent {
         questions: [],
       ),
       pronunciationLab: [],
+      plusPointQuestionBank: PlusPointQuestionBank(
+        chapterNumber: chapterNum.toString(),
+        chapterName: title,
+        patterns: [],
+      ),
     );
   }
 }
@@ -667,6 +680,119 @@ class PronunciationWord {
       'localPath': localPath,
       'sentenceSamples': sentenceSamples,
       'meaningSamples': meaningSamples,
+    };
+  }
+}
+
+class PlusPointQuestionBank {
+  String? chapterNumber;
+  String? chapterName;
+  List<PlusPointPattern> patterns;
+
+  PlusPointQuestionBank({
+    this.chapterNumber,
+    this.chapterName,
+    required this.patterns,
+  });
+
+  factory PlusPointQuestionBank.fromJson(Map<String, dynamic> json) {
+    final List<PlusPointPattern> patternList = [];
+    if (json['patterns'] is List) {
+      for (var item in json['patterns']) {
+        patternList.add(PlusPointPattern.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
+    return PlusPointQuestionBank(
+      chapterNumber: json['chapter_number']?.toString(),
+      chapterName: json['chapter_name']?.toString(),
+      patterns: patternList,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': 'plus_point_question_bank',
+      'chapter_number': chapterNumber,
+      'chapter_name': chapterName,
+      'patterns': patterns.map((p) => p.toJson()).toList(),
+    };
+  }
+}
+
+class PlusPointPattern {
+  String id;
+  String conceptId;
+  String conceptName;
+  String patternNumber;
+  String patternName;
+  List<PlusPointQuestion> questions;
+
+  PlusPointPattern({
+    required this.id,
+    required this.conceptId,
+    required this.conceptName,
+    required this.patternNumber,
+    required this.patternName,
+    required this.questions,
+  });
+
+  factory PlusPointPattern.fromJson(Map<String, dynamic> json) {
+    final List<PlusPointQuestion> questionList = [];
+    if (json['questions'] is List) {
+      for (var item in json['questions']) {
+        questionList.add(PlusPointQuestion.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
+    return PlusPointPattern(
+      id: json['id']?.toString() ?? '',
+      conceptId: json['concept_id']?.toString() ?? '',
+      conceptName: json['concept_name']?.toString() ?? '',
+      patternNumber: json['pattern_number']?.toString() ?? '',
+      patternName: json['pattern_name']?.toString() ?? '',
+      questions: questionList,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'concept_id': conceptId,
+      'concept_name': conceptName,
+      'pattern_number': patternNumber,
+      'pattern_name': patternName,
+      'questions': questions.map((q) => q.toJson()).toList(),
+    };
+  }
+}
+
+class PlusPointQuestion {
+  int questionNumber;
+  String instruction;
+  String equationLatex;
+  String source;
+
+  PlusPointQuestion({
+    required this.questionNumber,
+    required this.instruction,
+    required this.equationLatex,
+    required this.source,
+  });
+
+  factory PlusPointQuestion.fromJson(Map<String, dynamic> json) {
+    return PlusPointQuestion(
+      questionNumber: int.tryParse(json['question_number']?.toString() ?? '') ?? 0,
+      instruction: json['instruction']?.toString() ?? '',
+      equationLatex: json['equation_latex']?.toString() ?? '',
+      source: json['source']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'question_number': questionNumber,
+      'instruction': instruction,
+      'equation_latex': equationLatex,
+      'source': source,
     };
   }
 }

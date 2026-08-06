@@ -27,6 +27,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     'Plus Points Topics',
     'Quiz & Questions',
     'Pronunciation Lab',
+    'Plus Point Question Bank',
   ];
 
   bool _isUploadingHtml = false;
@@ -200,7 +201,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.06),
@@ -227,13 +231,17 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                                 children: [
                                   const TextSpan(text: 'Editing content for '),
                                   TextSpan(
-                                    text: 'Grade ${adminProv.selectedGradeKey?.replaceAll('grade_', '')} > ${adminProv.selectedSubjectId?.toUpperCase()} > Ch ${adminProv.selectedChapterNumber}',
+                                    text:
+                                        'Grade ${adminProv.selectedGradeKey?.replaceAll('grade_', '')} > ${adminProv.selectedSubjectId?.toUpperCase()} > Ch ${adminProv.selectedChapterNumber}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primary,
                                     ),
                                   ),
-                                  const TextSpan(text: '. Changes here apply to the selected chapter\'s lessons. Structural hierarchy changes are published using the bottom button.'),
+                                  const TextSpan(
+                                    text:
+                                        '. Changes here apply to the selected chapter\'s lessons. Structural hierarchy changes are published using the bottom button.',
+                                  ),
                                 ],
                               ),
                             ),
@@ -270,7 +278,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                           children: [
                             // Save Button
                             Tooltip(
-                              message: 'Publishes lesson content (Read Mode, Quizzes, etc.) for this chapter. Structure layout is published at the bottom.',
+                              message:
+                                  'Publishes lesson content (Read Mode, Quizzes, etc.) for this chapter. Structure layout is published at the bottom.',
                               child: ElevatedButton.icon(
                                 onPressed: adminProv.isLoadingContent
                                     ? null
@@ -383,12 +392,19 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  Future<String?> _showUploadModeDialog(BuildContext context, String sectionName, int incomingCount, int existingCount) async {
+  Future<String?> _showUploadModeDialog(
+    BuildContext context,
+    String sectionName,
+    int incomingCount,
+    int existingCount,
+  ) async {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
@@ -410,27 +426,42 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               const SizedBox(height: 16),
               Text(
                 'How would you like to apply the uploaded data?',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 '• Replace: Clears all $existingCount existing items and imports only the $incomingCount uploaded items (useful for re-uploading edited files).',
-                style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+                style: GoogleFonts.inter(
+                  fontSize: 12.5,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 '• Merge: Keeps the existing items and appends the $incomingCount new items to the end of the list.',
-                style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+                style: GoogleFonts.inter(
+                  fontSize: 12.5,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actionsPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('cancel'),
               child: Text(
                 'Cancel',
-                style: GoogleFonts.inter(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                style: GoogleFonts.inter(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(
@@ -438,7 +469,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.secondary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(
                 'Merge (Keep Existing)',
@@ -450,7 +483,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(
                 'Replace Existing',
@@ -484,7 +519,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         final bytes = result.files.single.bytes!;
         final rawText = utf8.decode(bytes);
         final decoded = json.decode(rawText);
-        
+
         List<dynamic>? list;
         if (decoded is List) {
           list = decoded;
@@ -502,7 +537,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Invalid JSON format. Expected a List or a Map containing a List under "$mapKey".'),
+                content: Text(
+                  'Invalid JSON format. Expected a List or a Map containing a List under "$mapKey".',
+                ),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -511,8 +548,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         }
 
         if (!context.mounted) return;
-        
-        final mode = await _showUploadModeDialog(context, sectionName, list.length, existingCount);
+
+        final mode = await _showUploadModeDialog(
+          context,
+          sectionName,
+          list.length,
+          existingCount,
+        );
         if (mode == null || mode == 'cancel') {
           return;
         }
@@ -527,7 +569,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Successfully ${mode == 'replace' ? 'replaced with' : 'merged'} ${list.length} items for $sectionName!'),
+              content: Text(
+                'Successfully ${mode == 'replace' ? 'replaced with' : 'merged'} ${list.length} items for $sectionName!',
+              ),
               backgroundColor: AppColors.success,
             ),
           );
@@ -611,6 +655,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         return _buildQuizForm(prov, active);
       case 7: // Pronunciation Lab
         return _buildPronunciationForm(prov, active);
+      case 8: // Plus Point QB
+        return _buildPlusPointQBForm(prov, active);
       default:
         return const Text('Form Index Error');
     }
@@ -813,7 +859,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     }
                   }
                 }
-                final newId = 'diagram_${(maxNum + 1).toString().padLeft(3, '0')}';
+                final newId =
+                    'diagram_${(maxNum + 1).toString().padLeft(3, '0')}';
                 list.add(
                   InteractiveDiagram(
                     id: newId,
@@ -835,7 +882,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           ],
         ),
         const SizedBox(height: 10),
-        if (content.metadata.interactiveDiagrams != null && content.metadata.interactiveDiagrams!.isNotEmpty)
+        if (content.metadata.interactiveDiagrams != null &&
+            content.metadata.interactiveDiagrams!.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -891,7 +939,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       key: 'diagram_thumb_$idx',
                       label: 'Thumbnail URL',
                       value: diagram.thumbnail,
-                      isUploading: _isUploadingDiagramThumbnailMap[idx] ?? false,
+                      isUploading:
+                          _isUploadingDiagramThumbnailMap[idx] ?? false,
                       onChanged: (val) {
                         diagram.thumbnail = val.trim();
                         prov.updateActiveContent(content);
@@ -1007,7 +1056,6 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-
   // 3. Pre-requisite Form
   Widget _buildPrerequisiteForm(AdminProvider prov, ChapterContent content) {
     return Column(
@@ -1057,7 +1105,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     onClear: () => content.preRequisite.clear(),
                     onDataLoaded: (list) {
                       content.preRequisite.addAll(
-                        list.map((item) => PreRequisiteItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => PreRequisiteItem.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -1209,12 +1263,21 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     content: content,
                     sectionName: 'Industry Insights',
                     mapKey: 'industry_insights',
-                    alternativeMapKeys: ['industryInsights', 'industry_insights_list'],
+                    alternativeMapKeys: [
+                      'industryInsights',
+                      'industry_insights_list',
+                    ],
                     existingCount: content.industryInsights.length,
                     onClear: () => content.industryInsights.clear(),
                     onDataLoaded: (list) {
                       content.industryInsights.addAll(
-                        list.map((item) => IndustryInsightItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => IndustryInsightItem.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -1375,7 +1438,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     onClear: () => content.chips.clear(),
                     onDataLoaded: (list) {
                       content.chips.addAll(
-                        list.map((item) => ChipItem.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => ChipItem.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -1592,7 +1661,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     onClear: () => content.plusPoints.clear(),
                     onDataLoaded: (list) {
                       content.plusPoints.addAll(
-                        list.map((item) => PlusPointTopic.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => PlusPointTopic.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -1747,7 +1822,10 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                             prov.updateActiveContent(content);
                           },
                           icon: const Icon(Icons.add, size: 14),
-                          label: const Text('Add Checkpoint / Fact', style: TextStyle(fontSize: 11)),
+                          label: const Text(
+                            'Add Checkpoint / Fact',
+                            style: TextStyle(fontSize: 11),
+                          ),
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             padding: EdgeInsets.zero,
@@ -1779,25 +1857,39 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                               ),
                               decoration: InputDecoration(
                                 hintText: 'ID (e.g. 7.2.1)',
-                                hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                hintStyle: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
+                                ),
                                 filled: true,
                                 fillColor: AppColors.card,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.border),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.border),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.primary),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                               ),
                               onChanged: (val) {
-                                fact.id = val.trim().isEmpty ? null : val.trim();
+                                fact.id = val.trim().isEmpty
+                                    ? null
+                                    : val.trim();
                                 prov.updateActiveContent(content);
                               },
                             ),
@@ -1815,21 +1907,33 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Fact description / Title',
-                                hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                hintStyle: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
+                                ),
                                 filled: true,
                                 fillColor: AppColors.card,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.border),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.border),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: AppColors.primary),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                               ),
                               onChanged: (val) {
@@ -1840,7 +1944,11 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                           ),
                           const SizedBox(width: 4),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                             onPressed: () {
@@ -1853,7 +1961,6 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     },
                   ),
                   const SizedBox(height: 20),
-
                 ],
               ),
             );
@@ -1996,7 +2103,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     onClear: () => content.quiz.questions.clear(),
                     onDataLoaded: (list) {
                       content.quiz.questions.addAll(
-                        list.map((item) => QuizQuestion.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => QuizQuestion.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -2373,7 +2486,13 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     onClear: () => content.pronunciationLab.clear(),
                     onDataLoaded: (list) {
                       content.pronunciationLab.addAll(
-                        list.map((item) => PronunciationWord.fromJson(Map<String, dynamic>.from(item))).toList(),
+                        list
+                            .map(
+                              (item) => PronunciationWord.fromJson(
+                                Map<String, dynamic>.from(item),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   ),
@@ -2475,7 +2594,8 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       Expanded(
                         child: _buildFormField(
                           key: 'pron_${item.hashCode}_syllables',
-                          label: 'Syllables breakdown (hyphen-separated, e.g. nu-tri-tion)',
+                          label:
+                              'Syllables breakdown (hyphen-separated, e.g. nu-tri-tion)',
                           value: item.syllables,
                           onChanged: (val) {
                             item.syllables = val;
@@ -2498,18 +2618,33 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
-                              value: item.isPriority == 'true' || item.downloadStatus ? 'true' : 'false',
+                              value:
+                                  item.isPriority == 'true' ||
+                                      item.downloadStatus
+                                  ? 'true'
+                                  : 'false',
                               items: const [
-                                DropdownMenuItem(value: 'false', child: Text('Regular Vocabulary')),
-                                DropdownMenuItem(value: 'true', child: Text('Priority (Starred)')),
+                                DropdownMenuItem(
+                                  value: 'false',
+                                  child: Text('Regular Vocabulary'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'true',
+                                  child: Text('Priority (Starred)'),
+                                ),
                               ],
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: AppColors.card,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: AppColors.border),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
                                 ),
                               ),
                               onChanged: (val) {
@@ -2559,6 +2694,493 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         ),
       ],
     );
+  }
+
+  // 9. Plus Point Question Bank Form
+  Widget _buildPlusPointQBForm(AdminProvider prov, ChapterContent content) {
+    final qb = content.plusPointQuestionBank;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Action Buttons Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Patterns list (${qb.patterns.length})',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final nextPatternNum = (qb.patterns.length + 1)
+                        .toString()
+                        .padLeft(2, '0');
+                    final newPatternId =
+                        '${content.metadata.chapterNumber}.2.$nextPatternNum';
+                    qb.patterns.add(
+                      PlusPointPattern(
+                        id: newPatternId,
+                        conceptId: '${content.metadata.chapterNumber}.2',
+                        conceptName: 'New Concept Name',
+                        patternNumber: nextPatternNum,
+                        patternName: 'New Pattern Name',
+                        questions: [],
+                      ),
+                    );
+                    prov.updateActiveContent(content);
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('Add Pattern'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleQBBulkUpload(context, prov, content),
+                  icon: const Icon(Icons.upload_file, size: 14),
+                  label: const Text('Bulk Upload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleQBExport(context, content),
+                  icon: const Icon(Icons.download, size: 14),
+                  label: const Text('Export JSON'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+
+        // List of Patterns
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: qb.patterns.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 32),
+          itemBuilder: (context, pIdx) {
+            final pattern = qb.patterns[pIdx];
+            return Container(
+              key: ValueKey(pattern),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.divider, width: 1.5),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Pattern header row
+                  Row(
+                    children: [
+                      Text(
+                        'Pattern #${pIdx + 1}: ${pattern.patternName.isNotEmpty ? pattern.patternName : "Unnamed Pattern"}',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          qb.patterns.removeAt(pIdx);
+                          prov.updateActiveContent(content);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Pattern input fields
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pattern_id_$pIdx',
+                          label: 'Pattern ID',
+                          value: pattern.id,
+                          onChanged: (val) {
+                            pattern.id = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pattern_concept_id_$pIdx',
+                          label: 'Concept ID',
+                          value: pattern.conceptId,
+                          onChanged: (val) {
+                            pattern.conceptId = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pattern_number_$pIdx',
+                          label: 'Pattern Number',
+                          value: pattern.patternNumber,
+                          onChanged: (val) {
+                            pattern.patternNumber = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pattern_concept_name_$pIdx',
+                          label: 'Concept Name',
+                          value: pattern.conceptName,
+                          onChanged: (val) {
+                            pattern.conceptName = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'pattern_name_$pIdx',
+                          label: 'Pattern Name',
+                          value: pattern.patternName,
+                          onChanged: (val) {
+                            pattern.patternName = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Questions Section Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Questions (${pattern.questions.length})',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          pattern.questions.add(
+                            PlusPointQuestion(
+                              questionNumber: pattern.questions.length + 1,
+                              instruction: 'Find the antiderivative of',
+                              equationLatex: '',
+                              source: 'NCERT Textbook',
+                            ),
+                          );
+                          prov.updateActiveContent(content);
+                        },
+                        icon: const Icon(Icons.add_circle_outline, size: 14),
+                        label: const Text(
+                          'Add Question',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Questions List
+                  if (pattern.questions.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Text(
+                        'No questions added to this pattern yet.',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: pattern.questions.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, qIdx) {
+                        final question = pattern.questions[qIdx];
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 12,
+                                    backgroundColor: AppColors.primary
+                                        .withOpacity(0.15),
+                                    child: Text(
+                                      '${question.questionNumber}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Question Info',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: AppColors.error,
+                                      size: 16,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () {
+                                      pattern.questions.removeAt(qIdx);
+                                      // Re-index question numbers
+                                      for (
+                                        int i = 0;
+                                        i < pattern.questions.length;
+                                        i++
+                                      ) {
+                                        pattern.questions[i].questionNumber =
+                                            i + 1;
+                                      }
+                                      prov.updateActiveContent(content);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: _buildFormField(
+                                      key: 'pattern_${pIdx}_q_${qIdx}_num',
+                                      label: 'Number',
+                                      value: question.questionNumber.toString(),
+                                      isNumeric: true,
+                                      onChanged: (val) {
+                                        question.questionNumber =
+                                            int.tryParse(val) ??
+                                            question.questionNumber;
+                                        prov.updateActiveContent(content);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 3,
+                                    child: _buildFormField(
+                                      key: 'pattern_${pIdx}_q_${qIdx}_inst',
+                                      label: 'Instruction',
+                                      value: question.instruction,
+                                      onChanged: (val) {
+                                        question.instruction = val;
+                                        prov.updateActiveContent(content);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildFormField(
+                                      key: 'pattern_${pIdx}_q_${qIdx}_eq',
+                                      label: 'Equation (LaTeX)',
+                                      value: question.equationLatex,
+                                      onChanged: (val) {
+                                        question.equationLatex = val;
+                                        prov.updateActiveContent(content);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildFormField(
+                                      key: 'pattern_${pIdx}_q_${qIdx}_src',
+                                      label: 'Source',
+                                      value: question.source,
+                                      onChanged: (val) {
+                                        question.source = val;
+                                        prov.updateActiveContent(content);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleQBBulkUpload(
+    BuildContext context,
+    AdminProvider prov,
+    ChapterContent content,
+  ) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final rawText = utf8.decode(bytes);
+        final decoded = json.decode(rawText);
+
+        if (decoded is! Map<String, dynamic>) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid JSON format. Expected a Map object.'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
+        final incomingQB = PlusPointQuestionBank.fromJson(decoded);
+        final incomingCount = incomingQB.patterns.length;
+        final existingCount = content.plusPointQuestionBank.patterns.length;
+
+        if (!context.mounted) return;
+
+        final mode = await _showUploadModeDialog(
+          context,
+          'Plus Point Question Bank',
+          incomingCount,
+          existingCount,
+        );
+        if (mode == null || mode == 'cancel') {
+          return;
+        }
+
+        if (mode == 'replace') {
+          content.plusPointQuestionBank.chapterNumber =
+              incomingQB.chapterNumber;
+          content.plusPointQuestionBank.chapterName = incomingQB.chapterName;
+          content.plusPointQuestionBank.patterns.clear();
+        }
+
+        content.plusPointQuestionBank.patterns.addAll(incomingQB.patterns);
+        prov.updateActiveContent(content);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Successfully ${mode == 'replace' ? 'replaced with' : 'merged'} ${incomingQB.patterns.length} patterns!',
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to parse JSON: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleQBExport(BuildContext context, ChapterContent content) {
+    try {
+      final qb = content.plusPointQuestionBank;
+      final rawText = const JsonEncoder.withIndent('  ').convert(qb.toJson());
+      downloadJsonFile(rawText, _getExportFileName(content, 'plus_point_qb'));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Exported successfully as ${_getExportFileName(content, 'plus_point_qb')}',
+          ),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to export: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 }
 

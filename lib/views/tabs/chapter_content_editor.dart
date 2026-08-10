@@ -2731,6 +2731,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         conceptName: 'New Concept Name',
                         patternNumber: nextPatternNum,
                         patternName: 'New Pattern Name',
+                        marks: 2,
                         questions: [],
                       ),
                     );
@@ -2790,7 +2791,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   Row(
                     children: [
                       Text(
-                        'Pattern #${pIdx + 1}: ${pattern.patternName.isNotEmpty ? pattern.patternName : "Unnamed Pattern"}',
+                        'Pattern #${pIdx + 1}: ${pattern.patternName.isNotEmpty ? pattern.patternName : "Unnamed Pattern"}${pattern.marks != null ? " (${pattern.marks} Marks)" : ""}',
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -2857,6 +2858,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   Row(
                     children: [
                       Expanded(
+                        flex: 3,
                         child: _buildFormField(
                           key: 'pattern_concept_name_$pIdx',
                           label: 'Concept Name',
@@ -2869,12 +2871,28 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
+                        flex: 3,
                         child: _buildFormField(
                           key: 'pattern_name_$pIdx',
                           label: 'Pattern Name',
                           value: pattern.patternName,
                           onChanged: (val) {
                             pattern.patternName = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: _buildFormField(
+                          key: 'pattern_marks_$pIdx',
+                          label: 'Marks',
+                          value: pattern.marks?.toString() ?? '',
+                          isNumeric: true,
+                          hint: 'e.g. 2, 5, 10',
+                          onChanged: (val) {
+                            pattern.marks = int.tryParse(val);
                             prov.updateActiveContent(content);
                           },
                         ),

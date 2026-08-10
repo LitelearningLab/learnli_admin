@@ -725,6 +725,7 @@ class PlusPointPattern {
   String conceptName;
   String patternNumber;
   String patternName;
+  int? marks;
   List<PlusPointQuestion> questions;
 
   PlusPointPattern({
@@ -733,6 +734,7 @@ class PlusPointPattern {
     required this.conceptName,
     required this.patternNumber,
     required this.patternName,
+    this.marks,
     required this.questions,
   });
 
@@ -749,6 +751,7 @@ class PlusPointPattern {
       conceptName: json['concept_name']?.toString() ?? '',
       patternNumber: json['pattern_number']?.toString() ?? '',
       patternName: json['pattern_name']?.toString() ?? '',
+      marks: json['marks'] != null ? int.tryParse(json['marks'].toString()) : null,
       questions: questionList,
     );
   }
@@ -761,6 +764,7 @@ class PlusPointPattern {
       'pattern_number': patternNumber,
       'pattern_name': patternName,
       'questions': questions.map((q) => q.toJson()).toList(),
+      if (marks != null) 'marks': marks,
     };
   }
 }

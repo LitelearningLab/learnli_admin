@@ -1551,44 +1551,75 @@ class _CurriculumTabState extends State<CurriculumTab> {
   }
 
   void _showAddChapterDialog(String gradeKey, String subjectId) {
-    final numCtrl = TextEditingController();
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    final grade = adminProvider.curriculum[gradeKey];
+    final subject = grade?.subjects.where((s) => s.id == subjectId).firstOrNull;
+
+    int nextNum = 1;
+    if (subject != null && subject.chapters.isNotEmpty) {
+      final maxNum = subject.chapters
+          .map((c) => c.number)
+          .reduce((a, b) => a > b ? a : b);
+      nextNum = maxNum + 1;
+    }
+
+    final formKey = GlobalKey<FormState>();
+    final numCtrl = TextEditingController(text: '$nextNum');
     final titleCtrl = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: AppColors.card,
           title: Text(
             'Add Chapter',
             style: GoogleFonts.outfit(color: AppColors.textPrimary),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: numCtrl,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Chapter Number',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: numCtrl,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'Chapter Number',
+                    labelStyle: TextStyle(color: AppColors.textSecondary),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Please enter chapter number';
+                    }
+                    if (int.tryParse(val.trim()) == null) {
+                      return 'Please enter a valid integer';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: titleCtrl,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Chapter Title',
-                  labelStyle: TextStyle(color: AppColors.textSecondary),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: titleCtrl,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'Chapter Title',
+                    labelStyle: TextStyle(color: AppColors.textSecondary),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Please enter chapter title';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: AppColors.textSecondary),
@@ -1596,19 +1627,26 @@ class _CurriculumTabState extends State<CurriculumTab> {
             ),
             ElevatedButton(
               onPressed: () {
-                final chNum = int.tryParse(numCtrl.text);
-                if (chNum == null || titleCtrl.text.isEmpty) return;
-                Provider.of<AdminProvider>(context, listen: false).addChapter(
+                if (!(formKey.currentState?.validate() ?? false)) return;
+
+                final chNum = int.tryParse(numCtrl.text.trim());
+                final title = titleCtrl.text.trim();
+
+                if (chNum == null || title.isEmpty) return;
+
+                final newChapter = Chapter(number: chNum, title: title);
+                adminProvider.addChapter(
                   gradeKey,
                   subjectId,
-                  Chapter(number: chNum, title: titleCtrl.text.trim()),
+                  newChapter,
                 );
-                Navigator.pop(context);
+
+                Navigator.pop(dialogContext);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: Text('Add', style: TextStyle(color: Colors.white)),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
             ),
           ],
         );

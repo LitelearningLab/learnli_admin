@@ -60,6 +60,12 @@ class DatabaseService {
       return 'HIN';
     } else if (s.startsWith('comp') || s.startsWith('com')) {
       return 'COMP';
+    } else if (s.startsWith('chem') || s.startsWith('che')) {
+      return 'CHE';
+    } else if (s.startsWith('phys') || s.startsWith('phy')) {
+      return 'PHY';
+    } else if (s.startsWith('biol') || s.startsWith('bio')) {
+      return 'BIO';
     }
     // Fallback: use first 3 chars capitalized or whatever
     return s.length >= 3 ? s.substring(0, 3).toUpperCase() : s.toUpperCase();
@@ -75,6 +81,12 @@ class DatabaseService {
       'SST': 'social',
       'HIN': 'hindi',
       'COMP': 'computer',
+      'CHE': 'che',
+      'CHEM': 'che',
+      'PHY': 'phy',
+      'PHYS': 'phy',
+      'BIO': 'bio',
+      'BIOL': 'bio',
     };
 
     return subjectMap[prefix] ?? subject.toLowerCase();

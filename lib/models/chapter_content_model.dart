@@ -14,6 +14,12 @@ String _getSubjectPrefix(String subject) {
     return 'HIN';
   } else if (s.startsWith('comp') || s.startsWith('com')) {
     return 'COMP';
+  } else if (s.startsWith('chem') || s.startsWith('che')) {
+    return 'CHE';
+  } else if (s.startsWith('phys') || s.startsWith('phy')) {
+    return 'PHY';
+  } else if (s.startsWith('biol') || s.startsWith('bio')) {
+    return 'BIO';
   }
   return s.length >= 3 ? s.substring(0, 3).toUpperCase() : s.toUpperCase();
 }
@@ -168,6 +174,9 @@ class ChapterContent {
       'ENG': 'English',
       'HIN': 'Hindi',
       'COMP': 'Computer',
+      'CHE': 'Chemistry',
+      'PHY': 'Physics',
+      'BIO': 'Biology',
     };
     final displaySubject = subjectDisplayMap[prefix] ?? subject;
 

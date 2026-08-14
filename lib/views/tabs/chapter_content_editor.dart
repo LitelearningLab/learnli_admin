@@ -1412,9 +1412,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         id: idStr,
                         title: 'New Chip',
                         preview: '',
-                        paragraphs: [],
-                        keyPoints: [],
+                        subtopics: [],
                         aiEnabled: true,
+                        evaluationReady: true,
                       ),
                     );
                     prov.updateActiveContent(content);
@@ -1520,6 +1520,23 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                               prov.updateActiveContent(content);
                             },
                           ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Eval Ready',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Checkbox(
+                            value: chip.evaluationReady,
+                            activeColor: AppColors.primary,
+                            checkColor: Colors.white,
+                            onChanged: (val) {
+                              chip.evaluationReady = val ?? true;
+                              prov.updateActiveContent(content);
+                            },
+                          ),
                         ],
                       ),
                       IconButton(
@@ -1573,30 +1590,361 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                       prov.updateActiveContent(content);
                     },
                   ),
-                  _buildFormField(
-                    key: 'chip_${chip.hashCode}_paragraphs',
-                    label: 'Detailed Paragraphs (One per line)',
-                    value: chip.paragraphs.join('\n'),
-                    maxLines: 4,
-                    onChanged: (val) {
-                      chip.paragraphs = val
-                          .split('\n')
-                          .where((line) => line.trim().isNotEmpty)
-                          .toList();
-                      prov.updateActiveContent(content);
-                    },
+                  const Divider(color: AppColors.divider),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Subtopics (${chip.subtopics.length})',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            chip.subtopics.add(
+                              SubtopicItem(
+                                id: '${chip.id}.${chip.subtopics.length + 1}',
+                                title: 'New Subtopic',
+                                explanation: SubtopicExplanation(paragraphs: [], keyPoints: []),
+                                fillInTheBlanks: [],
+                                patternBasedQuestions: [],
+                              ),
+                            );
+                            prov.updateActiveContent(content);
+                          },
+                          icon: const Icon(Icons.add, size: 12),
+                          label: const Text('Add Subtopic', style: TextStyle(fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildFormField(
-                    key: 'chip_${chip.hashCode}_key_points',
-                    label: 'Key points summary (One per line)',
-                    value: chip.keyPoints.join('\n'),
-                    maxLines: 4,
-                    onChanged: (val) {
-                      chip.keyPoints = val
-                          .split('\n')
-                          .where((line) => line.trim().isNotEmpty)
-                          .toList();
-                      prov.updateActiveContent(content);
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: chip.subtopics.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (context, sIdx) {
+                      final subtopic = chip.subtopics[sIdx];
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.card,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Subtopic #${sIdx + 1}',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
+                                  onPressed: () {
+                                    chip.subtopics.removeAt(sIdx);
+                                    prov.updateActiveContent(content);
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildFormField(
+                                    key: 'subtopic_${subtopic.hashCode}_id',
+                                    label: 'Subtopic ID',
+                                    value: subtopic.id,
+                                    onChanged: (val) {
+                                      subtopic.id = val;
+                                      prov.updateActiveContent(content);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildFormField(
+                                    key: 'subtopic_${subtopic.hashCode}_title',
+                                    label: 'Subtopic Title',
+                                    value: subtopic.title,
+                                    onChanged: (val) {
+                                      subtopic.title = val;
+                                      prov.updateActiveContent(content);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            _buildFormField(
+                              key: 'subtopic_${subtopic.hashCode}_paragraphs',
+                              label: 'Detailed Paragraphs (One per line)',
+                              value: subtopic.explanation.paragraphs.join('\n'),
+                              maxLines: 3,
+                              onChanged: (val) {
+                                subtopic.explanation.paragraphs = val
+                                    .split('\n')
+                                    .where((line) => line.trim().isNotEmpty)
+                                    .toList();
+                                prov.updateActiveContent(content);
+                              },
+                            ),
+                            _buildFormField(
+                              key: 'subtopic_${subtopic.hashCode}_key_points',
+                              label: 'Key Points (One per line)',
+                              value: subtopic.explanation.keyPoints.join('\n'),
+                              maxLines: 3,
+                              onChanged: (val) {
+                                subtopic.explanation.keyPoints = val
+                                    .split('\n')
+                                    .where((line) => line.trim().isNotEmpty)
+                                    .toList();
+                                prov.updateActiveContent(content);
+                              },
+                            ),
+                            const Divider(color: AppColors.divider),
+                            
+                            // Fill-in-the-Blanks section
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Fill in the Blanks (${subtopic.fillInTheBlanks.length})',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    subtopic.fillInTheBlanks.add(
+                                      FillInTheBlankItem(question: '', answer: ''),
+                                    );
+                                    prov.updateActiveContent(content);
+                                  },
+                                  icon: const Icon(Icons.add, size: 14),
+                                  label: const Text('Add Blank', style: TextStyle(fontSize: 11)),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: subtopic.fillInTheBlanks.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 8),
+                              itemBuilder: (context, fibIdx) {
+                                final fib = subtopic.fillInTheBlanks[fibIdx];
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: TextFormField(
+                                        key: ValueKey('subtopic_${subtopic.hashCode}_fib_q_$fibIdx'),
+                                        initialValue: fib.question,
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.textPrimary,
+                                          fontSize: 13,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Question (Latex support e.g. \\int x^n\\,dx = ...)',
+                                          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                        ),
+                                        onChanged: (val) {
+                                          fib.question = val;
+                                          prov.updateActiveContent(content);
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 2,
+                                      child: TextFormField(
+                                        key: ValueKey('subtopic_${subtopic.hashCode}_fib_a_$fibIdx'),
+                                        initialValue: fib.answer,
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.textPrimary,
+                                          fontSize: 13,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Answer (e.g. n+1)',
+                                          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                        ),
+                                        onChanged: (val) {
+                                          fib.answer = val;
+                                          prov.updateActiveContent(content);
+                                        },
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
+                                      onPressed: () {
+                                        subtopic.fillInTheBlanks.removeAt(fibIdx);
+                                        prov.updateActiveContent(content);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(color: AppColors.divider),
+                            
+                            // Pattern-Based Questions section
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Pattern-Based Questions (${subtopic.patternBasedQuestions.length})',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    subtopic.patternBasedQuestions.add(
+                                      PatternBasedQuestionItem(pattern: '', question: '', answer: ''),
+                                    );
+                                    prov.updateActiveContent(content);
+                                  },
+                                  icon: const Icon(Icons.add, size: 14),
+                                  label: const Text('Add Pattern-Based', style: TextStyle(fontSize: 11)),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: subtopic.patternBasedQuestions.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              itemBuilder: (context, pbqIdx) {
+                                final pbq = subtopic.patternBasedQuestions[pbqIdx];
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextFormField(
+                                            key: ValueKey('subtopic_${subtopic.hashCode}_pbq_p_$pbqIdx'),
+                                            initialValue: pbq.pattern,
+                                            style: GoogleFonts.inter(
+                                              color: AppColors.textPrimary,
+                                              fontSize: 13,
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Pattern (e.g. Complete the calculation)',
+                                              hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                            ),
+                                            onChanged: (val) {
+                                              pbq.pattern = val;
+                                              prov.updateActiveContent(content);
+                                            },
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: AppColors.error, size: 16),
+                                          onPressed: () {
+                                            subtopic.patternBasedQuestions.removeAt(pbqIdx);
+                                            prov.updateActiveContent(content);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: TextFormField(
+                                            key: ValueKey('subtopic_${subtopic.hashCode}_pbq_q_$pbqIdx'),
+                                            initialValue: pbq.question,
+                                            style: GoogleFonts.inter(
+                                              color: AppColors.textPrimary,
+                                              fontSize: 13,
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Question (Latex support)',
+                                              hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                            ),
+                                            onChanged: (val) {
+                                              pbq.question = val;
+                                              prov.updateActiveContent(content);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          flex: 2,
+                                          child: TextFormField(
+                                            key: ValueKey('subtopic_${subtopic.hashCode}_pbq_a_$pbqIdx'),
+                                            initialValue: pbq.answer,
+                                            style: GoogleFonts.inter(
+                                              color: AppColors.textPrimary,
+                                              fontSize: 13,
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Answer (e.g. 4)',
+                                              hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                            ),
+                                            onChanged: (val) {
+                                              pbq.answer = val;
+                                              prov.updateActiveContent(content);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 40), // Spacer matching the delete button width
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
                     },
                   ),
                 ],

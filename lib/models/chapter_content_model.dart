@@ -395,28 +395,33 @@ class ChipItem {
   String id;
   String title;
   String preview;
-  List<String> paragraphs;
-  List<String> keyPoints;
+  List<SubtopicItem> subtopics;
   bool aiEnabled;
+  bool evaluationReady;
 
   ChipItem({
     required this.id,
     required this.title,
     required this.preview,
-    required this.paragraphs,
-    required this.keyPoints,
+    required this.subtopics,
     required this.aiEnabled,
+    required this.evaluationReady,
   });
 
   factory ChipItem.fromJson(Map<String, dynamic> json) {
-    final explanation = Map<String, dynamic>.from(json['explanation'] ?? {});
+    final List<SubtopicItem> subtopicsList = [];
+    if (json['subtopics'] is List) {
+      for (var item in json['subtopics']) {
+        subtopicsList.add(SubtopicItem.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
     return ChipItem(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       preview: json['preview'] ?? '',
-      paragraphs: List<String>.from(explanation['paragraphs'] ?? []),
-      keyPoints: List<String>.from(explanation['key_points'] ?? []),
+      subtopics: subtopicsList,
       aiEnabled: json['ai_enabled'] ?? true,
+      evaluationReady: json['evaluation_ready'] ?? true,
     );
   }
 
@@ -425,11 +430,137 @@ class ChipItem {
       'id': id,
       'title': title,
       'preview': preview,
-      'explanation': {
-        'paragraphs': paragraphs,
-        'key_points': keyPoints,
-      },
+      'subtopics': subtopics.map((item) => item.toJson()).toList(),
       'ai_enabled': aiEnabled,
+      'evaluation_ready': evaluationReady,
+    };
+  }
+}
+
+class SubtopicItem {
+  String id;
+  String title;
+  SubtopicExplanation explanation;
+  List<FillInTheBlankItem> fillInTheBlanks;
+  List<PatternBasedQuestionItem> patternBasedQuestions;
+
+  SubtopicItem({
+    required this.id,
+    required this.title,
+    required this.explanation,
+    required this.fillInTheBlanks,
+    required this.patternBasedQuestions,
+  });
+
+  factory SubtopicItem.fromJson(Map<String, dynamic> json) {
+    final expJson = Map<String, dynamic>.from(json['explanation'] ?? {});
+    
+    final List<FillInTheBlankItem> fibList = [];
+    if (json['fill_in_the_blanks'] is List) {
+      for (var item in json['fill_in_the_blanks']) {
+        fibList.add(FillInTheBlankItem.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
+
+    final List<PatternBasedQuestionItem> pbqList = [];
+    if (json['pattern_based_questions'] is List) {
+      for (var item in json['pattern_based_questions']) {
+        pbqList.add(PatternBasedQuestionItem.fromJson(Map<String, dynamic>.from(item)));
+      }
+    }
+
+    return SubtopicItem(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      explanation: SubtopicExplanation.fromJson(expJson),
+      fillInTheBlanks: fibList,
+      patternBasedQuestions: pbqList,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'explanation': explanation.toJson(),
+      'fill_in_the_blanks': fillInTheBlanks.map((item) => item.toJson()).toList(),
+      'pattern_based_questions': patternBasedQuestions.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class SubtopicExplanation {
+  List<String> paragraphs;
+  List<String> keyPoints;
+
+  SubtopicExplanation({
+    required this.paragraphs,
+    required this.keyPoints,
+  });
+
+  factory SubtopicExplanation.fromJson(Map<String, dynamic> json) {
+    return SubtopicExplanation(
+      paragraphs: List<String>.from(json['paragraphs'] ?? []),
+      keyPoints: List<String>.from(json['key_points'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'paragraphs': paragraphs,
+      'key_points': keyPoints,
+    };
+  }
+}
+
+class FillInTheBlankItem {
+  String question;
+  String answer;
+
+  FillInTheBlankItem({
+    required this.question,
+    required this.answer,
+  });
+
+  factory FillInTheBlankItem.fromJson(Map<String, dynamic> json) {
+    return FillInTheBlankItem(
+      question: json['question'] ?? '',
+      answer: json['answer'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'question': question,
+      'answer': answer,
+    };
+  }
+}
+
+class PatternBasedQuestionItem {
+  String pattern;
+  String question;
+  String answer;
+
+  PatternBasedQuestionItem({
+    required this.pattern,
+    required this.question,
+    required this.answer,
+  });
+
+  factory PatternBasedQuestionItem.fromJson(Map<String, dynamic> json) {
+    return PatternBasedQuestionItem(
+      pattern: json['pattern'] ?? '',
+      question: json['question'] ?? '',
+      answer: json['answer'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pattern': pattern,
+      'question': question,
+      'answer': answer,
     };
   }
 }

@@ -210,7 +210,7 @@ class _DashboardViewState extends State<DashboardView> {
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
-                          'v1.0.10',
+                          'v1.2.0',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             color: AppColors.textMuted,

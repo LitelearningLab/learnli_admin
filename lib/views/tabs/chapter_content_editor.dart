@@ -531,6 +531,23 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               break;
             }
           }
+          if (list == null && decoded.containsKey('sub_topics') && decoded['sub_topics'] is List) {
+            final subTopics = decoded['sub_topics'] as List;
+            final flatList = <dynamic>[];
+            for (var subTopic in subTopics) {
+              if (subTopic is Map) {
+                for (var key in possibleKeys) {
+                  if (subTopic.containsKey(key) && subTopic[key] is List) {
+                    flatList.addAll(subTopic[key] as List);
+                    break;
+                  }
+                }
+              }
+            }
+            if (flatList.isNotEmpty) {
+              list = flatList;
+            }
+          }
         }
 
         if (list == null) {

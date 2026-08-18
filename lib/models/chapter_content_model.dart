@@ -34,6 +34,7 @@ class ChapterContent {
   final QuizSection quiz;
   final List<PronunciationWord> pronunciationLab;
   final PlusPointQuestionBank plusPointQuestionBank;
+  HierarchicalPrerequisites? hierarchicalPrerequisites;
 
   ChapterContent({
     required this.metadata,
@@ -45,6 +46,7 @@ class ChapterContent {
     required this.quiz,
     required this.pronunciationLab,
     required this.plusPointQuestionBank,
+    this.hierarchicalPrerequisites,
   });
 
   factory ChapterContent.fromJson(Map<String, dynamic> json) {
@@ -63,9 +65,24 @@ class ChapterContent {
     // Parse pre_requisite
     final prerequisiteJson = sections['pre_requisite'] ?? {};
     final List<PreRequisiteItem> preRequisiteList = [];
-    if (prerequisiteJson['data'] is List) {
-      for (var item in prerequisiteJson['data']) {
-        preRequisiteList.add(PreRequisiteItem.fromJson(Map<String, dynamic>.from(item)));
+    HierarchicalPrerequisites? hierarchicalPrereqs;
+
+    final prereqData = prerequisiteJson['data'];
+    final bool isHierarchical = (prerequisiteJson.containsKey('sub_topics')) ||
+        (prereqData is Map && (prereqData as Map).containsKey('sub_topics')) ||
+        (prerequisiteJson['type'] == 'nested_prerequisites');
+
+    if (isHierarchical) {
+      final Map<String, dynamic> decodedMap = Map<String, dynamic>.from(prerequisiteJson);
+      final mapToParse = decodedMap.containsKey('sub_topics')
+          ? decodedMap
+          : (prereqData is Map ? Map<String, dynamic>.from(prereqData) : <String, dynamic>{});
+      hierarchicalPrereqs = HierarchicalPrerequisites.fromJson(mapToParse);
+    } else {
+      if (prereqData is List) {
+        for (var item in prereqData) {
+          preRequisiteList.add(PreRequisiteItem.fromJson(Map<String, dynamic>.from(item)));
+        }
       }
     }
 
@@ -126,6 +143,7 @@ class ChapterContent {
       quiz: quizSection,
       pronunciationLab: pronunciationList,
       plusPointQuestionBank: plusPointQB,
+      hierarchicalPrerequisites: hierarchicalPrereqs,
     );
   }
 
@@ -138,10 +156,15 @@ class ChapterContent {
           'url': simpleOverviewUrl,
         },
 
-        'pre_requisite': {
-          'type': 'array_of_prerequisites',
-          'data': preRequisite.map((item) => item.toJson()).toList(),
-        },
+        'pre_requisite': hierarchicalPrerequisites != null
+            ? {
+                'type': 'nested_prerequisites',
+                'data': hierarchicalPrerequisites!.toJson(),
+              }
+            : {
+                'type': 'array_of_prerequisites',
+                'data': preRequisite.map((item) => item.toJson()).toList(),
+              },
         'industry_insights': {
           'type': 'array_of_applications',
           'data': industryInsights.map((item) => item.toJson()).toList(),
@@ -208,6 +231,7 @@ class ChapterContent {
         chapterName: title,
         patterns: [],
       ),
+      hierarchicalPrerequisites: null,
     );
   }
 }
@@ -352,9 +376,9 @@ class PreRequisiteItem {
 
   factory PreRequisiteItem.fromJson(Map<String, dynamic> json) {
     return PreRequisiteItem(
-      concept: json['concept'] ?? '',
+      concept: json['concept'] ?? json['prerequisite_terminology_concept_process'] ?? '',
       explanation: json['explanation'] ?? '',
-      connection: json['connection'] ?? '',
+      connection: json['connection'] ?? json['formula_rule_example'] ?? '',
     );
   }
 
@@ -937,6 +961,88 @@ class PlusPointQuestion {
       'instruction': instruction,
       'equation_latex': equationLatex,
       'source': source,
+    };
+  }
+}
+
+class HierarchicalPrerequisiteConcept {
+  String concept;
+  String explanation;
+  String formulaRuleExample;
+
+  HierarchicalPrerequisiteConcept({
+    required this.concept,
+    required this.explanation,
+    required this.formulaRuleExample,
+  });
+
+  factory HierarchicalPrerequisiteConcept.fromJson(Map<String, dynamic> json) {
+    return HierarchicalPrerequisiteConcept(
+      concept: json['prerequisite_terminology_concept_process'] ?? json['concept'] ?? '',
+      explanation: json['explanation'] ?? '',
+      formulaRuleExample: json['formula_rule_example'] ?? json['connection'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'prerequisite_terminology_concept_process': concept,
+      'explanation': explanation,
+      'formula_rule_example': formulaRuleExample,
+    };
+  }
+}
+
+class HierarchicalPrerequisiteSubTopic {
+  String subTopic;
+  List<HierarchicalPrerequisiteConcept> prerequisites;
+
+  HierarchicalPrerequisiteSubTopic({
+    required this.subTopic,
+    required this.prerequisites,
+  });
+
+  factory HierarchicalPrerequisiteSubTopic.fromJson(Map<String, dynamic> json) {
+    final list = json['prerequisites'] as List? ?? [];
+    return HierarchicalPrerequisiteSubTopic(
+      subTopic: json['sub_topic'] ?? '',
+      prerequisites: list
+          .map((item) => HierarchicalPrerequisiteConcept.fromJson(Map<String, dynamic>.from(item)))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sub_topic': subTopic,
+      'prerequisites': prerequisites.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class HierarchicalPrerequisites {
+  String title;
+  List<HierarchicalPrerequisiteSubTopic> subTopics;
+
+  HierarchicalPrerequisites({
+    required this.title,
+    required this.subTopics,
+  });
+
+  factory HierarchicalPrerequisites.fromJson(Map<String, dynamic> json) {
+    final list = json['sub_topics'] as List? ?? [];
+    return HierarchicalPrerequisites(
+      title: json['title'] ?? '',
+      subTopics: list
+          .map((item) => HierarchicalPrerequisiteSubTopic.fromJson(Map<String, dynamic>.from(item)))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'sub_topics': subTopics.map((item) => item.toJson()).toList(),
     };
   }
 }

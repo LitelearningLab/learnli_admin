@@ -3043,35 +3043,6 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () => _handleBulkUpload(
-                    context: context,
-                    prov: prov,
-                    content: content,
-                    sectionName: 'Pronunciation Lab',
-                    mapKey: 'pronunciation_lab',
-                    alternativeMapKeys: ['pronunciationLab', 'words', 'items'],
-                    existingCount: content.pronunciationLab.length,
-                    onClear: () => content.pronunciationLab.clear(),
-                    onDataLoaded: (list) {
-                      content.pronunciationLab.addAll(
-                        list
-                            .map(
-                              (item) => PronunciationWord.fromJson(
-                                Map<String, dynamic>.from(item),
-                              ),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-                  icon: const Icon(Icons.upload_file, size: 14),
-                  label: const Text('Bulk Upload (JSON)'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
                   onPressed: () => _handleExcelBulkUpload(
                     context: context,
                     prov: prov,
@@ -3084,22 +3055,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     },
                   ),
                   icon: const Icon(Icons.grid_on, size: 14),
-                  label: const Text('Bulk Upload (Excel)'),
+                  label: const Text('Bulk Upload'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal[700],
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _handleExport(
-                    context: context,
-                    list: content.pronunciationLab,
-                    fileName: _getExportFileName(content, 'pronunciation_lab'),
-                  ),
-                  icon: const Icon(Icons.download, size: 14),
-                  label: const Text('Export JSON'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[700],
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -3110,7 +3068,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     fileName: _getExcelExportFileName(content, 'pronunciation_lab'),
                   ),
                   icon: const Icon(Icons.table_view, size: 14),
-                  label: const Text('Export Excel'),
+                  label: const Text('Export'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green[800],
                     foregroundColor: Colors.white,

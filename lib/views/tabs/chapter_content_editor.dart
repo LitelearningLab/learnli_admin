@@ -1,5 +1,7 @@
 import 'dart:convert';
 import '../../utils/json_export_helper.dart';
+import '../../utils/excel_export_helper.dart';
+import 'package:excel/excel.dart' as excel_pkg;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -604,6 +606,207 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
         );
       }
     }
+  }
+
+  String _getCellValueAsString(excel_pkg.CellValue? cellValue) {
+    if (cellValue == null) return '';
+    final String result = switch (cellValue) {
+      excel_pkg.TextCellValue(value: var v) => v.toString(),
+      excel_pkg.IntCellValue(value: var v) => v.toString(),
+      excel_pkg.DoubleCellValue(value: var v) => v.toString(),
+      excel_pkg.BoolCellValue(value: var v) => v.toString(),
+      excel_pkg.FormulaCellValue(formula: var f) => f,
+      excel_pkg.DateCellValue() => '${cellValue.year}-${cellValue.month.toString().padLeft(2, '0')}-${cellValue.day.toString().padLeft(2, '0')}',
+      excel_pkg.DateTimeCellValue() => '${cellValue.year}-${cellValue.month.toString().padLeft(2, '0')}-${cellValue.day.toString().padLeft(2, '0')} ${cellValue.hour.toString().padLeft(2, '0')}:${cellValue.minute.toString().padLeft(2, '0')}',
+      excel_pkg.TimeCellValue() => '${cellValue.hour.toString().padLeft(2, '0')}:${cellValue.minute.toString().padLeft(2, '0')}',
+    };
+    return result.trim();
+  }
+
+  Future<void> _handleExcelBulkUpload({
+    required BuildContext context,
+    required AdminProvider prov,
+    required ChapterContent content,
+    required String sectionName,
+    required int existingCount,
+    required Function() onClear,
+    required Function(List<PronunciationWord>) onDataLoaded,
+  }) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final excel = excel_pkg.Excel.decodeBytes(bytes);
+
+        final parsedWords = <PronunciationWord>[];
+
+        for (var table in excel.tables.keys) {
+          final sheet = excel.tables[table];
+          if (sheet == null || sheet.maxRows <= 1) continue;
+
+          // Row 0 is header. Let's find column indices.
+          // Headers: Word / Term, Pronunciation (English letters), IPA, Meaning, Link
+          int textCol = -1;
+          final headerRow = sheet.rows.first;
+          for (int c = 0; c < headerRow.length; c++) {
+            final val = _getCellValueAsString(headerRow[c]?.value).toLowerCase();
+            if (val.contains('word') || val.contains('term')) {
+              textCol = c;
+              break;
+            }
+          }
+
+          // Fallback to col 0 if not found
+          if (textCol == -1) textCol = 0;
+
+          // Process rows
+          for (int r = 1; r < sheet.maxRows; r++) {
+            final row = sheet.rows[r];
+            if (row.isEmpty) continue;
+
+            final String textVal = (textCol < row.length ? _getCellValueAsString(row[textCol]?.value) : '');
+            final String syllablesVal = (1 < row.length ? _getCellValueAsString(row[1]?.value) : '');
+            final String pronunVal = (2 < row.length ? _getCellValueAsString(row[2]?.value) : '');
+            final String meaningVal = (3 < row.length ? _getCellValueAsString(row[3]?.value) : '');
+            final String linkVal = (4 < row.length ? _getCellValueAsString(row[4]?.value) : '');
+
+            // Skip empty rows
+            if (textVal.isEmpty && syllablesVal.isEmpty && pronunVal.isEmpty && linkVal.isEmpty) {
+              continue;
+            }
+
+            final List<String> meaningsList = meaningVal.isNotEmpty ? [meaningVal] : [];
+
+            parsedWords.add(
+              PronunciationWord(
+                text: textVal,
+                syllables: syllablesVal,
+                pronun: pronunVal,
+                file: linkVal,
+                meaningSamples: meaningsList,
+                sentenceSamples: [],
+                isPriority: 'false',
+                downloadStatus: false,
+              ),
+            );
+          }
+        }
+
+        if (parsedWords.isEmpty) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('No valid rows found in the selected Excel file.'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
+        if (!context.mounted) return;
+
+        final mode = await _showUploadModeDialog(
+          context,
+          sectionName,
+          parsedWords.length,
+          existingCount,
+        );
+        if (mode == null || mode == 'cancel') {
+          return;
+        }
+
+        if (mode == 'replace') {
+          onClear();
+        }
+
+        onDataLoaded(parsedWords);
+        prov.updateActiveContent(content);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Successfully ${mode == 'replace' ? 'replaced with' : 'merged'} ${parsedWords.length} items for $sectionName!',
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to parse Excel: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleExcelExport({
+    required BuildContext context,
+    required List<PronunciationWord> list,
+    required String fileName,
+  }) {
+    try {
+      final excel = excel_pkg.Excel.createExcel();
+      final sheet = excel['Sheet1'];
+
+      // Write Headers
+      sheet.appendRow([
+        excel_pkg.TextCellValue('Word / Term'),
+        excel_pkg.TextCellValue('Pronunciation (English letters)'),
+        excel_pkg.TextCellValue('IPA'),
+        excel_pkg.TextCellValue('Meaning'),
+        excel_pkg.TextCellValue('Link'),
+      ]);
+
+      // Write Rows
+      for (var word in list) {
+        final meaningVal = word.meaningSamples.isNotEmpty ? word.meaningSamples.join('; ') : '';
+        sheet.appendRow([
+          excel_pkg.TextCellValue(word.text),
+          excel_pkg.TextCellValue(word.syllables),
+          excel_pkg.TextCellValue(word.pronun),
+          excel_pkg.TextCellValue(meaningVal),
+          excel_pkg.TextCellValue(word.file),
+        ]);
+      }
+
+      final bytes = excel.save();
+      if (bytes != null) {
+        downloadExcelFile(bytes, fileName);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Exported successfully as $fileName'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        throw Exception('Failed to generate Excel bytes');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to export Excel: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  String _getExcelExportFileName(ChapterContent content, String sectionName) {
+    final grade = content.metadata.grade;
+    final subject = content.metadata.subject.replaceAll(' ', '_').toLowerCase();
+    final chNum = content.metadata.chapterNumber.toString().padLeft(2, '0');
+    return 'G${grade}_${subject}_CH${chNum}_$sectionName.xlsx';
   }
 
   void _handleExport({
@@ -2862,9 +3065,28 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                     },
                   ),
                   icon: const Icon(Icons.upload_file, size: 14),
-                  label: const Text('Bulk Upload'),
+                  label: const Text('Bulk Upload (JSON)'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExcelBulkUpload(
+                    context: context,
+                    prov: prov,
+                    content: content,
+                    sectionName: 'Pronunciation Lab',
+                    existingCount: content.pronunciationLab.length,
+                    onClear: () => content.pronunciationLab.clear(),
+                    onDataLoaded: (list) {
+                      content.pronunciationLab.addAll(list);
+                    },
+                  ),
+                  icon: const Icon(Icons.grid_on, size: 14),
+                  label: const Text('Bulk Upload (Excel)'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal[700],
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -2878,6 +3100,19 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   label: const Text('Export JSON'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _handleExcelExport(
+                    context: context,
+                    list: content.pronunciationLab,
+                    fileName: _getExcelExportFileName(content, 'pronunciation_lab'),
+                  ),
+                  icon: const Icon(Icons.table_view, size: 14),
+                  label: const Text('Export Excel'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[800],
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -3023,6 +3258,15 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                         ),
                       ),
                     ],
+                  ),
+                  _buildFormField(
+                    key: 'pron_${item.hashCode}_file',
+                    label: 'Audio File / URL',
+                    value: item.file,
+                    onChanged: (val) {
+                      item.file = val.trim();
+                      prov.updateActiveContent(content);
+                    },
                   ),
                   _buildFormField(
                     key: 'pron_${item.hashCode}_meanings',

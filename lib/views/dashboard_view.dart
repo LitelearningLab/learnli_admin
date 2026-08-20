@@ -293,7 +293,7 @@ class _DashboardViewState extends State<DashboardView> {
 
                 // Main Tab Body
                 Expanded(
-                  child: adminProv.isLoadingCurriculum
+                  child: (adminProv.isLoadingCurriculum && adminProv.curriculum.isEmpty)
                       ? const Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

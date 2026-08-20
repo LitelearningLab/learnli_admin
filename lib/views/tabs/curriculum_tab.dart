@@ -35,6 +35,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
   final _chapterTitleController = TextEditingController();
 
   bool _isSavingToDb = false;
+  bool _isSavingVisibility = false;
 
   @override
   void dispose() {
@@ -209,6 +210,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               _activeGradeKey == gradeKey;
 
                           return ExpansionTile(
+                            key: PageStorageKey<String>('grade_$gradeKey'),
                             initiallyExpanded: false,
                             shape: const RoundedRectangleBorder(),
                             collapsedShape: const RoundedRectangleBorder(),
@@ -274,6 +276,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
                               return Padding(
                                 padding: const EdgeInsets.only(left: 16.0),
                                 child: ExpansionTile(
+                                  key: PageStorageKey<String>('subject_${gradeKey}_${subject.id}'),
                                   initiallyExpanded: false,
                                   shape: const RoundedRectangleBorder(),
                                   collapsedShape:
@@ -701,7 +704,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
     }
   }
 
-  void _toggleChapterHidden(AdminProvider prov, bool hideValue) {
+  Future<void> _toggleChapterHidden(AdminProvider prov, bool hideValue) async {
     if (_activeGradeKey == null ||
         _activeSubjectId == null ||
         _activeChapterNumber == null) {
@@ -716,30 +719,94 @@ class _CurriculumTabState extends State<CurriculumTab> {
     if (oldCh == null) {
       return;
     }
-    final existingUrl = oldCh.interactiveLessonUrl;
-    final existingDiagrams = oldCh.interactiveDiagrams;
 
-    prov.updateChapter(
-      _activeGradeKey!,
-      _activeSubjectId!,
-      _activeChapterNumber!,
-      Chapter(
-        number: oldCh.number,
-        title: oldCh.title,
-        interactiveLessonUrl: existingUrl,
-        interactiveDiagrams: existingDiagrams
-            ?.map(
-              (d) => InteractiveDiagram(
-                id: d.id,
-                title: d.title,
-                thumbnail: d.thumbnail,
-                url: d.url,
-              ),
-            )
-            .toList(),
-        isHidden: hideValue,
-      ),
-    );
+    setState(() {
+      _isSavingVisibility = true;
+    });
+
+    try {
+      final existingUrl = oldCh.interactiveLessonUrl;
+      final existingDiagrams = oldCh.interactiveDiagrams;
+
+      prov.updateChapter(
+        _activeGradeKey!,
+        _activeSubjectId!,
+        _activeChapterNumber!,
+        Chapter(
+          number: oldCh.number,
+          title: oldCh.title,
+          interactiveLessonUrl: existingUrl,
+          interactiveDiagrams: existingDiagrams
+              ?.map(
+                (d) => InteractiveDiagram(
+                  id: d.id,
+                  title: d.title,
+                  thumbnail: d.thumbnail,
+                  url: d.url,
+                ),
+              )
+              .toList(),
+          isHidden: hideValue,
+        ),
+      );
+
+      // Save directly to Firebase Database
+      await prov.saveCurriculum();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              hideValue
+                  ? 'Chapter is now hidden and updated in database!'
+                  : 'Chapter is now visible and updated in database!',
+            ),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      // Revert if saving fails
+      final existingUrl = oldCh.interactiveLessonUrl;
+      final existingDiagrams = oldCh.interactiveDiagrams;
+      
+      prov.updateChapter(
+        _activeGradeKey!,
+        _activeSubjectId!,
+        _activeChapterNumber!,
+        Chapter(
+          number: oldCh.number,
+          title: oldCh.title,
+          interactiveLessonUrl: existingUrl,
+          interactiveDiagrams: existingDiagrams
+              ?.map(
+                (d) => InteractiveDiagram(
+                  id: d.id,
+                  title: d.title,
+                  thumbnail: d.thumbnail,
+                  url: d.url,
+                ),
+              )
+              .toList(),
+          isHidden: !hideValue,
+        ),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update chapter visibility: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingVisibility = false;
+        });
+      }
+    }
   }
 
   Widget _buildGradeForm(AdminProvider prov) {
@@ -1048,16 +1115,25 @@ class _CurriculumTabState extends State<CurriculumTab> {
                   ],
                 ),
               ),
-              Switch(
-                value: isHidden,
-                activeThumbColor: AppColors.error,
-                activeTrackColor: AppColors.error.withOpacity(0.3),
-                inactiveThumbColor: AppColors.secondary,
-                inactiveTrackColor: AppColors.secondary.withOpacity(0.3),
-                onChanged: (value) {
-                  _toggleChapterHidden(prov, value);
-                },
-              ),
+              _isSavingVisibility
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: isHidden ? AppColors.error : AppColors.secondary,
+                      ),
+                    )
+                  : Switch(
+                      value: isHidden,
+                      activeThumbColor: AppColors.error,
+                      activeTrackColor: AppColors.error.withOpacity(0.3),
+                      inactiveThumbColor: AppColors.secondary,
+                      inactiveTrackColor: AppColors.secondary.withOpacity(0.3),
+                      onChanged: (value) {
+                        _toggleChapterHidden(prov, value);
+                      },
+                    ),
             ],
           ),
         ),

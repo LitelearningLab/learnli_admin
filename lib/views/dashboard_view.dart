@@ -210,7 +210,7 @@ class _DashboardViewState extends State<DashboardView> {
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
-                          'v1.2.1',
+                          'v1.2.2',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             color: AppColors.textMuted,
@@ -293,7 +293,9 @@ class _DashboardViewState extends State<DashboardView> {
 
                 // Main Tab Body
                 Expanded(
-                  child: (adminProv.isLoadingCurriculum && adminProv.curriculum.isEmpty)
+                  child:
+                      (adminProv.isLoadingCurriculum &&
+                          adminProv.curriculum.isEmpty)
                       ? const Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

@@ -951,11 +951,21 @@ class _CurriculumTabState extends State<CurriculumTab> {
             ),
             const SizedBox(width: 20),
             Expanded(
-              child: _buildTextField(
-                controller: _subjectColorController,
-                label: 'Subject Color (HEX)',
-                hint: '#4E7FFF',
-                onChanged: (_) => _autoUpdateSubject(prov),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextField(
+                    controller: _subjectColorController,
+                    label: 'Subject Color (HEX)',
+                    hint: '#4E7FFF',
+                    onChanged: (_) => _autoUpdateSubject(prov),
+                  ),
+                  const SizedBox(height: 12),
+                  SubjectColorPicker(
+                    controller: _subjectColorController,
+                    onChanged: () => _autoUpdateSubject(prov),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1679,6 +1689,12 @@ class _CurriculumTabState extends State<CurriculumTab> {
                         labelStyle: TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    SubjectColorPicker(
+                      controller: colorCtrl,
+                      onChanged: () => setDialogState(() {}),
+                      readOnly: isReadOnly,
+                    ),
                   ],
                 ),
               ),
@@ -1882,6 +1898,304 @@ class _CurriculumTabState extends State<CurriculumTab> {
           ],
         );
       },
+    );
+  }
+}
+
+class SubjectColorPicker extends StatefulWidget {
+  final TextEditingController controller;
+  final VoidCallback onChanged;
+  final bool readOnly;
+
+  const SubjectColorPicker({
+    super.key,
+    required this.controller,
+    required this.onChanged,
+    this.readOnly = false,
+  });
+
+  @override
+  State<SubjectColorPicker> createState() => _SubjectColorPickerState();
+}
+
+class _SubjectColorPickerState extends State<SubjectColorPicker> {
+  static const List<String> _predefinedColors = [
+    '#D1FAE5', // Pastel Green
+    '#DBEAFE', // Pastel Blue
+    '#FEF3C7', // Pastel Yellow
+    '#FCE7F3', // Pastel Pink
+    '#FFF2E2', // Pastel Orange
+    '#E0F2FE', // Pastel Cyan
+    '#4E7FFF', // Bright Blue
+    '#8B5CF6', // Purple
+    '#EC4899', // Pink
+    '#EF4444', // Red
+    '#F97316', // Orange
+    '#10B981', // Green
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onControllerChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant SubjectColorPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChange);
+      widget.controller.addListener(_onControllerChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChange);
+    super.dispose();
+  }
+
+  void _onControllerChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Color _parseHexColor(String hex) {
+    var clean = hex.replaceAll('#', '').trim();
+    if (clean.length == 6) {
+      clean = 'FF$clean';
+    }
+    if (clean.length == 8) {
+      final val = int.tryParse(clean, radix: 16);
+      if (val != null) return Color(val);
+    }
+    return const Color(0xFF4E7FFF);
+  }
+
+  String _colorToHex(Color color) {
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+  }
+
+  bool _useWhiteText(Color color) {
+    return color.computeLuminance() < 0.5;
+  }
+
+  void _updateHue(double localX, double width) {
+    if (widget.readOnly) return;
+    final ratio = width > 0 ? (localX / width).clamp(0.0, 1.0) : 0.0;
+    final double hue = ratio * 360.0;
+
+    final currentColor = _parseHexColor(widget.controller.text);
+    var hsv = HSVColor.fromColor(currentColor);
+
+    double saturation = hsv.saturation;
+    double value = hsv.value;
+    if (saturation < 0.1 || value < 0.1) {
+      saturation = 0.8;
+      value = 0.95;
+    }
+
+    final newColor = HSVColor.fromAHSV(1.0, hue, saturation, value).toColor();
+    widget.controller.text = _colorToHex(newColor);
+    widget.onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = _parseHexColor(widget.controller.text);
+    final String currentHex = widget.controller.text.isEmpty
+        ? '#4E7FFF'
+        : widget.controller.text.toUpperCase();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Predefined Presets',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: activeColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.border,
+                  width: 1.0,
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              currentHex,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _predefinedColors.map((hex) {
+            final color = _parseHexColor(hex);
+            final bool isSelected = currentHex == hex.toUpperCase();
+            return GestureDetector(
+              onTap: widget.readOnly
+                  ? null
+                  : () {
+                      widget.controller.text = hex;
+                      widget.onChanged();
+                    },
+              child: MouseRegion(
+                cursor: widget.readOnly
+                    ? SystemMouseCursors.basic
+                    : SystemMouseCursors.click,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? (Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black)
+                          : Colors.transparent,
+                      width: 2.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1.5),
+                      ),
+                    ],
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          size: 14,
+                          color: _useWhiteText(color) ? Colors.white : Colors.black87,
+                        )
+                      : null,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Rainbow Spectrum (Drag/Click to select hue)',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Opacity(
+          opacity: widget.readOnly ? 0.5 : 1.0,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final hsv = HSVColor.fromColor(activeColor);
+              final hueRatio = hsv.hue / 360.0;
+              final thumbX = hueRatio * width;
+
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanDown: widget.readOnly
+                    ? null
+                    : (details) {
+                        _updateHue(details.localPosition.dx, width);
+                      },
+                onPanUpdate: widget.readOnly
+                    ? null
+                    : (details) {
+                        _updateHue(details.localPosition.dx, width);
+                      },
+                child: MouseRegion(
+                  cursor: widget.readOnly
+                      ? SystemMouseCursors.basic
+                      : SystemMouseCursors.click,
+                  child: SizedBox(
+                    height: 24,
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Container(
+                          height: 10,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFF0000), // Red
+                                Color(0xFFFFFF00), // Yellow
+                                Color(0xFF00FF00), // Green
+                                Color(0xFF00FFFF), // Cyan
+                                Color(0xFF0000FF), // Blue
+                                Color(0xFFFF00FF), // Magenta
+                                Color(0xFFFF0000), // Red
+                              ],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: (thumbX - 9).clamp(0.0, width - 18),
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.black.withOpacity(0.3),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 1.5),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: activeColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

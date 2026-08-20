@@ -159,6 +159,7 @@ class AdminProvider with ChangeNotifier {
                           url: d.url,
                         )).toList()
                       : null,
+                  isHidden: chapter.isHidden,
                 );
               }).toList(),
             );

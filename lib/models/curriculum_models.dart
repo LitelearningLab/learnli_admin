@@ -5,12 +5,14 @@ class Chapter {
   final String title;
   final String? interactiveLessonUrl;
   final List<InteractiveDiagram>? interactiveDiagrams;
+  final bool isHidden;
 
   Chapter({
     required this.number,
     required this.title,
     this.interactiveLessonUrl,
     this.interactiveDiagrams,
+    this.isHidden = false,
   });
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class Chapter {
       title: json['title'] ?? '',
       interactiveLessonUrl: json['interactiveLessonUrl'] ?? json['interactive_lesson_url'],
       interactiveDiagrams: diagramsList,
+      isHidden: json['isHidden'] ?? json['is_hidden'] ?? false,
     );
   }
 
@@ -52,7 +55,8 @@ class Chapter {
       },
       if (interactiveDiagrams != null) ...{
         'interactiveDiagrams': interactiveDiagrams!.map((d) => d.toJson()).toList(),
-      }
+      },
+      'isHidden': isHidden,
     };
   }
 }

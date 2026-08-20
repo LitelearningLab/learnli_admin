@@ -368,6 +368,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                           size: 14,
                                           color: AppColors.textMuted,
                                         ),
+                                        trailing: chapter.isHidden
+                                            ? const Icon(
+                                                Icons.visibility_off_outlined,
+                                                size: 14,
+                                                color: AppColors.error,
+                                              )
+                                            : null,
                                         title: Text(
                                           'Ch ${chapter.number}: ${chapter.title}',
                                           maxLines: 1,
@@ -375,7 +382,9 @@ class _CurriculumTabState extends State<CurriculumTab> {
                                           style: GoogleFonts.inter(
                                             color: isChapterSelected
                                                 ? AppColors.primary
-                                                : AppColors.textSecondary,
+                                                : chapter.isHidden
+                                                    ? AppColors.textMuted
+                                                    : AppColors.textSecondary,
                                             fontWeight: isChapterSelected
                                                 ? FontWeight.bold
                                                 : FontWeight.normal,
@@ -646,10 +655,13 @@ class _CurriculumTabState extends State<CurriculumTab> {
   void _autoUpdateChapter(AdminProvider prov) {
     if (_activeGradeKey == null ||
         _activeSubjectId == null ||
-        _activeChapterNumber == null)
+        _activeChapterNumber == null) {
       return;
+    }
     final chNum = int.tryParse(_chapterNumberController.text);
-    if (chNum == null || _chapterTitleController.text.isEmpty) return;
+    if (chNum == null || _chapterTitleController.text.isEmpty) {
+      return;
+    }
 
     final grade = prov.curriculum[_activeGradeKey!];
     final subject = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
@@ -677,6 +689,7 @@ class _CurriculumTabState extends State<CurriculumTab> {
               ),
             )
             .toList(),
+        isHidden: oldCh?.isHidden ?? false,
       ),
     );
 
@@ -686,6 +699,47 @@ class _CurriculumTabState extends State<CurriculumTab> {
       });
       prov.selectChapter(chNum);
     }
+  }
+
+  void _toggleChapterHidden(AdminProvider prov, bool hideValue) {
+    if (_activeGradeKey == null ||
+        _activeSubjectId == null ||
+        _activeChapterNumber == null) {
+      return;
+    }
+
+    final grade = prov.curriculum[_activeGradeKey!];
+    final subject = grade?.subjects.firstWhere((s) => s.id == _activeSubjectId);
+    final oldCh = subject?.chapters.firstWhere(
+      (c) => c.number == _activeChapterNumber,
+    );
+    if (oldCh == null) {
+      return;
+    }
+    final existingUrl = oldCh.interactiveLessonUrl;
+    final existingDiagrams = oldCh.interactiveDiagrams;
+
+    prov.updateChapter(
+      _activeGradeKey!,
+      _activeSubjectId!,
+      _activeChapterNumber!,
+      Chapter(
+        number: oldCh.number,
+        title: oldCh.title,
+        interactiveLessonUrl: existingUrl,
+        interactiveDiagrams: existingDiagrams
+            ?.map(
+              (d) => InteractiveDiagram(
+                id: d.id,
+                title: d.title,
+                thumbnail: d.thumbnail,
+                url: d.url,
+              ),
+            )
+            .toList(),
+        isHidden: hideValue,
+      ),
+    );
   }
 
   Widget _buildGradeForm(AdminProvider prov) {
@@ -886,6 +940,11 @@ class _CurriculumTabState extends State<CurriculumTab> {
   }
 
   Widget _buildChapterForm(AdminProvider prov) {
+    final grade = prov.curriculum[_activeGradeKey!];
+    final subject = grade?.subjects.where((s) => s.id == _activeSubjectId).firstOrNull;
+    final chapter = subject?.chapters.where((c) => c.number == _activeChapterNumber).firstOrNull;
+    final isHidden = chapter?.isHidden ?? false;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -941,6 +1000,63 @@ class _CurriculumTabState extends State<CurriculumTab> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+              ),
+            ],
+          ),
+        ),
+        // Visibility Settings Card
+        Container(
+          margin: const EdgeInsets.only(bottom: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isHidden ? AppColors.error.withOpacity(0.05) : AppColors.secondary.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isHidden ? AppColors.error.withOpacity(0.3) : AppColors.secondary.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: isHidden ? AppColors.error : AppColors.secondary,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isHidden ? 'Chapter is Hidden' : 'Chapter is Visible',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isHidden
+                          ? 'Students cannot see this chapter in the learning application.'
+                          : 'Students can see this chapter in the learning application.',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: isHidden,
+                activeThumbColor: AppColors.error,
+                activeTrackColor: AppColors.error.withOpacity(0.3),
+                inactiveThumbColor: AppColors.secondary,
+                inactiveTrackColor: AppColors.secondary.withOpacity(0.3),
+                onChanged: (value) {
+                  _toggleChapterHidden(prov, value);
+                },
               ),
             ],
           ),

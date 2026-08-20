@@ -20,6 +20,7 @@ class ChapterContentEditor extends StatefulWidget {
 
 class _ChapterContentEditorState extends State<ChapterContentEditor> {
   int _activeSectionIndex = 0;
+  int _selectedPrerequisiteSubtopicIndex = 0;
   final List<String> _sections = [
     'General Metadata',
     'Simple Overview',
@@ -1276,8 +1277,476 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
     );
   }
 
-  // 3. Pre-requisite Form
+  // ==========================================
+  // HIERARCHICAL PREREQUISITE MANAGEMENT HELPERS
+  // ==========================================
+
+  void _initializeHierarchicalPrerequisites(AdminProvider prov, ChapterContent content) {
+    final flatItems = content.preRequisite;
+    final chNum = content.metadata.chapterNumber;
+    final subject = content.metadata.subject.toLowerCase();
+    
+    final subTopics = <HierarchicalPrerequisiteSubTopic>[];
+    
+    // Check for Matrices Chapter 3
+    if ((chNum == 3 && (subject.contains('math') || subject.contains('mat'))) || 
+        content.metadata.chapterName.toLowerCase().contains('matrices')) {
+      final configs = [
+        {"sub_topic": "3.1 Introduction", "count": 4},
+        {"sub_topic": "3.2 Matrix and Order", "count": 5},
+        {"sub_topic": "3.3 Types of Matrices and Equality", "count": 6},
+        {"sub_topic": "3.4 Operations on Matrices", "count": 10},
+        {"sub_topic": "3.5 Transpose of a Matrix", "count": 5},
+        {"sub_topic": "3.6 Symmetric and Skew-Symmetric Matrices", "count": 7},
+        {"sub_topic": "3.7 Invertible Matrices", "count": 9},
+      ];
+      
+      int currentIndex = 0;
+      for (var conf in configs) {
+        final name = conf["sub_topic"] as String;
+        final count = conf["count"] as int;
+        final List<HierarchicalPrerequisiteConcept> concepts = [];
+        
+        for (int i = 0; i < count && currentIndex < flatItems.length; i++) {
+          final item = flatItems[currentIndex];
+          concepts.add(HierarchicalPrerequisiteConcept(
+            concept: item.concept,
+            explanation: item.explanation,
+            formulaRuleExample: item.connection,
+          ));
+          currentIndex++;
+        }
+        
+        subTopics.add(HierarchicalPrerequisiteSubTopic(
+          subTopic: name,
+          prerequisites: concepts,
+        ));
+      }
+      
+      if (currentIndex < flatItems.length) {
+        final remaining = <HierarchicalPrerequisiteConcept>[];
+        while (currentIndex < flatItems.length) {
+          final item = flatItems[currentIndex];
+          remaining.add(HierarchicalPrerequisiteConcept(
+            concept: item.concept,
+            explanation: item.explanation,
+            formulaRuleExample: item.connection,
+          ));
+          currentIndex++;
+        }
+        if (subTopics.isNotEmpty) {
+          subTopics.last.prerequisites.addAll(remaining);
+        } else {
+          subTopics.add(HierarchicalPrerequisiteSubTopic(
+            subTopic: "Remaining Prerequisites",
+            prerequisites: remaining,
+          ));
+        }
+      }
+    } 
+    // Check for Integrals Chapter 7
+    else if ((chNum == 7 && (subject.contains('math') || subject.contains('mat'))) || 
+        content.metadata.chapterName.toLowerCase().contains('integrals')) {
+      final configs = [
+        {"sub_topic": "7.1 Introduction", "count": 8},
+        {"sub_topic": "7.2 Integration as Reverse of Differentiation", "count": 8},
+        {"sub_topic": "7.3 Methods of Integration", "count": 6},
+        {"sub_topic": "7.4 Particular Functions", "count": 9},
+        {"sub_topic": "7.5 Partial Fractions", "count": 11},
+        {"sub_topic": "7.6 Integration by Parts", "count": 8},
+        {"sub_topic": "7.7 Limit of a Sum", "count": 7},
+        {"sub_topic": "7.8 Fundamental Theorem of Calculus", "count": 8},
+        {"sub_topic": "7.9 Properties of Definite Integrals", "count": 11},
+      ];
+      
+      int currentIndex = 0;
+      for (var conf in configs) {
+        final name = conf["sub_topic"] as String;
+        final count = conf["count"] as int;
+        final List<HierarchicalPrerequisiteConcept> concepts = [];
+        
+        for (int i = 0; i < count && currentIndex < flatItems.length; i++) {
+          final item = flatItems[currentIndex];
+          concepts.add(HierarchicalPrerequisiteConcept(
+            concept: item.concept,
+            explanation: item.explanation,
+            formulaRuleExample: item.connection,
+          ));
+          currentIndex++;
+        }
+        
+        subTopics.add(HierarchicalPrerequisiteSubTopic(
+          subTopic: name,
+          prerequisites: concepts,
+        ));
+      }
+      
+      if (currentIndex < flatItems.length) {
+        final remaining = <HierarchicalPrerequisiteConcept>[];
+        while (currentIndex < flatItems.length) {
+          final item = flatItems[currentIndex];
+          remaining.add(HierarchicalPrerequisiteConcept(
+            concept: item.concept,
+            explanation: item.explanation,
+            formulaRuleExample: item.connection,
+          ));
+          currentIndex++;
+        }
+        if (subTopics.isNotEmpty) {
+          subTopics.last.prerequisites.addAll(remaining);
+        } else {
+          subTopics.add(HierarchicalPrerequisiteSubTopic(
+            subTopic: "Remaining Prerequisites",
+            prerequisites: remaining,
+          ));
+        }
+      }
+    }
+    // Generic default
+    else {
+      if (flatItems.isEmpty) {
+        subTopics.add(HierarchicalPrerequisiteSubTopic(
+          subTopic: "1.1 Introduction",
+          prerequisites: [],
+        ));
+      } else {
+        final concepts = flatItems.map((item) => HierarchicalPrerequisiteConcept(
+          concept: item.concept,
+          explanation: item.explanation,
+          formulaRuleExample: item.connection,
+        )).toList();
+        
+        subTopics.add(HierarchicalPrerequisiteSubTopic(
+          subTopic: "1.1 Introduction",
+          prerequisites: concepts,
+        ));
+      }
+    }
+    
+    content.hierarchicalPrerequisites = HierarchicalPrerequisites(
+      title: "Grade ${content.metadata.grade} CBSE ${content.metadata.subject} - Chapter ${content.metadata.chapterNumber}: ${content.metadata.chapterName} - Prerequisite Knowledge",
+      subTopics: subTopics,
+    );
+    
+    content.preRequisite.clear();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      prov.updateActiveContent(content);
+    });
+  }
+
+  void _showAddSubtopicDialog(AdminProvider prov, ChapterContent content) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Subtopic'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Subtopic Name (e.g., 3.1 Introduction)',
+            hintText: 'Enter subtopic name',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                if (content.hierarchicalPrerequisites == null) {
+                  content.hierarchicalPrerequisites = HierarchicalPrerequisites(
+                    title: '${content.metadata.chapterName} - Prerequisite Knowledge',
+                    subTopics: [],
+                  );
+                }
+                content.hierarchicalPrerequisites!.subTopics.add(
+                  HierarchicalPrerequisiteSubTopic(
+                    subTopic: name,
+                    prerequisites: [],
+                  ),
+                );
+                setState(() {
+                  _selectedPrerequisiteSubtopicIndex = content.hierarchicalPrerequisites!.subTopics.length - 1;
+                });
+                prov.updateActiveContent(content);
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRenameSubtopicDialog(AdminProvider prov, ChapterContent content, int index) {
+    final subTopic = content.hierarchicalPrerequisites!.subTopics[index];
+    final controller = TextEditingController(text: subTopic.subTopic);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Subtopic'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Subtopic Name',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                subTopic.subTopic = name;
+                prov.updateActiveContent(content);
+                setState(() {});
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteSubtopicDialog(AdminProvider prov, ChapterContent content, int index) {
+    final subTopic = content.hierarchicalPrerequisites!.subTopics[index];
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Subtopic'),
+        content: Text('Are you sure you want to delete "${subTopic.subTopic}" and all of its ${subTopic.prerequisites.length} prerequisites?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              content.hierarchicalPrerequisites!.subTopics.removeAt(index);
+              setState(() {
+                if (_selectedPrerequisiteSubtopicIndex >= content.hierarchicalPrerequisites!.subTopics.length) {
+                  _selectedPrerequisiteSubtopicIndex = (content.hierarchicalPrerequisites!.subTopics.length - 1).clamp(0, double.maxFinite.toInt());
+                }
+              });
+              prov.updateActiveContent(content);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handlePrerequisitesExport(BuildContext context, ChapterContent content) {
+    if (content.hierarchicalPrerequisites == null) return;
+    try {
+      final map = content.hierarchicalPrerequisites!.toJson();
+      final fullExportMap = {
+        "type": "nested_prerequisites",
+        "data": map,
+      };
+      
+      final encoder = const JsonEncoder.withIndent('  ');
+      final rawText = encoder.convert(fullExportMap);
+      final fileName = _getExportFileName(content, 'prerequisites');
+      
+      downloadJsonFile(rawText, fileName);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Exported successfully as $fileName'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to export: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handlePrerequisitesBulkUpload(
+    BuildContext context,
+    AdminProvider prov,
+    ChapterContent content,
+  ) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.bytes != null) {
+        final bytes = result.files.single.bytes!;
+        final rawText = utf8.decode(bytes);
+        final decoded = json.decode(rawText);
+
+        bool isHierarchicalUploaded = false;
+        Map<String, dynamic>? hierarchicalData;
+        List<dynamic>? flatData;
+
+        if (decoded is Map) {
+          if (decoded.containsKey('sub_topics') || 
+              (decoded.containsKey('data') && decoded['data'] is Map && (decoded['data'] as Map).containsKey('sub_topics')) ||
+              decoded['type'] == 'nested_prerequisites') {
+            isHierarchicalUploaded = true;
+            if (decoded.containsKey('sub_topics')) {
+              hierarchicalData = Map<String, dynamic>.from(decoded);
+            } else if (decoded['data'] is Map) {
+              hierarchicalData = Map<String, dynamic>.from(decoded['data']);
+            } else {
+              hierarchicalData = Map<String, dynamic>.from(decoded);
+            }
+          } else if (decoded.containsKey('data') && decoded['data'] is List) {
+            flatData = decoded['data'] as List;
+          } else if (decoded.containsKey('pre_requisite') && decoded['pre_requisite'] is Map) {
+            final pr = decoded['pre_requisite'] as Map;
+            if (pr.containsKey('sub_topics')) {
+              isHierarchicalUploaded = true;
+              hierarchicalData = Map<String, dynamic>.from(pr);
+            } else if (pr.containsKey('data') && pr['data'] is List) {
+              flatData = pr['data'] as List;
+            }
+          }
+        } else if (decoded is List) {
+          flatData = decoded;
+        }
+
+        if (!isHierarchicalUploaded && flatData == null) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid JSON format. Expected hierarchical sub_topics or flat list.'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
+        if (!context.mounted) return;
+
+        final mode = await _showUploadModeDialog(
+          context,
+          'Prerequisites',
+          isHierarchicalUploaded ? 1 : flatData!.length,
+          content.hierarchicalPrerequisites != null ? 1 : content.preRequisite.length,
+        );
+
+        if (mode == null || mode == 'cancel') return;
+
+        if (mode == 'replace') {
+          content.preRequisite.clear();
+          content.hierarchicalPrerequisites = null;
+        }
+
+        if (isHierarchicalUploaded && hierarchicalData != null) {
+          content.hierarchicalPrerequisites = HierarchicalPrerequisites.fromJson(hierarchicalData);
+          content.preRequisite.clear();
+          setState(() {
+            _selectedPrerequisiteSubtopicIndex = 0;
+          });
+        } else if (flatData != null) {
+          final parsedItems = flatData.map((item) => PreRequisiteItem.fromJson(Map<String, dynamic>.from(item))).toList();
+          
+          if (content.hierarchicalPrerequisites != null) {
+            final subtopics = content.hierarchicalPrerequisites!.subTopics;
+            if (subtopics.isNotEmpty) {
+              if (_selectedPrerequisiteSubtopicIndex >= subtopics.length) {
+                _selectedPrerequisiteSubtopicIndex = 0;
+              }
+              final currentSubtopic = subtopics[_selectedPrerequisiteSubtopicIndex];
+              currentSubtopic.prerequisites.addAll(
+                parsedItems.map((e) => HierarchicalPrerequisiteConcept(
+                  concept: e.concept,
+                  explanation: e.explanation,
+                  formulaRuleExample: e.connection,
+                ))
+              );
+            } else {
+              content.hierarchicalPrerequisites!.subTopics.add(
+                HierarchicalPrerequisiteSubTopic(
+                  subTopic: 'Uploaded Prerequisites',
+                  prerequisites: parsedItems.map((e) => HierarchicalPrerequisiteConcept(
+                    concept: e.concept,
+                    explanation: e.explanation,
+                    formulaRuleExample: e.connection,
+                  )).toList(),
+                )
+              );
+              setState(() {
+                _selectedPrerequisiteSubtopicIndex = 0;
+              });
+            }
+          } else {
+            // Auto initialize with this flat data
+            content.preRequisite.addAll(parsedItems);
+            _initializeHierarchicalPrerequisites(prov, content);
+          }
+        }
+
+        prov.updateActiveContent(content);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully uploaded Prerequisites!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  // 3. Pre-requisite Form (Hierarchical Layout)
   Widget _buildPrerequisiteForm(AdminProvider prov, ChapterContent content) {
+    if (content.hierarchicalPrerequisites == null) {
+      _initializeHierarchicalPrerequisites(prov, content);
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              CircularProgressIndicator(color: AppColors.primary),
+              SizedBox(height: 16),
+              Text('Initializing Hierarchical Layout...', style: TextStyle(color: AppColors.textSecondary)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final subTopics = content.hierarchicalPrerequisites!.subTopics;
+    if (_selectedPrerequisiteSubtopicIndex >= subTopics.length) {
+      _selectedPrerequisiteSubtopicIndex = (subTopics.length - 1).clamp(0, double.maxFinite.toInt());
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1285,7 +1754,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Prerequisites list (${content.preRequisite.length})',
+              'Prerequisite Subtopics (${subTopics.length})',
               style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.bold,
@@ -1296,45 +1765,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               runSpacing: 8,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    content.preRequisite.add(
-                      PreRequisiteItem(
-                        concept: '',
-                        explanation: '',
-                        connection: '',
-                      ),
-                    );
-                    prov.updateActiveContent(content);
-                  },
-                  icon: const Icon(Icons.add, size: 14),
-                  label: const Text('Add Prerequisite'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _handleBulkUpload(
-                    context: context,
-                    prov: prov,
-                    content: content,
-                    sectionName: 'Prerequisites',
-                    mapKey: 'pre_requisite',
-                    alternativeMapKeys: ['preRequisite', 'prerequisites'],
-                    existingCount: content.preRequisite.length,
-                    onClear: () => content.preRequisite.clear(),
-                    onDataLoaded: (list) {
-                      content.preRequisite.addAll(
-                        list
-                            .map(
-                              (item) => PreRequisiteItem.fromJson(
-                                Map<String, dynamic>.from(item),
-                              ),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
+                  onPressed: () => _handlePrerequisitesBulkUpload(context, prov, content),
                   icon: const Icon(Icons.upload_file, size: 14),
                   label: const Text('Bulk Upload'),
                   style: ElevatedButton.styleFrom(
@@ -1343,11 +1774,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () => _handleExport(
-                    context: context,
-                    list: content.preRequisite,
-                    fileName: _getExportFileName(content, 'prerequisites'),
-                  ),
+                  onPressed: () => _handlePrerequisitesExport(context, content),
                   icon: const Icon(Icons.download, size: 14),
                   label: const Text('Export JSON'),
                   style: ElevatedButton.styleFrom(
@@ -1359,82 +1786,257 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.preRequisite.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, idx) {
-            final item = content.preRequisite[idx];
-            return Container(
-              key: ValueKey(item),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Prerequisite #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+        const SizedBox(height: 16),
+        // Subtopics horizontal scrollable selection tabs
+        Row(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: subTopics.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final sub = entry.value;
+                    final isSelected = idx == _selectedPrerequisiteSubtopicIndex;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ChoiceChip(
+                        label: Text(sub.subTopic),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedPrerequisiteSubtopicIndex = idx;
+                            });
+                          }
+                        },
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.textSecondary,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add_box, color: AppColors.primary, size: 24),
+              tooltip: 'Add Subtopic',
+              onPressed: () => _showAddSubtopicDialog(prov, content),
+            ),
+          ],
+        ),
+        
+        if (subTopics.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          // Subtopic details section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.folder_open, size: 18, color: AppColors.textSecondary),
+                const SizedBox(width: 8),
+                Text(
+                  'Subtopic: ',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  subTopics[_selectedPrerequisiteSubtopicIndex].subTopic,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 14),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18, color: AppColors.textSecondary),
+                  tooltip: 'Rename Subtopic',
+                  onPressed: () => _showRenameSubtopicDialog(prov, content, _selectedPrerequisiteSubtopicIndex),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 18, color: AppColors.error),
+                  tooltip: 'Delete Subtopic',
+                  onPressed: () => _showDeleteSubtopicDialog(prov, content, _selectedPrerequisiteSubtopicIndex),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // Prerequisites under selected subtopic list
+          Builder(
+            builder: (context) {
+              final selectedSubtopic = subTopics[_selectedPrerequisiteSubtopicIndex];
+              final prereqs = selectedSubtopic.prerequisites;
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Prerequisites in this subtopic (${prereqs.length})',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
                         ),
+                      ),
+                      ElevatedButton.icon(
                         onPressed: () {
-                          content.preRequisite.removeAt(idx);
+                          selectedSubtopic.prerequisites.add(
+                            HierarchicalPrerequisiteConcept(
+                              concept: '',
+                              explanation: '',
+                              formulaRuleExample: '',
+                            ),
+                          );
                           prov.updateActiveContent(content);
+                          setState(() {});
                         },
+                        icon: const Icon(Icons.add, size: 14),
+                        label: const Text('Add Prerequisite'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildFormField(
-                    key: 'pre_${item.hashCode}_concept',
-                    label: 'Concept / Foundation name',
-                    value: item.concept,
-                    onChanged: (val) {
-                      item.concept = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'pre_${item.hashCode}_explanation',
-                    label: 'Brief explanation',
-                    value: item.explanation,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.explanation = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
-                  _buildFormField(
-                    key: 'pre_${item.hashCode}_connection',
-                    label: 'Connection to this Chapter',
-                    value: item.connection,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.connection = val;
-                      prov.updateActiveContent(content);
-                    },
-                  ),
+                  const SizedBox(height: 16),
+                  
+                  if (prereqs.isEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Text(
+                          'No prerequisites in this subtopic yet.\nClick "Add Prerequisite" above to add one!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: AppColors.textMuted, height: 1.5),
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: prereqs.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 20),
+                      itemBuilder: (ctx, idx) {
+                        final item = prereqs[idx];
+                        return Container(
+                          key: ValueKey(item),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Prerequisite #${idx + 1}',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  if (idx > 0)
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_upward, size: 16, color: AppColors.textSecondary),
+                                      tooltip: 'Move Up',
+                                      onPressed: () {
+                                        final temp = selectedSubtopic.prerequisites.removeAt(idx);
+                                        selectedSubtopic.prerequisites.insert(idx - 1, temp);
+                                        prov.updateActiveContent(content);
+                                        setState(() {});
+                                      },
+                                    ),
+                                  if (idx < prereqs.length - 1)
+                                    IconButton(
+                                      icon: const Icon(Icons.arrow_downward, size: 16, color: AppColors.textSecondary),
+                                      tooltip: 'Move Down',
+                                      onPressed: () {
+                                        final temp = selectedSubtopic.prerequisites.removeAt(idx);
+                                        selectedSubtopic.prerequisites.insert(idx + 1, temp);
+                                        prov.updateActiveContent(content);
+                                        setState(() {});
+                                      },
+                                    ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: AppColors.error,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      selectedSubtopic.prerequisites.removeAt(idx);
+                                      prov.updateActiveContent(content);
+                                      setState(() {});
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _buildFormField(
+                                key: 'pre_${item.hashCode}_concept',
+                                label: 'Concept / Foundation name',
+                                value: item.concept,
+                                onChanged: (val) {
+                                  item.concept = val;
+                                  prov.updateActiveContent(content);
+                                },
+                              ),
+                              _buildFormField(
+                                key: 'pre_${item.hashCode}_explanation',
+                                label: 'Brief explanation',
+                                value: item.explanation,
+                                maxLines: 2,
+                                onChanged: (val) {
+                                  item.explanation = val;
+                                  prov.updateActiveContent(content);
+                                },
+                              ),
+                              _buildFormField(
+                                key: 'pre_${item.hashCode}_connection',
+                                label: 'Connection to this Chapter (Formula/Rule/Example)',
+                                value: item.formulaRuleExample,
+                                maxLines: 2,
+                                onChanged: (val) {
+                                  item.formulaRuleExample = val;
+                                  prov.updateActiveContent(content);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                 ],
+              );
+            },
+          ),
+        ] else
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Text(
+                'No subtopics exist.\nClick the "+" icon above to create one.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textMuted, height: 1.5),
               ),
-            );
-          },
-        ),
+            ),
+          ),
       ],
     );
   }

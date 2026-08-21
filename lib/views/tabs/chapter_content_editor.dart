@@ -2043,14 +2043,17 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
 
   // 4. Industry Insights Form
   Widget _buildIndustryForm(AdminProvider prov, ChapterContent content) {
+    final section = content.industryInsights ?? IndustryInsightsSection.empty();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ─── Header row ────────────────────────────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Industry Applications list (${content.industryInsights.length})',
+              'Industry Insights Section',
               style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.bold,
@@ -2060,60 +2063,74 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
               spacing: 8,
               runSpacing: 8,
               children: [
+                // Bulk upload – accepts the full section JSON object
                 ElevatedButton.icon(
-                  onPressed: () {
-                    content.industryInsights.add(
-                      IndustryInsightItem(
-                        topic: '',
-                        industrialInsight: '',
-                        realWorldExample: '',
-                      ),
-                    );
-                    prov.updateActiveContent(content);
-                  },
-                  icon: const Icon(Icons.add, size: 14),
-                  label: const Text('Add Application'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _handleBulkUpload(
-                    context: context,
-                    prov: prov,
-                    content: content,
-                    sectionName: 'Industry Insights',
-                    mapKey: 'industry_insights',
-                    alternativeMapKeys: [
-                      'industryInsights',
-                      'industry_insights_list',
-                    ],
-                    existingCount: content.industryInsights.length,
-                    onClear: () => content.industryInsights.clear(),
-                    onDataLoaded: (list) {
-                      content.industryInsights.addAll(
-                        list
-                            .map(
-                              (item) => IndustryInsightItem.fromJson(
-                                Map<String, dynamic>.from(item),
-                              ),
-                            )
-                            .toList(),
+                  onPressed: () async {
+                    try {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['json'],
                       );
-                    },
-                  ),
+                      if (result != null && result.files.single.bytes != null) {
+                        final bytes = result.files.single.bytes!;
+                        final rawText = utf8.decode(bytes);
+                        final decoded = json.decode(rawText);
+                        IndustryInsightsSection? parsed;
+                        if (decoded is Map) {
+                          final m = Map<String, dynamic>.from(decoded);
+                          if (m.containsKey('examples')) {
+                            parsed = IndustryInsightsSection.fromJson(m);
+                          } else if (m.containsKey('data') && m['data'] is Map) {
+                            parsed = IndustryInsightsSection.fromJson(
+                                Map<String, dynamic>.from(m['data']));
+                          }
+                        }
+                        if (parsed != null) {
+                          content.industryInsights = parsed;
+                          prov.updateActiveContent(content);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Industry Insights uploaded successfully!'),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                          }
+                        } else {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Invalid JSON – expected an object with an "examples" key.'),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to parse JSON: $e'),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                      }
+                    }
+                  },
                   icon: const Icon(Icons.upload_file, size: 14),
-                  label: const Text('Bulk Upload'),
+                  label: const Text('Bulk Upload JSON'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondary,
                     foregroundColor: Colors.white,
                   ),
                 ),
+                // Export full section JSON
                 ElevatedButton.icon(
                   onPressed: () => _handleExport(
                     context: context,
-                    list: content.industryInsights,
+                    list: [section.toJson()],
                     fileName: _getExportFileName(content, 'industry_insights'),
                   ),
                   icon: const Icon(Icons.download, size: 14),
@@ -2127,16 +2144,63 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+
+        // ─── Section Title ─────────────────────────────────────────────────
+        _buildFormField(
+          key: 'ind_section_title',
+          label: 'Section Title',
+          value: section.title,
+          onChanged: (val) {
+            section.title = val;
+            content.industryInsights = section;
+            prov.updateActiveContent(content);
+          },
+        ),
+        const SizedBox(height: 24),
+
+        // ─── Application Cards ─────────────────────────────────────────────
+        Row(
+          children: [
+            Text(
+              'Application Cards (${section.examples.length})',
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.textPrimary),
+            ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () {
+                section.examples.add(IndustryExampleCard(
+                  id: '${section.examples.length + 1}',
+                  icon: '🏭',
+                  title: '',
+                  industry: [],
+                  howMatricesAreUsed: '',
+                  example: IndustryExample(icon: '💡', text: ''),
+                  matrixConceptsUsed: [],
+                ));
+                content.industryInsights = section;
+                prov.updateActiveContent(content);
+              },
+              icon: const Icon(Icons.add, size: 14),
+              label: const Text('Add Card'),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: content.industryInsights.length,
+          itemCount: section.examples.length,
           separatorBuilder: (_, __) => const SizedBox(height: 20),
           itemBuilder: (context, idx) {
-            final item = content.industryInsights[idx];
+            final card = section.examples[idx];
             return Container(
-              key: ValueKey(item),
+              key: ValueKey('ind_card_$idx'),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -2144,57 +2208,363 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                 border: Border.all(color: AppColors.divider),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Text(
-                        'Application #${idx + 1}',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
+                      Text('Card #${idx + 1}',
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary)),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 18,
-                        ),
+                        icon: const Icon(Icons.delete,
+                            color: AppColors.error, size: 18),
                         onPressed: () {
-                          content.industryInsights.removeAt(idx);
+                          section.examples.removeAt(idx);
+                          content.industryInsights = section;
                           prov.updateActiveContent(content);
                         },
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 90,
+                        child: _buildFormField(
+                          key: 'card_${idx}_icon',
+                          label: 'Icon',
+                          value: card.icon,
+                          onChanged: (val) {
+                            card.icon = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'card_${idx}_title',
+                          label: 'Title',
+                          value: card.title,
+                          onChanged: (val) {
+                            card.title = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                   _buildFormField(
-                    key: 'ind_${item.hashCode}_topic',
-                    label: 'Topic / Section',
-                    value: item.topic,
+                    key: 'card_${idx}_industry',
+                    label: 'Industry Tags (comma-separated)',
+                    value: card.industry.join(', '),
                     onChanged: (val) {
-                      item.topic = val;
+                      card.industry = val
+                          .split(',')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList();
                       prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
-                    key: 'ind_${item.hashCode}_industrialInsight',
-                    label: 'Industrial Insight',
-                    value: item.industrialInsight,
-                    maxLines: 2,
+                    key: 'card_${idx}_how',
+                    label: 'How Matrices Are Used',
+                    value: card.howMatricesAreUsed,
+                    maxLines: 3,
                     onChanged: (val) {
-                      item.industrialInsight = val;
+                      card.howMatricesAreUsed = val;
                       prov.updateActiveContent(content);
                     },
                   ),
-                  _buildFormField(
-                    key: 'ind_${item.hashCode}_realWorldExample',
-                    label: 'Real-world Example',
-                    value: item.realWorldExample,
-                    maxLines: 2,
-                    onChanged: (val) {
-                      item.realWorldExample = val;
+                  const SizedBox(height: 8),
+                  Text('Example',
+                      style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary)),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: _buildFormField(
+                          key: 'card_${idx}_ex_icon',
+                          label: 'Icon',
+                          value: card.example.icon,
+                          onChanged: (val) {
+                            card.example.icon = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          key: 'card_${idx}_ex_text',
+                          label: 'Example Text',
+                          value: card.example.text,
+                          onChanged: (val) {
+                            card.example.text = val;
+                            prov.updateActiveContent(content);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Text(
+                        'Matrix Concepts Used (${card.matrixConceptsUsed.length})',
+                        style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary),
+                      ),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: () {
+                          card.matrixConceptsUsed.add(
+                              IndustryConceptUsed(concept: '', application: ''));
+                          prov.updateActiveContent(content);
+                        },
+                        icon: const Icon(Icons.add, size: 12),
+                        label: const Text('Add Concept',
+                            style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                  ...card.matrixConceptsUsed.asMap().entries.map((entry) {
+                    final ci = entry.key;
+                    final concept = entry.value;
+                    return Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text('Concept ${ci + 1}',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary)),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.close,
+                                    size: 14, color: AppColors.error),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  card.matrixConceptsUsed.removeAt(ci);
+                                  prov.updateActiveContent(content);
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            key: 'card_${idx}_concept_${ci}_name',
+                            label: 'Concept Name',
+                            value: concept.concept,
+                            onChanged: (val) {
+                              concept.concept = val;
+                              prov.updateActiveContent(content);
+                            },
+                          ),
+                          _buildFormField(
+                            key: 'card_${idx}_concept_${ci}_app',
+                            label: 'Application',
+                            value: concept.application,
+                            maxLines: 2,
+                            onChanged: (val) {
+                              concept.application = val;
+                              prov.updateActiveContent(content);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 32),
+
+        // ─── Concept–Industry Mapping ──────────────────────────────────────
+        Row(
+          children: [
+            Text(
+              'Concept–Industry Mapping (${section.conceptIndustryMapping.length})',
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.textPrimary),
+            ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () {
+                section.conceptIndustryMapping.add(
+                    ConceptIndustryMapping(
+                        cbseTopic: '', realLifeApplications: []));
+                content.industryInsights = section;
+                prov.updateActiveContent(content);
+              },
+              icon: const Icon(Icons.add, size: 14),
+              label: const Text('Add Row'),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: section.conceptIndustryMapping.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, mi) {
+            final mapping = section.conceptIndustryMapping[mi];
+            return Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildFormField(
+                      key: 'map_${mi}_topic',
+                      label: 'CBSE Topic',
+                      value: mapping.cbseTopic,
+                      onChanged: (val) {
+                        mapping.cbseTopic = val;
+                        prov.updateActiveContent(content);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 3,
+                    child: _buildFormField(
+                      key: 'map_${mi}_apps',
+                      label: 'Real-Life Applications (comma-separated)',
+                      value: mapping.realLifeApplications.join(', '),
+                      onChanged: (val) {
+                        mapping.realLifeApplications = val
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList();
+                        prov.updateActiveContent(content);
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete,
+                        color: AppColors.error, size: 16),
+                    onPressed: () {
+                      section.conceptIndustryMapping.removeAt(mi);
+                      content.industryInsights = section;
+                      prov.updateActiveContent(content);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 32),
+
+        // ─── Did You Know ──────────────────────────────────────────────────
+        Row(
+          children: [
+            Text(
+              'Did You Know (${section.didYouKnow.length})',
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.textPrimary),
+            ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () {
+                section.didYouKnow.add(DidYouKnowItem(icon: '💡', text: ''));
+                content.industryInsights = section;
+                prov.updateActiveContent(content);
+              },
+              icon: const Icon(Icons.add, size: 14),
+              label: const Text('Add Fact'),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: section.didYouKnow.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, di) {
+            final fact = section.didYouKnow[di];
+            return Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 80,
+                    child: _buildFormField(
+                      key: 'dyk_${di}_icon',
+                      label: 'Icon',
+                      value: fact.icon,
+                      onChanged: (val) {
+                        fact.icon = val;
+                        prov.updateActiveContent(content);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildFormField(
+                      key: 'dyk_${di}_text',
+                      label: 'Fact Text',
+                      value: fact.text,
+                      maxLines: 2,
+                      onChanged: (val) {
+                        fact.text = val;
+                        prov.updateActiveContent(content);
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete,
+                        color: AppColors.error, size: 16),
+                    onPressed: () {
+                      section.didYouKnow.removeAt(di);
+                      content.industryInsights = section;
                       prov.updateActiveContent(content);
                     },
                   ),
@@ -2206,6 +2576,7 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
       ],
     );
   }
+
 
   // 5. AI Learning Chips Form
   Widget _buildChipsForm(AdminProvider prov, ChapterContent content) {

@@ -28,7 +28,7 @@ class ChapterContent {
   final ChapterMetadata metadata;
   String? simpleOverviewUrl;
   final List<PreRequisiteItem> preRequisite;
-  final List<IndustryInsightItem> industryInsights;
+  IndustryInsightsSection? industryInsights;
   final List<ChipItem> chips;
   final List<PlusPointTopic> plusPoints;
   final QuizSection quiz;
@@ -40,7 +40,7 @@ class ChapterContent {
     required this.metadata,
     this.simpleOverviewUrl,
     required this.preRequisite,
-    required this.industryInsights,
+    this.industryInsights,
     required this.chips,
     required this.plusPoints,
     required this.quiz,
@@ -88,11 +88,35 @@ class ChapterContent {
 
     // Parse industry_insights
     final industryJson = sections['industry_insights'] ?? {};
-    final List<IndustryInsightItem> industryList = [];
-    if (industryJson['data'] is List) {
-      for (var item in industryJson['data']) {
-        industryList.add(IndustryInsightItem.fromJson(Map<String, dynamic>.from(item)));
-      }
+    IndustryInsightsSection? industrySection;
+    final industryType = industryJson['type'] ?? '';
+    final industryData = industryJson['data'];
+    if (industryType == 'industry_insights_v2' && industryData is Map) {
+      // New rich format
+      industrySection = IndustryInsightsSection.fromJson(Map<String, dynamic>.from(industryData));
+    } else if (industryData is List && industryData.isNotEmpty) {
+      // Backward-compat: old flat list format → wrap into section
+      final legacyItems = industryData.map((item) {
+        final m = Map<String, dynamic>.from(item);
+        return IndustryExampleCard(
+          id: m['topic'] ?? '',
+          icon: '🏭',
+          title: m['topic'] ?? m['field'] ?? '',
+          industry: const [],
+          howMatricesAreUsed: m['industrialInsight'] ?? m['industrial_insight'] ?? m['application'] ?? '',
+          example: IndustryExample(
+            icon: '💡',
+            text: m['realWorldExample'] ?? m['real_world_example'] ?? m['example_role'] ?? '',
+          ),
+          matrixConceptsUsed: const [],
+        );
+      }).toList();
+      industrySection = IndustryInsightsSection(
+        title: '🌍 Industry Insights',
+        examples: legacyItems,
+        conceptIndustryMapping: const [],
+        didYouKnow: const [],
+      );
     }
 
     // Parse chips
@@ -137,7 +161,7 @@ class ChapterContent {
       metadata: ChapterMetadata.fromJson(metadataJson),
       simpleOverviewUrl: simpleOverviewUrl,
       preRequisite: preRequisiteList,
-      industryInsights: industryList,
+      industryInsights: industrySection,
       chips: chipsList,
       plusPoints: plusPointsList,
       quiz: quizSection,
@@ -165,10 +189,15 @@ class ChapterContent {
                 'type': 'array_of_prerequisites',
                 'data': preRequisite.map((item) => item.toJson()).toList(),
               },
-        'industry_insights': {
-          'type': 'array_of_applications',
-          'data': industryInsights.map((item) => item.toJson()).toList(),
-        },
+        'industry_insights': industryInsights != null
+            ? {
+                'type': 'industry_insights_v2',
+                'data': industryInsights!.toJson(),
+              }
+            : {
+                'type': 'industry_insights_v2',
+                'data': IndustryInsightsSection.empty().toJson(),
+              },
         'chips': {
           'type': 'array_of_chips',
           'items': chips.map((item) => item.toJson()).toList(),
@@ -215,7 +244,7 @@ class ChapterContent {
       ),
       simpleOverviewUrl: null,
       preRequisite: [],
-      industryInsights: [],
+      industryInsights: null,
       chips: [],
       plusPoints: [],
       quiz: QuizSection(
@@ -391,28 +420,189 @@ class PreRequisiteItem {
   }
 }
 
-class IndustryInsightItem {
-  String topic;
-  String industrialInsight;
-  String realWorldExample;
+// ─── Industry Insights V2 Models ─────────────────────────────────────────────
 
-  IndustryInsightItem({required this.topic, required this.industrialInsight, required this.realWorldExample});
+class IndustryConceptUsed {
+  String concept;
+  String application;
 
-  factory IndustryInsightItem.fromJson(Map<String, dynamic> json) {
-    return IndustryInsightItem(
-      topic: json['topic'] ?? json['field'] ?? '',
-      industrialInsight: json['industrialInsight'] ?? json['industrial_insight'] ?? json['application'] ?? '',
-      realWorldExample: json['realWorldExample'] ?? json['real_world_example'] ?? json['example_role'] ?? '',
+  IndustryConceptUsed({required this.concept, required this.application});
+
+  factory IndustryConceptUsed.fromJson(Map<String, dynamic> json) {
+    return IndustryConceptUsed(
+      concept: json['concept'] ?? '',
+      application: json['application'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'topic': topic,
-      'industrialInsight': industrialInsight,
-      'realWorldExample': realWorldExample,
-    };
+  Map<String, dynamic> toJson() => {'concept': concept, 'application': application};
+}
+
+class IndustryExample {
+  String icon;
+  String text;
+
+  IndustryExample({required this.icon, required this.text});
+
+  factory IndustryExample.fromJson(Map<String, dynamic> json) {
+    return IndustryExample(
+      icon: json['icon'] ?? '💡',
+      text: json['text'] ?? '',
+    );
   }
+
+  Map<String, dynamic> toJson() => {'icon': icon, 'text': text};
+}
+
+class IndustryExampleCard {
+  String id;
+  String icon;
+  String title;
+  List<String> industry;
+  String howMatricesAreUsed;
+  IndustryExample example;
+  List<IndustryConceptUsed> matrixConceptsUsed;
+
+  IndustryExampleCard({
+    required this.id,
+    required this.icon,
+    required this.title,
+    required this.industry,
+    required this.howMatricesAreUsed,
+    required this.example,
+    required this.matrixConceptsUsed,
+  });
+
+  factory IndustryExampleCard.fromJson(Map<String, dynamic> json) {
+    final industryList = <String>[];
+    if (json['industry'] is List) {
+      industryList.addAll((json['industry'] as List).map((e) => e.toString()));
+    }
+    final conceptsUsed = <IndustryConceptUsed>[];
+    if (json['matrixConceptsUsed'] is List) {
+      for (var c in json['matrixConceptsUsed'] as List) {
+        conceptsUsed.add(IndustryConceptUsed.fromJson(Map<String, dynamic>.from(c)));
+      }
+    }
+    final exampleMap = json['example'];
+    return IndustryExampleCard(
+      id: (json['id'] ?? '').toString(),
+      icon: json['icon'] ?? '🏭',
+      title: json['title'] ?? '',
+      industry: industryList,
+      howMatricesAreUsed: json['howMatricesAreUsed'] ?? '',
+      example: exampleMap is Map
+          ? IndustryExample.fromJson(Map<String, dynamic>.from(exampleMap))
+          : IndustryExample(icon: '💡', text: exampleMap?.toString() ?? ''),
+      matrixConceptsUsed: conceptsUsed,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'icon': icon,
+        'title': title,
+        'industry': industry,
+        'howMatricesAreUsed': howMatricesAreUsed,
+        'example': example.toJson(),
+        'matrixConceptsUsed': matrixConceptsUsed.map((c) => c.toJson()).toList(),
+      };
+}
+
+class ConceptIndustryMapping {
+  String cbseTopic;
+  List<String> realLifeApplications;
+
+  ConceptIndustryMapping({required this.cbseTopic, required this.realLifeApplications});
+
+  factory ConceptIndustryMapping.fromJson(Map<String, dynamic> json) {
+    final apps = <String>[];
+    if (json['realLifeApplications'] is List) {
+      apps.addAll((json['realLifeApplications'] as List).map((e) => e.toString()));
+    }
+    return ConceptIndustryMapping(
+      cbseTopic: json['cbseTopic'] ?? '',
+      realLifeApplications: apps,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'cbseTopic': cbseTopic,
+        'realLifeApplications': realLifeApplications,
+      };
+}
+
+class DidYouKnowItem {
+  String icon;
+  String text;
+
+  DidYouKnowItem({required this.icon, required this.text});
+
+  factory DidYouKnowItem.fromJson(Map<String, dynamic> json) {
+    return DidYouKnowItem(
+      icon: json['icon'] ?? '💡',
+      text: json['text'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'icon': icon, 'text': text};
+}
+
+class IndustryInsightsSection {
+  String title;
+  List<IndustryExampleCard> examples;
+  List<ConceptIndustryMapping> conceptIndustryMapping;
+  List<DidYouKnowItem> didYouKnow;
+
+  IndustryInsightsSection({
+    required this.title,
+    required this.examples,
+    required this.conceptIndustryMapping,
+    required this.didYouKnow,
+  });
+
+  factory IndustryInsightsSection.empty() {
+    return IndustryInsightsSection(
+      title: '🌍 Industry Insights',
+      examples: [],
+      conceptIndustryMapping: [],
+      didYouKnow: [],
+    );
+  }
+
+  factory IndustryInsightsSection.fromJson(Map<String, dynamic> json) {
+    final examples = <IndustryExampleCard>[];
+    if (json['examples'] is List) {
+      for (var e in json['examples'] as List) {
+        examples.add(IndustryExampleCard.fromJson(Map<String, dynamic>.from(e)));
+      }
+    }
+    final mapping = <ConceptIndustryMapping>[];
+    if (json['conceptIndustryMapping'] is List) {
+      for (var m in json['conceptIndustryMapping'] as List) {
+        mapping.add(ConceptIndustryMapping.fromJson(Map<String, dynamic>.from(m)));
+      }
+    }
+    final didYouKnow = <DidYouKnowItem>[];
+    if (json['didYouKnow'] is List) {
+      for (var d in json['didYouKnow'] as List) {
+        didYouKnow.add(DidYouKnowItem.fromJson(Map<String, dynamic>.from(d)));
+      }
+    }
+    return IndustryInsightsSection(
+      title: json['title'] ?? '🌍 Industry Insights',
+      examples: examples,
+      conceptIndustryMapping: mapping,
+      didYouKnow: didYouKnow,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'examples': examples.map((e) => e.toJson()).toList(),
+        'conceptIndustryMapping': conceptIndustryMapping.map((m) => m.toJson()).toList(),
+        'didYouKnow': didYouKnow.map((d) => d.toJson()).toList(),
+      };
 }
 
 class ChipItem {

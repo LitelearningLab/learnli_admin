@@ -2064,9 +2064,9 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   onPressed: () {
                     content.industryInsights.add(
                       IndustryInsightItem(
-                        field: '',
-                        application: '',
-                        exampleRole: '',
+                        topic: '',
+                        industrialInsight: '',
+                        realWorldExample: '',
                       ),
                     );
                     prov.updateActiveContent(content);
@@ -2170,30 +2170,31 @@ class _ChapterContentEditorState extends State<ChapterContentEditor> {
                   ),
                   const SizedBox(height: 12),
                   _buildFormField(
-                    key: 'ind_${item.hashCode}_field',
-                    label: 'Field / Industry Sector',
-                    value: item.field,
+                    key: 'ind_${item.hashCode}_topic',
+                    label: 'Topic / Section',
+                    value: item.topic,
                     onChanged: (val) {
-                      item.field = val;
+                      item.topic = val;
                       prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
-                    key: 'ind_${item.hashCode}_application',
-                    label: 'Real-world Application description',
-                    value: item.application,
+                    key: 'ind_${item.hashCode}_industrialInsight',
+                    label: 'Industrial Insight',
+                    value: item.industrialInsight,
                     maxLines: 2,
                     onChanged: (val) {
-                      item.application = val;
+                      item.industrialInsight = val;
                       prov.updateActiveContent(content);
                     },
                   ),
                   _buildFormField(
-                    key: 'ind_${item.hashCode}_example_role',
-                    label: 'Example Professional Role',
-                    value: item.exampleRole,
+                    key: 'ind_${item.hashCode}_realWorldExample',
+                    label: 'Real-world Example',
+                    value: item.realWorldExample,
+                    maxLines: 2,
                     onChanged: (val) {
-                      item.exampleRole = val;
+                      item.realWorldExample = val;
                       prov.updateActiveContent(content);
                     },
                   ),

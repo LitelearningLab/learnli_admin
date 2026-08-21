@@ -392,25 +392,25 @@ class PreRequisiteItem {
 }
 
 class IndustryInsightItem {
-  String field;
-  String application;
-  String exampleRole;
+  String topic;
+  String industrialInsight;
+  String realWorldExample;
 
-  IndustryInsightItem({required this.field, required this.application, required this.exampleRole});
+  IndustryInsightItem({required this.topic, required this.industrialInsight, required this.realWorldExample});
 
   factory IndustryInsightItem.fromJson(Map<String, dynamic> json) {
     return IndustryInsightItem(
-      field: json['field'] ?? '',
-      application: json['application'] ?? '',
-      exampleRole: json['example_role'] ?? '',
+      topic: json['topic'] ?? json['field'] ?? '',
+      industrialInsight: json['industrialInsight'] ?? json['industrial_insight'] ?? json['application'] ?? '',
+      realWorldExample: json['realWorldExample'] ?? json['real_world_example'] ?? json['example_role'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'field': field,
-      'application': application,
-      'example_role': exampleRole,
+      'topic': topic,
+      'industrialInsight': industrialInsight,
+      'realWorldExample': realWorldExample,
     };
   }
 }
